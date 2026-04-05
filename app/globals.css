@@ -1,43 +1,43 @@
 @import "tailwindcss";
 @source "../components";
-@source "../app";
 
-/* GECE MODUNU TÜM SİSTEMDE TAMAMEN İPTAL EDİYORUZ */
-:root, 
-.dark, 
-[data-theme='dark'], 
-html.dark {
-  color-scheme: light !important;
-  --bg-krem: #FAF7F2;
-  --text-mor: #2D1B4E;
-  --accent-turuncu: #E8622A;
+:root {
+  --sand: #FAF7F2;      /* Ana Arka Plan Krem/Beyaz */
+  --fig: #2D1B4E;       /* Kurumsal Başlık Koyu Mor */
+  --terra: #E8622A;     /* Vurgu Turuncusu */
+  --ink: #101010;       /* Metin Siyahı */
   
-  /* Arka planı ve yazıyı her koşulda Krem ve Mor'a sabitle */
-  background-color: #FAF7F2 !important;
-  color: #2D1B4E !important;
+  --c-bg-main: #FAF7F2;
+  --c-bg-card: #FFFFFF;
+  --c-text-main: #101010;
+  --c-text-head: #2D1B4E;
+  --c-border: #E2E8F0;
+  
+  --c-nav-bg: rgba(250, 247, 242, 0.9);
 }
 
-/* Sitenin ana omurgasını fotoğraftaki gibi ferahlatıyoruz */
-@layer base {
-  html, body {
-    background-color: #FAF7F2 !important;
-    color: #2D1B4E !important;
-    margin: 0;
-    padding: 0;
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* Koyu modda beyaz kalan yazıları mora, siyah kalan zeminleri kreme zorluyoruz */
-  * {
-    border-color: #E2E8F0 !important;
-  }
+/* KARANLIK MODU TÜM SİSTEMDE SABİT OLARAK ENGELLİYORUZ */
+.dark, :root[class~="dark"], html.dark {
+  --c-bg-main: #FAF7F2 !important;
+  --c-bg-card: #FFFFFF !important;
+  --c-text-main: #101010 !important;
+  --c-text-head: #2D1B4E !important;
+  color-scheme: light !important;
 }
 
-/* Kurumsal Buton Stilimiz (Navbar ve Hero'daki o şık turuncu buton) */
+body {
+  background-color: var(--c-bg-main) !important;
+  color: var(--c-text-main) !important;
+  font-family: 'DM Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Kurumsal Buton Stili (Fotoğraftaki Turuncu) */
 .btn-primary {
-  background-color: #E8622A !important;
+  background-color: var(--terra) !important;
   color: #FFFFFF !important;
   padding: 12px 28px;
   border-radius: 50px;
@@ -45,6 +45,8 @@ html.dark {
   text-transform: uppercase;
   font-size: 12px;
   transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
   box-shadow: 0 8px 20px rgba(232, 98, 42, 0.2);
 }
 
