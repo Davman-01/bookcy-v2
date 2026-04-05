@@ -1,28 +1,54 @@
 @import "tailwindcss";
+@source "../components";
+@source "../app";
 
-/* SİSTEMİ KESİN OLARAK KREM VE MORA KİLİTLİYORUZ */
+/* GECE MODUNU TÜM SİSTEMDE TAMAMEN İPTAL EDİYORUZ */
 :root, 
 .dark, 
 [data-theme='dark'], 
 html.dark {
+  color-scheme: light !important;
   --bg-krem: #FAF7F2;
   --text-mor: #2D1B4E;
+  --accent-turuncu: #E8622A;
   
+  /* Arka planı ve yazıyı her koşulda Krem ve Mor'a sabitle */
   background-color: #FAF7F2 !important;
   color: #2D1B4E !important;
-  color-scheme: light !important;
 }
 
-body {
-  background-color: #FAF7F2 !important;
-  color: #2D1B4E !important;
-  font-family: 'DM Sans', sans-serif;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
+/* Sitenin ana omurgasını fotoğraftaki gibi ferahlatıyoruz */
+@layer base {
+  html, body {
+    background-color: #FAF7F2 !important;
+    color: #2D1B4E !important;
+    margin: 0;
+    padding: 0;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Koyu modda beyaz kalan yazıları mora, siyah kalan zeminleri kreme zorluyoruz */
+  * {
+    border-color: #E2E8F0 !important;
+  }
 }
 
-/* Önceden kalma karanlık mod sınıflarını temizliyoruz */
-* {
-  border-color: #E2E8F0;
+/* Kurumsal Buton Stilimiz (Navbar ve Hero'daki o şık turuncu buton) */
+.btn-primary {
+  background-color: #E8622A !important;
+  color: #FFFFFF !important;
+  padding: 12px 28px;
+  border-radius: 50px;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 20px rgba(232, 98, 42, 0.2);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(232, 98, 42, 0.3);
 }
