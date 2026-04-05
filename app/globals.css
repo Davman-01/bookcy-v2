@@ -1,26 +1,32 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  /* RESERV KKTC ORIJINAL FERAH RENKLERI */
-  --sand: #FAF7F2;     /* KREM ARKA PLAN */
-  --fig: #2D1B4E;      /* KURUMSAL MOR */
-  --terra: #E8622A;    /* VURGU TURUNCUSU */
-  
-  --c-bg-main: #FAF7F2 !important;
-  --c-text-main: #2D1B4E !important;
+  --bg-krem: #FAF7F2;
+  --text-mor: #2D1B4E;
+  --accent-turuncu: #E8622A;
 }
 
-/* Koyu Modun Siteyi Karartmasını Engelle (Şu anki hatan bu) */
-.dark, [data-theme='dark'] {
-  --c-bg-main: #0B0710 !important;
-  --c-text-main: #FFFFFF !important;
+/* GECE MODUNU TAMAMEN İPTAL EDİYORUZ */
+:root[class~="dark"], 
+.dark, 
+html.dark {
+  color-scheme: light !important;
 }
 
+/* SİTEYİ KREM VE MORA KESİN OLARAK ZORLUYORUZ */
+html, 
 body {
-  background-color: var(--c-bg-main) !important;
-  color: var(--c-text-main) !important;
+  background-color: #FAF7F2 !important;
+  color: #2D1B4E !important;
+  font-family: 'DM Sans', sans-serif;
   margin: 0;
   padding: 0;
-  font-family: 'DM Sans', sans-serif;
   min-height: 100vh;
+}
+
+/* Önceden kalma karanlık mod sınıflarını temizliyoruz */
+* {
+  border-color: #E2E8F0; /* Çizgileri yumuşatır */
 }
