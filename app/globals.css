@@ -2,31 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg-krem: #FAF7F2;
-  --text-mor: #2D1B4E;
-  --accent-turuncu: #E8622A;
-}
-
-/* GECE MODUNU TAMAMEN İPTAL EDİYORUZ */
-:root[class~="dark"], 
-.dark, 
-html.dark {
-  color-scheme: light !important;
-}
-
-/* SİTEYİ KREM VE MORA KESİN OLARAK ZORLUYORUZ */
-html, 
-body {
-  background-color: #FAF7F2 !important;
-  color: #2D1B4E !important;
-  font-family: 'DM Sans', sans-serif;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-}
-
-/* Önceden kalma karanlık mod sınıflarını temizliyoruz */
-* {
-  border-color: #E2E8F0; /* Çizgileri yumuşatır */
+@layer base {
+  :root {
+    --bg-krem: #FAF7F2;
+    --text-mor: #2D1B4E;
+    --accent-turuncu: #E8622A;
+  }
+  
+  /* SİTEYİ KREM RENGİNE KİLİTLİYORUZ */
+  html, body {
+    background-color: #FAF7F2 !important;
+    color: #2D1B4E !important;
+  }
+  
+  /* VERCEL'İN GECE MODU DAYATMASINI İPTAL EDİYORUZ */
+  .dark, [data-theme='dark'] {
+    background-color: #FAF7F2 !important;
+    color: #2D1B4E !important;
+    color-scheme: light !important;
+  }
 }
