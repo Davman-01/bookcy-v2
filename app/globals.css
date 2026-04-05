@@ -1,0 +1,54 @@
+@import "tailwindcss";
+@source "../components";
+
+:root {
+  /* RESERV KKTC ORIJINAL RENK PALETI */
+  --fig: #2D1B4E;      /* Kurumsal Koyu Mor */
+  --terra: #E8622A;    /* Vurgu Turuncusu */
+  --blush: #F5C5A3;    /* Yumuşak Krem-Pembe */
+  --sand: #FAF7F2;     /* Ana Arka Plan Krem */
+  
+  --c-bg-main: #FAF7F2;
+  --c-bg-card: #FFFFFF;
+  --c-text-main: #2D1B4E;
+  --c-border: #E2E8F0;
+}
+
+/* KOYU MOD - RESERV KKTC STANDARTI */
+.dark {
+  --c-bg-main: #0B0710; /* Simsiyah değil, Koyu Mor Gece Modu */
+  --c-bg-card: #150D1E;
+  --c-text-main: #FFFFFF;
+  --c-border: #382252;
+}
+
+body {
+  background-color: var(--c-bg-main);
+  color: var(--c-text-main);
+  font-family: 'DM Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s ease;
+}
+
+/* Kurumsal Buton Stili (Ekran Görüntülerindeki gibi) */
+.btn-primary {
+  background-color: var(--terra);
+  color: white;
+  padding: 12px 26px;
+  border-radius: 50px;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(232, 98, 42, 0.2);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  background-color: #d4561f;
+  box-shadow: 0 10px 25px rgba(232, 98, 42, 0.3);
+}
