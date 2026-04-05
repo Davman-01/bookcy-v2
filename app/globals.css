@@ -1,24 +1,28 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --bg-krem: #FAF7F2;
-    --text-mor: #2D1B4E;
-    --accent-turuncu: #E8622A;
-  }
+/* SİSTEMİ KESİN OLARAK KREM VE MORA KİLİTLİYORUZ */
+:root, 
+.dark, 
+[data-theme='dark'], 
+html.dark {
+  --bg-krem: #FAF7F2;
+  --text-mor: #2D1B4E;
   
-  /* SİTEYİ KREM RENGİNE KİLİTLİYORUZ */
-  html, body {
-    background-color: #FAF7F2 !important;
-    color: #2D1B4E !important;
-  }
-  
-  /* VERCEL'İN GECE MODU DAYATMASINI İPTAL EDİYORUZ */
-  .dark, [data-theme='dark'] {
-    background-color: #FAF7F2 !important;
-    color: #2D1B4E !important;
-    color-scheme: light !important;
-  }
+  background-color: #FAF7F2 !important;
+  color: #2D1B4E !important;
+  color-scheme: light !important;
+}
+
+body {
+  background-color: #FAF7F2 !important;
+  color: #2D1B4E !important;
+  font-family: 'DM Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Önceden kalma karanlık mod sınıflarını temizliyoruz */
+* {
+  border-color: #E2E8F0;
 }
