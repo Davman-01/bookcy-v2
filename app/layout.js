@@ -1,5 +1,4 @@
 import './globals.css';
-import CookieBanner from '@/components/CookieBanner'; // Birazdan bu dosyayı oluşturacağız
 
 export const metadata = {
   metadataBase: new URL('https://bookcy.co'),
