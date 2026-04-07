@@ -1,14 +1,11 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
 import { 
   MapPin, Star, ArrowRight, CheckCircle2, XCircle, ChevronLeft, ChevronRight, ChevronDown, 
-  Phone, Calendar, Clock, Lock, Upload, FileText, Briefcase, 
-  MessageSquare, Mail, Settings, Edit3, Target, TrendingUp, Users, Crown, 
-  Search, Sliders, MessageCircle, Scissors, Tag, User, UserCircle, 
-  Smartphone, Bell, Grid, X, Gem, Zap, Check, Award, LayoutDashboard, PieChart, Store, 
-  CalendarOff, Music, Ticket, ShieldCheck, HeartHandshake
+  Phone, Calendar, Clock, Lock, Upload, Briefcase, MessageSquare, Mail, Target, TrendingUp, 
+  Users, Crown, Search, Sliders, MessageCircle, Scissors, User, UserCircle, Smartphone, 
+  Grid, X, Gem, Check, PieChart, Store, CalendarOff, Music, Ticket, ShieldCheck, HeartHandshake
 } from 'lucide-react';
 
 const supabase = {
@@ -16,19 +13,13 @@ const supabase = {
     select: () => ({ eq: async () => ({ data: [] }), then: (cb) => cb({ data: [] }) }),
     insert: async () => ({ error: null })
   }),
-  storage: { 
-    from: () => ({ 
-      upload: async () => ({ error: null }), 
-      getPublicUrl: () => ({ data: { publicUrl: '' } }) 
-    }) 
-  }
+  storage: { from: () => ({ upload: async () => ({ error: null }), getPublicUrl: () => ({ data: { publicUrl: '' } }) }) }
 };
 
 const InstagramIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
   </svg>
 );
 
@@ -37,113 +28,51 @@ function parseDuration(durationStr) {
   const match = durationStr.match(/\d+/);
   return match ? parseInt(match[0]) : 30;
 }
+function getRequiredSlots(durationStr) { return Math.ceil(parseDuration(durationStr) / 30); }
 
-function getRequiredSlots(durationStr) {
-  return Math.ceil(parseDuration(durationStr) / 30);
-}
-
-const allTimeSlots = [
-  "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", 
-  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", 
-  "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", 
-  "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00", "23:30", 
-  "00:00", "00:30", "01:00", "01:30", "02:00"
-];
+const allTimeSlots = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30","00:00","00:30","01:00","01:30","02:00"];
 
 const defaultWorkingHours = [
-  { day: 'Pazartesi', open: '09:00', close: '19:00', isClosed: false },
-  { day: 'Salı', open: '09:00', close: '19:00', isClosed: false },
-  { day: 'Çarşamba', open: '09:00', close: '19:00', isClosed: false },
-  { day: 'Perşembe', open: '09:00', close: '19:00', isClosed: false },
-  { day: 'Cuma', open: '09:00', close: '19:00', isClosed: false },
-  { day: 'Cumartesi', open: '09:00', close: '19:00', isClosed: false },
+  { day: 'Pazartesi', open: '09:00', close: '19:00', isClosed: false }, { day: 'Salı', open: '09:00', close: '19:00', isClosed: false },
+  { day: 'Çarşamba', open: '09:00', close: '19:00', isClosed: false }, { day: 'Perşembe', open: '09:00', close: '19:00', isClosed: false },
+  { day: 'Cuma', open: '09:00', close: '19:00', isClosed: false }, { day: 'Cumartesi', open: '09:00', close: '19:00', isClosed: false },
   { day: 'Pazar', open: '09:00', close: '19:00', isClosed: true },
 ];
 
 export default function Home() {
   const router = useRouter(); 
-  
   const [step, setStep] = useState('services'); 
   const [shops, setShops] = useState([]);
   const [lang, setLang] = useState('TR');
   const [showFeaturesMenu, setShowFeaturesMenu] = useState(false);
   const [activeFeature, setActiveFeature] = useState(null);
-  
   const approvedShops = shops.filter(shop => shop.status === 'approved');
   const [selectedShop, setSelectedShop] = useState(null);
-  
-  const [bookingData, setBookingData] = useState({ 
-    date: new Date().toISOString().split('T')[0], 
-    time: '', 
-    selectedShopService: null, 
-    selectedStaff: null,
-    selectedEvent: null
-  });
-
+  const [bookingData, setBookingData] = useState({ date: new Date().toISOString().split('T')[0], time: '', selectedShopService: null, selectedStaff: null, selectedEvent: null });
   const [formData, setFormData] = useState({ name: '', surname: '', phoneCode: '+90', phone: '', email: '' });
   const [bookingPhase, setBookingPhase] = useState(1);
-
   const [bookingEmailValid, setBookingEmailValid] = useState(null);
   const [bookingPhoneValid, setBookingPhoneValid] = useState(null);
-
-  const handleBookingEmailChange = (e) => {
-    const val = e.target.value;
-    setFormData(prev => ({...prev, email: val}));
-    setBookingEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val));
-  };
-  const handleBookingPhoneChange = (e) => {
-    const val = e.target.value;
-    setFormData(prev => ({...prev, phone: val}));
-    setBookingPhoneValid(val === '' ? null : val.replace(/\s/g, '').length >= 7);
-  };
-
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [feedbackData, setFeedbackData] = useState({ q1: null, q2: null, q3: null, q4: null });
-
   const [showRegister, setShowRegister] = useState(false);
   const [loggedInShop, setLoggedInShop] = useState(null);
-
   const [showLogin, setShowLogin] = useState(false);
   const [loginType, setLoginType] = useState('owner');
   const [loginUsername, setLoginUsername] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginStaffName, setLoginStaffName] = useState('');
   const [isLoginLoading, setIsLoginLoading] = useState(false);
-
   const [filterRegion, setFilterRegion] = useState('All');
   const [filterService, setFilterService] = useState('All');
   const [filterSort, setFilterSort] = useState('High'); 
   const [searchQuery, setSearchQuery] = useState('');
-
-  const [newShop, setNewShop] = useState({ 
-    name: '', category: 'Berber', location: 'Girne', address: '', maps_link: '', 
-    phoneCode: '+90', contactPhone: '', contactInsta: '', contactEmail: '', 
-    username: '', password: '', email: '', description: '', logoFile: null, package: 'Standard' 
-  });
-  
+  const [newShop, setNewShop] = useState({ name: '', category: 'Berber', location: 'Girne', address: '', maps_link: '', phoneCode: '+90', contactPhone: '', contactInsta: '', contactEmail: '', username: '', password: '', email: '', description: '', logoFile: null, package: 'Standart Paket' });
   const [isUploading, setIsUploading] = useState(false);
   const [registerSuccess, setRegisterSuccess] = useState(false);
-  
   const [emailValid, setEmailValid] = useState(null);
   const [phoneValid, setPhoneValid] = useState(null);
   const [adminEmailValid, setAdminEmailValid] = useState(null);
-
-  const handleEmailChange = (e) => {
-    const val = e.target.value;
-    setNewShop(prev => ({...prev, email: val}));
-    setEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val));
-  };
-  const handleAdminEmailChange = (e) => {
-    const val = e.target.value;
-    setNewShop(prev => ({...prev, contactEmail: val}));
-    setAdminEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val));
-  };
-  const handlePhoneChange = (e) => {
-    const val = e.target.value;
-    setNewShop(prev => ({...prev, contactPhone: val}));
-    setPhoneValid(val === '' ? null : val.replace(/\s/g, '').length >= 7);
-  };
-
   const [appointments, setAppointments] = useState([]);
   const [globalAppointments, setGlobalAppointments] = useState([]); 
   const [closedSlots, setClosedSlots] = useState([]);
@@ -154,543 +83,138 @@ export default function Home() {
 
   const t = {
     TR: {
-      nav: { places: "Mekanlar", features: "Özellikler", contact: "İletişim", about: "Hakkımızda ve Paketler", addShop: "İşletme Ekle", login: "İşletme Girişi", logout: "Çıkış Yap", dashboard: "Panelime Git" },
-      megaMenu: { col1Title: "Kurulum", col2Title: "Müşterileri Etkile", col3Title: "İşletmeni Yönet", col4Title: "Büyümeye Devam Et", btn: "Tüm Özellikleri Keşfet" },
-      featNames: { profile: "Bookcy Profili", market: "Pazaryeri Listeleme", team: "Ekip Yönetimi", booking: "Online Randevu", app: "Müşteri Uygulaması", marketing: "Pazarlama Araçları", calendar: "Takvim & Planlama", crm: "Müşteri Yönetimi", boost: "Öne Çık", stats: "İstatistik & Raporlar" },
-      featDesc: { profile: "İşletmenizin dijital vitrinini saniyeler içinde oluşturun.", market: "Bookcy kullanan binlerce aktif müşteriye doğrudan ulaşın.", team: "Personelinizin çalışma saatlerini kolayca yönetin.", booking: "Müşterilerinizin 7/24 randevu almasını sağlayın.", app: "Müşterilerinize özel mobil uygulama konforu sunun.", marketing: "Doğru zamanda doğru mesajı gönderin.", calendar: "Akıllı dijital takvim ile çakışmaları önleyin.", crm: "Müşteri geçmişini güvenle saklayın.", boost: "Aramalarda üst sıralara çıkın.", stats: "Anlık ve net raporlarla kazancınızı görün." },
+      nav: { places: "Mekanlar", features: "Özellikler", why: "Neden Bookcy", contact: "İletişim", about: "Hakkımızda", addShop: "İşletme Ekle", login: "Giriş", logout: "Çıkış", dashboard: "Panel" },
+      megaMenu: { col1Title: "Kurulum", col2Title: "Müşterileri Etkile", col3Title: "Yönet", col4Title: "Büyü", btn: "Tüm Özellikler" },
+      featNames: { profile: "Profil", market: "Pazaryeri", team: "Ekip", booking: "Randevu", app: "Uygulama", marketing: "Pazarlama", calendar: "Takvim", crm: "Müşteri Yönetimi", boost: "Öne Çık", stats: "Raporlar" },
+      featDesc: { profile: "Dijital vitrin", market: "Müşteriye ulaşın", team: "Saatleri yönetin", booking: "7/24 randevu", app: "Mobil uygulama", marketing: "Mesaj gönderin", calendar: "Çakışmaları önleyin", crm: "Geçmişi saklayın", boost: "Üst sıralara çıkın", stats: "Kazancınızı görün" },
       featDetails: {
-        profile: { purpose: "Bookcy Profili, işletmenizin çevrimiçi ortamdaki dijital vitrinidir.", adv1: { title: "Profesyonel İmaj", desc: "Kaliteli fotoğraflar ile ilk intibanızı güçlendirin." }, adv2: { title: "Güven İnşası", desc: "Müşteri yorumları ile güveni hızla kazanın." }, adv3: { title: "Kolay Keşfedilebilirlik", desc: "Arama motorlarında üst sıralarda bulunun." } },
-        market: { purpose: "Binlerce hazır müşteriyi sizinle buluşturur.", adv1: { title: "Yeni Müşteriler", desc: "Bölgenizde hizmet arayan aktif kullanıcılara ulaşın." }, adv2: { title: "Boşlukları Doldurun", desc: "İptal edilen randevuları sergileyin." }, adv3: { title: "Rekabet Avantajı", desc: "Rakiplerinizin önünde yer alın." } },
-        team: { purpose: "Personelinizin mesailerini zahmetsizce koordine etmenizi sağlar.", adv1: { title: "Kolay Planlama", desc: "Vardiyaları dijital olarak düzenleyin." }, adv2: { title: "Performans Takibi", desc: "Gelirleri anlık görün." }, adv3: { title: "Bireysel Takvimler", desc: "Çakışmaları tamamen ortadan kaldırın." } },
-        booking: { purpose: "Müşterilerin 7/24 randevu oluşturmasını sağlar.", adv1: { title: "Zaman Tasarrufu", desc: "Randevu telefonları yerine işinize odaklanın." }, adv2: { title: "Sıfır Hata", desc: "Not alma hatalarını sıfıra indirin." }, adv3: { title: "Kesintisiz Hizmet", desc: "İşletmeniz kapalıyken bile rezervasyon kabul edin." } },
-        app: { purpose: "İşletmenizle müşterilerinizin pürüzsüz bir bağ kurmalarını sağlar.", adv1: { title: "Kusursuz Deneyim", desc: "Kullanıcı dostu bir arayüz sunun." }, adv2: { title: "Kolay Takip", desc: "Yaklaşan randevular takip edilsin." }, adv3: { title: "Anlık İptal", desc: "İptaller saat takviminize boş yansısın." } },
-        marketing: { purpose: "İletişim asistanınızdır.", adv1: { title: "Hedefli Kampanyalar", desc: "Özel fırsatlar sunun." }, adv2: { title: "SMS ve E-posta", desc: "Otomatik kutlama mesajları gönderin." }, adv3: { title: "Ciro Artışı", desc: "Ziyaret sıklığını artırın." } },
-        calendar: { purpose: "Randevuları organize eden yapıdır.", adv1: { title: "Çakışma Koruması", desc: "Aynı saate iki randevuyu imkansız hale getirir." }, adv2: { title: "Optimizasyon", desc: "Takvimdeki boşlukları analiz eder." }, adv3: { title: "Sürükle & Bırak", desc: "Saatleri farenizle anında değiştirin." } },
-        crm: { purpose: "Müşterinizin tercihlerini saklayan arşivinizdir.", adv1: { title: "Müşteri Profili", desc: "Geçmiş işlemleri görün." }, adv2: { title: "Özel Notlar", desc: "Detayları sisteme kaydedin." }, adv3: { title: "Sadakat İnşası", desc: "Kırılmaz bir bağ oluşturun." } },
-        boost: { purpose: "Görünürlüğünüzü en üst seviyeye taşıyan pakettir.", adv1: { title: "Aramalarda Zirve", desc: "En üst sıralarda yer alın." }, adv2: { title: "Vitrinde Yer Alın", desc: "Önerilenler listesinde gösterilin." }, adv3: { title: "Prestijli İmaj", desc: "Öne çıkan rozetlerle kalitenizi vurgulayın." } },
-        stats: { purpose: "Verilerle doğru kararlar almanızı sağlayan sistemdir.", adv1: { title: "Gerçek Zamanlı Ciro", desc: "Kazançlarınızı anlık olarak takip edin." }, adv2: { title: "Hizmet Analizi", desc: "Stratejinizi belirleyin." }, adv3: { title: "Personel Raporları", desc: "Uzman performansını görün." } }
+        profile: { purpose: "Dijital vitrininiz.", adv1: { title: "İmaj", desc: "İlk intibayı güçlendirir." }, adv2: { title: "Güven", desc: "Yorumlarla güven kazanın." }, adv3: { title: "Keşfedilebilirlik", desc: "Aramalarda bulunun." } },
+        market: { purpose: "Müşteriyi buluşturur.", adv1: { title: "Yeni Müşteriler", desc: "Aktif kullanıcılara ulaşın." }, adv2: { title: "Boşlukları Doldurun", desc: "İptalleri sergileyin." }, adv3: { title: "Rekabet", desc: "Önde yer alın." } },
+        team: { purpose: "Personeli koordine edin.", adv1: { title: "Planlama", desc: "Vardiyaları düzenleyin." }, adv2: { title: "Performans", desc: "Gelirleri görün." }, adv3: { title: "Takvimler", desc: "Çakışmaları kaldırın." } },
+        booking: { purpose: "7/24 randevu.", adv1: { title: "Zaman Tasarrufu", desc: "İşinize odaklanın." }, adv2: { title: "Sıfır Hata", desc: "Hataları indirin." }, adv3: { title: "Kesintisiz Hizmet", desc: "Sürekli rezervasyon alın." } },
+        app: { purpose: "Müşteri ile bağ.", adv1: { title: "Deneyim", desc: "Kullanıcı dostu arayüz." }, adv2: { title: "Takip", desc: "Yaklaşan randevular." }, adv3: { title: "İptal", desc: "İptaller yansısın." } },
+        marketing: { purpose: "İletişim asistanı.", adv1: { title: "Kampanyalar", desc: "Özel fırsatlar." }, adv2: { title: "Mesajlar", desc: "Otomatik mesajlar." }, adv3: { title: "Ciro Artışı", desc: "Sıklığı artırın." } },
+        calendar: { purpose: "Randevu organizasyonu.", adv1: { title: "Koruması", desc: "İki randevuyu engeller." }, adv2: { title: "Optimizasyon", desc: "Boşlukları analiz eder." }, adv3: { title: "Sürükle", desc: "Anında değiştirin." } },
+        crm: { purpose: "Müşteri arşivi.", adv1: { title: "Profil", desc: "Geçmişi görün." }, adv2: { title: "Özel Notlar", desc: "Sisteme kaydedin." }, adv3: { title: "Sadakat", desc: "Bağ oluşturun." } },
+        boost: { purpose: "Görünürlük paketi.", adv1: { title: "Zirve", desc: "En üstte yer alın." }, adv2: { title: "Vitrin", desc: "Önerilenlerde gösterilin." }, adv3: { title: "İmaj", desc: "Kalitenizi vurgulayın." } },
+        stats: { purpose: "Veri sistemi.", adv1: { title: "Ciro", desc: "Anlık takip." }, adv2: { title: "Analiz", desc: "Strateji belirleyin." }, adv3: { title: "Raporlar", desc: "Performansı görün." } }
       },
-      featUI: { purposeTitle: "Amacı ve Ne İşe Yarar?", benefitsTitle: "Avantajları", allFeaturesTitle: "Tüm Özellikler", allFeaturesSub: "İşletmenizi büyütmek için ihtiyacınız olan her şey." },
-      home: { eyebrow: "Kıbrıs'ın #1 Randevu Platformu", title1: "Kendine", title2: "iyi bak,", title3: "hemen", title4: "randevu al.", subtitle: "Kendine iyi bak, zamanın sana kalsın. Kuaför, berber, spa, masaj ve daha fazlasını saniyeler içinde keşfet.", searchPlace: "Hizmet veya mekan ara...", searchLoc: "Nerede?", searchBtn: "Ara", popTitle: "Popüler:", stats: {s1:"Aktif İşletme", s2:"Mutlu Müşteri", s3:"Tamamlanan İşlem", s4:"Memnuniyet"} },
-      cats: { catTitle: "Kategoriler", catSub: "Bugün ne yaptırmak istersiniz?", seeAll: "Tümünü Gör →", tattoo: "Dövme", barber: "Berber", hair: "Kuaför", nail: "Tırnak & Güzellik", club: "Bar & Club", spa: "Spa & Masaj", makeup: "Makyaj", skincare: "Cilt Bakımı" },
-      homeInfo: { recLabel: "Öne Çıkanlar", recTitle: "Kıbrıs'ta Bu Hafta 🔥", howLabel: "Nasıl Çalışır?", howTitle: "4 Basit Adımda Randevun Hazır", how1Title: "Keşfet", how1Desc: "Yakındaki mekanları incele ve filtrele.", how2Title: "Tarih Seç", how2Desc: "Sana en uygun zamanı tek tıkla seç.", how3Title: "Onayla", how3Desc: "Saniyeler içinde rezervasyonun onaylanır.", how4Title: "Keyif Çıkar", how4Desc: "Git, hizmetini al ve puan ver.", ctaLabel: "İşletme Sahibi misiniz?", ctaTitle1: "Bookcy ile İşletmeni", ctaTitle2: "Dijitalleştir.", ctaSub: "Randevu sistemini kolaylaştır, yeni müşteri kazan." },
-      filters: { title: "Arama Sonuçları", search: "Mekan Ara...", region: "Bölge", service: "Kategori", sortHigh: "En Yüksek Puan", sortLow: "En Düşük Puan", clear: "Temizle", count: "Mekan Bulundu" },
-      reg: { title: "İŞLETME KAYIT", subtitle: "Sadece İşletme Sahipleri İçindir", shopName: "İşletme Adı", location: "Bölge Seçin", address: "Tam Adres", maps: "Google Maps Linki", desc: "Hakkımızda", email: "Admin E-Posta", contactPhone: "İşletme Telefonu", contactInsta: "Instagram Linki", contactEmail: "İletişim E-Posta", user: "Kullanıcı Adı", pass: "Şifre", pack: "Paket Seçimi", upload: "Logo Yükle", submit: "BAŞVUR", success: "BAŞVURUNUZ ALINDI!", uploading: "YÜKLENİYOR..." },
-      shops: { back: "GERİ DÖN", empty: "Kriterlere uygun işletme bulunamadı." },
-      profile: { tabServices: "Hizmetler", tabEvents: "Etkinlikler", tabGallery: "Galeri", about: "Hakkında", contactTitle: "İLETİŞİM", bookBtn: "SEÇ", noDesc: "İşletme henüz bir açıklama eklememiş.", noServices: "İşletme henüz liste eklememiş.", noGallery: "İşletme henüz fotoğraf eklememiş.", similarTitle: "BENZER MEKANLAR" },
-      book: { change: "Geri", selectService: "Devam etmek için hizmet seçin.", selectEvent: "Etkinliği seçin.", selectLoca: "VIP türünü seçin.", selectStaff: "UZMAN SEÇİN", anyStaff: "Fark Etmez", date: "Tarih", time: "Saat", name: "Adınız", surname: "Soyadınız", phone: "Telefon", email: "E-Posta", submit: "ONAYLA", success: "RANDEVU ONAYLANDI", successSub: "Bilgileriniz işletmeye iletildi.", backHome: "ANA SAYFA", total: "Toplam", details: "Randevu Detayları", service: "Hizmet", event: "Etkinlik", staff: "Uzman", dateTime: "Zaman", contactInfo: "İletişim Bilgileri", btnBook: "Randevu Al →", shopClosed: "İŞLETME BU TARİHTE KAPALIDIR." },
-      contact: { title: "BİZE ULAŞIN", sub: "Sorularınız için bize 7/24 ulaşabilirsiniz.", whatsapp: "WhatsApp Destek", wpDesc: "Anında yanıt almak için WhatsApp.", insta: "Instagram", instaDesc: "En yeni mekanları keşfedin.", email: "Kurumsal E-Posta", emailDesc: "Sponsorluk ve görüşmeler.", btnWp: "MESAJ AT", btnInsta: "TAKİP ET", btnEmail: "MAİL GÖNDER" },
-      footer: { desc: "Kuzey Kıbrıs'ın tek rezervasyon platformu.", links: "Platform", cities: "Bölgeler", legal: "Sözleşmeler", terms: "Kullanım Şartları", privacy: "Gizlilik Politikası", kvkk: "KVKK Aydınlatma", cookies: "Çerez Politikası", copy: "Tüm hakları saklıdır. Kuzey Kıbrıs'ta kurulmuştur. 🇹🇷" },
-      legal: {
-        privacyTitle: "Gizlilik Politikası",
-        kvkkTitle: "KVKK Aydınlatma Metni",
-        termsTitle: "Kullanım Şartları",
-        cookiesTitle: "Çerez Politikası",
-        lastUpdated: "Son güncellenme tarihi: 10 Nisan 2024"
-      }
+      featUI: { purposeTitle: "Ne İşe Yarar?", benefitsTitle: "Avantajları", allFeaturesTitle: "Özellikler", allFeaturesSub: "Her şey burada." },
+      home: { eyebrow: "Kıbrıs'ın #1 Platformu", title1: "Kendine", title2: "iyi bak,", title3: "hemen", title4: "randevu al.", subtitle: "Kuaför, berber, spa, masaj ve daha fazlasını saniyeler içinde keşfet.", searchPlace: "Hizmet veya mekan ara...", searchLoc: "Nerede?", searchBtn: "Ara", popTitle: "Popüler:", stats: {s1:"İşletme", s2:"Müşteri", s3:"İşlem", s4:"Memnuniyet"} },
+      cats: { catTitle: "Kategoriler", catSub: "Ne yaptırmak istersiniz?", seeAll: "Tümünü Gör →", tattoo: "Dövme", barber: "Berber", hair: "Kuaför", nail: "Tırnak & Güzellik", club: "Bar & Club", spa: "Spa & Masaj", makeup: "Makyaj", skincare: "Cilt Bakımı" },
+      homeInfo: { recLabel: "Öne Çıkanlar", recTitle: "Bu Hafta 🔥", howLabel: "Nasıl Çalışır?", howTitle: "4 Adımda Hazır", how1Title: "Keşfet", how1Desc: "Mekanları incele.", how2Title: "Tarih Seç", how2Desc: "Zamanı seç.", how3Title: "Onayla", how3Desc: "Saniyeler içinde onay.", how4Title: "Keyif Çıkar", how4Desc: "Hizmetini al.", ctaLabel: "İşletme Misiniz?", ctaTitle1: "Bookcy ile", ctaTitle2: "Dijitalleş.", ctaSub: "Yeni müşteri kazan." },
+      filters: { title: "Sonuçlar", search: "Mekan Ara...", region: "Bölge", service: "Kategori", sortHigh: "En Yüksek", sortLow: "En Düşük", clear: "Temizle", count: "Mekan" },
+      reg: { title: "KAYIT", subtitle: "Sadece Sahipler İçin", shopName: "Adı", location: "Bölge", address: "Adres", maps: "Maps Linki", desc: "Hakkımızda", email: "E-Posta", contactPhone: "Telefon", contactInsta: "Instagram", contactEmail: "İletişim Maili", user: "Kullanıcı Adı", pass: "Şifre", pack: "Paket", upload: "Logo", submit: "BAŞVUR", success: "ALINDI!", uploading: "YÜKLENİYOR..." },
+      shops: { back: "GERİ DÖN", empty: "Bulunamadı." },
+      profile: { tabServices: "Hizmetler", tabEvents: "Etkinlikler", tabGallery: "Galeri", about: "Hakkında", contactTitle: "İLETİŞİM", bookBtn: "SEÇ", noDesc: "Açıklama yok.", noServices: "Liste yok.", noGallery: "Fotoğraf yok.", similarTitle: "BENZER MEKANLAR" },
+      book: { change: "Geri", selectService: "Hizmet seçin.", selectEvent: "Etkinlik seçin.", selectLoca: "VIP seçin.", selectStaff: "UZMAN SEÇİN", anyStaff: "Fark Etmez", date: "Tarih", time: "Saat", name: "Adınız", surname: "Soyadınız", phone: "Telefon", email: "E-Posta", submit: "ONAYLA", success: "ONAYLANDI", successSub: "İletildi.", backHome: "ANA SAYFA", total: "Toplam", details: "Detaylar", service: "Hizmet", event: "Etkinlik", staff: "Uzman", dateTime: "Zaman", contactInfo: "İletişim", btnBook: "Randevu Al →", shopClosed: "KAPALIDIR." },
+      about: { title: "Dijital Devrim", subtitle: "Büyütün.", missionDesc: "Telefon trafiğinden kurtulun.", bizTitle: "Çözümler", biz1: "7/24 Rezervasyon", biz1Desc: "Sistem randevu alır.", biz2: "Boş Koltuklara Son", biz2Desc: "İptalleri indirin.", biz3: "Sıfır Komisyon", biz3Desc: "Komisyon kesilmez.", biz4: "Lider Olun", biz4Desc: "Öne geçin.", usrTitle: "Neden Biz?", usr1: "Sırada Beklemeye Son", usr1Desc: "Beklemeyin.", usr2: "Şeffaf", usr2Desc: "Ne ödeyeceğinizi bilin.", usr3: "Yorumlar", usr3Desc: "Deneyimleri okuyun.", packTitle: "Paketler", packSub: "Sürpriz yok.", pkg1Name: "Standart Paket", pkg1Price: "60 STG", pkg1Period: "/ Ay", pkg1Feat1: "Sınırsız Randevu", pkg1Feat2: "Sosyal Medya", pkg1Feat3: "Panel", pkg1Feat4: "Personel Yönetimi", pkg1Feat5: "7/24 Destek", pkg2Name: "Premium Paket", pkg2Price: "100 STG", pkg2Period: "/ Ay", pkg2Feat1: "Standart Özellikler", pkg2Feat2: "Vitrini", pkg2Feat3: "Üst Sıra", pkg2Feat4: "VIP Çerçeve", pkg2Feat5: "Sponsorlu Reklam", ctaTitle: "Katlayın", ctaBtn: "EKLEYİN" },
+      contact: { title: "BİZE ULAŞIN", sub: "7/24 ulaşabilirsiniz.", whatsapp: "WhatsApp", wpDesc: "Anında yanıt.", insta: "Instagram", instaDesc: "Keşfedin.", email: "E-Posta", emailDesc: "Görüşmeler.", btnWp: "MESAJ AT", btnInsta: "TAKİP ET", btnEmail: "MAİL GÖNDER" },
+      footer: { desc: "Tek rezervasyon platformu.", links: "Platform", cities: "Bölgeler", legal: "Sözleşmeler", terms: "Kullanım Şartları", privacy: "Gizlilik", kvkk: "KVKK", cookies: "Çerez Politikası", copy: "Tüm hakları saklıdır. Kıbrıs 🇹🇷" },
+      legal: { privacyTitle: "Gizlilik Politikası", kvkkTitle: "KVKK", termsTitle: "Kullanım Şartları", cookiesTitle: "Çerez Politikası", lastUpdated: "Son güncellenme: 10 Nisan 2024" }
     },
-    EN: {
-      nav: { places: "Places", features: "Features", contact: "Contact", about: "About & Packages", addShop: "Add Business", login: "Login", logout: "Logout", dashboard: "Dashboard" },
-      megaMenu: { col1Title: "Set up shop", col2Title: "Wow your clients", col3Title: "Run your business", col4Title: "Keep growing", btn: "Explore All Features" },
-      featNames: { profile: "Bookcy Profile", market: "Marketplace", team: "Team Management", booking: "Online Booking", app: "Customer App", marketing: "Marketing Tools", calendar: "Calendar", crm: "Client Management", boost: "Boost", stats: "Stats & Reports" },
-      featDesc: { profile: "Create your digital storefront.", market: "Reach active customers.", team: "Manage staff hours.", booking: "Let clients book 24/7.", app: "Mobile app for clients.", marketing: "Send SMS/Email campaigns.", calendar: "Smart digital calendar.", crm: "Store client history.", boost: "Rank higher in searches.", stats: "Track your revenue." },
-      featDetails: {
-        profile: { purpose: "Your 24/7 open digital storefront.", adv1: { title: "Professional Image", desc: "Quality photos and detailed menu." }, adv2: { title: "Build Trust", desc: "Gain trust through reviews." }, adv3: { title: "Discoverability", desc: "Found on search engines." } },
-        market: { purpose: "Connects customers directly with your business.", adv1: { title: "Thousands of Clients", desc: "Reach active users." }, adv2: { title: "Fill Empty Seats", desc: "Display canceled appointments." }, adv3: { title: "Competitive Edge", desc: "Stay ahead of competitors." } },
-        team: { purpose: "Coordinate your staff's shifts and performance.", adv1: { title: "Easy Scheduling", desc: "Digitally arrange shifts." }, adv2: { title: "Performance", desc: "See staff revenue." }, adv3: { title: "Calendars", desc: "Eliminate conflicts." } },
-        booking: { purpose: "Allows clients to book autonomously 24/7.", adv1: { title: "Save Time", desc: "Focus on your work." }, adv2: { title: "Zero Errors", desc: "Eliminate double bookings." }, adv3: { title: "24/7 Service", desc: "Accept bookings anytime." } },
-        app: { purpose: "Ensures a seamless connection with your business.", adv1: { title: "Flawless Experience", desc: "Provide a VIP experience." }, adv2: { title: "Easy Tracking", desc: "Clients view appointments." }, adv3: { title: "Updates", desc: "Clients cancel easily." } },
-        marketing: { purpose: "Your automated assistant to build loyalty.", adv1: { title: "Targeted Campaigns", desc: "Offer special deals." }, adv2: { title: "SMS & Email", desc: "Automated greetings." }, adv3: { title: "Revenue Boost", desc: "Increase client frequency." } },
-        calendar: { purpose: "Perfectly organizes staff hours and appointments.", adv1: { title: "Conflict Protection", desc: "No double-booking." }, adv2: { title: "Optimization", desc: "Shows optimal times." }, adv3: { title: "Drag & Drop", desc: "Modify times easily." } },
-        crm: { purpose: "Safely stores all history and preferences.", adv1: { title: "Detailed Profiles", desc: "See past visits." }, adv2: { title: "Private Notes", desc: "Save important details." }, adv3: { title: "Build Loyalty", desc: "Make clients feel special." } },
-        boost: { purpose: "Maximizes your visibility using AI.", adv1: { title: "Top Search Ranks", desc: "Appear at the top." }, adv2: { title: "Homepage", desc: "Get featured directly." }, adv3: { title: "Image", desc: "Exclusive badges." } },
-        stats: { purpose: "Helps you make data-driven decisions.", adv1: { title: "Real-Time Revenue", desc: "Track earnings." }, adv2: { title: "Service Analysis", desc: "Identify profitable services." }, adv3: { title: "Staff Reports", desc: "See top specialists." } }
-      },
-      featUI: { purposeTitle: "Purpose & What It Does", benefitsTitle: "Benefits For Your Business", allFeaturesTitle: "All Features", allFeaturesSub: "Everything you need to grow your business." },
-      home: { eyebrow: "Cyprus's #1 Beauty Platform", title1: "Take care", title2: "of yourself,", title3: "book", title4: "instantly.", subtitle: "Find the best barbers, salons, and spas nearby. Book with one click, your time is yours.", searchPlace: "Search services...", searchLoc: "Where?", searchBtn: "Search", popTitle: "Popular:", stats: {s1:"Active Places", s2:"Happy Clients", s3:"Completed Bookings", s4:"Satisfaction"} },
-      cats: { catTitle: "Categories", catSub: "What are you looking for?", seeAll: "See All →", tattoo: "Tattoo", barber: "Barber", hair: "Hair Salon", nail: "Nail Art", club: "Bar & Club", spa: "Spa & Massage", makeup: "Makeup", skincare: "Skin Care" },
-      homeInfo: { recLabel: "Featured", recTitle: "Trending This Week 🔥", howLabel: "How it works?", howTitle: "Ready in 4 steps", how1Title: "Discover", how1Desc: "Find nearby places.", how2Title: "Select Date", how2Desc: "Pick the best time.", how3Title: "Confirm", how3Desc: "Booking confirmed.", how4Title: "Enjoy", how4Desc: "Get your service.", ctaLabel: "Business owner?", ctaTitle1: "Grow your business", ctaTitle2: "with Bookcy.", ctaSub: "Digitize your booking system." },
-      filters: { title: "Search Results", search: "Search places...", region: "Location", service: "Categories", sortHigh: "Highest Rated", sortLow: "Lowest Rated", clear: "Clear", count: "Places Found" },
-      reg: { title: "BUSINESS REGISTRATION", subtitle: "For Business Owners Only", shopName: "Business Name", location: "Select Region", address: "Full Address", maps: "Google Maps Link", desc: "Description", email: "Admin Email", contactPhone: "Business Phone", contactInsta: "Instagram Link", contactEmail: "Contact Email", user: "Username", pass: "Password", pack: "Select Package", upload: "Upload Logo", submit: "COMPLETE APPLICATION", success: "APPLICATION RECEIVED!", uploading: "UPLOADING..." },
-      shops: { back: "GO BACK", empty: "No businesses found." },
-      profile: { tabServices: "Services", tabEvents: "Events", tabGallery: "Gallery", about: "About Us", contactTitle: "CONTACT INFO", bookBtn: "SELECT", noDesc: "No description yet.", noServices: "No services yet.", noGallery: "No photos yet.", similarTitle: "SIMILAR PLACES NEARBY" },
-      book: { change: "Back", selectService: "Select a service to continue.", selectEvent: "Select an event.", selectLoca: "Select your VIP booking type.", selectStaff: "SELECT STAFF", anyStaff: "Any Staff", date: "Date", time: "Time", name: "First Name", surname: "Last Name", phone: "Phone", email: "Email", submit: "CONFIRM", success: "APPOINTMENT CONFIRMED", successSub: "Your details have been sent.", backHome: "RETURN TO HOME", total: "Total", details: "Appointment Details", service: "Service", event: "Event", staff: "Staff", dateTime: "Date/Time", contactInfo: "Contact Info", btnBook: "Book Now →", shopClosed: "SHOP IS CLOSED ON THIS DATE." },
-      contact: { title: "CONTACT US", sub: "We are here 24/7.", whatsapp: "WhatsApp", wpDesc: "Contact us via WhatsApp.", insta: "Instagram", instaDesc: "Follow us.", email: "Corporate Email", emailDesc: "Email us for inquiries.", btnWp: "MESSAGE", btnInsta: "FOLLOW", btnEmail: "EMAIL" },
-      footer: { desc: "North Cyprus's premier booking platform for beauty & wellness.", links: "Platform", cities: "Regions", legal: "Terms", terms: "Terms of Use", privacy: "Privacy Policy", kvkk: "KVKK", cookies: "Cookie Policy", copy: "All rights reserved. Made in North Cyprus. 🇹🇷" },
-      legal: { privacyTitle: "Privacy Policy", kvkkTitle: "KVKK", termsTitle: "Terms of Use", cookiesTitle: "Cookie Policy", lastUpdated: "Last updated: April 10, 2024" }
-    },
-    RU: {
-      nav: { places: "Места", features: "Функции", contact: "Контакты", about: "О нас и пакеты", addShop: "Добавить бизнес", login: "Вход", logout: "Выйти", dashboard: "Панель" },
-      megaMenu: { col1Title: "Настройка", col2Title: "Клиенты", col3Title: "Бизнес", col4Title: "Развитие", btn: "Узнать все функции" },
-      featNames: { profile: "Профиль Bookcy", market: "Маркетплейс", team: "Команда", booking: "Онлайн-бронирование", app: "Приложение", marketing: "Маркетинг", calendar: "Календарь", crm: "Управление клиентами", boost: "Продвижение", stats: "Статистика" },
-      featDesc: { profile: "Создайте витрину за секунды.", market: "Охватите тысячи клиентов.", team: "Управляйте персоналом.", booking: "Бронирование 24/7.", app: "Мобильное приложение.", marketing: "SMS и Email кампании.", calendar: "Умный календарь.", crm: "Управление клиентами.", boost: "Выше в поиске.", stats: "Следите за доходами." },
-      featDetails: {
-        profile: { purpose: "Ваша цифровая витрина.", adv1: { title: "Имидж", desc: "Улучшите первое впечатление." }, adv2: { title: "Доверие", desc: "Отзывы клиентов." }, adv3: { title: "Поиск", desc: "Легкий поиск." } },
-        market: { purpose: "Связывает клиентов с вашим бизнесом.", adv1: { title: "Клиенты", desc: "Активные пользователи." }, adv2: { title: "Пустые места", desc: "Отмененные записи." }, adv3: { title: "Конкуренция", desc: "Опережайте конкурентов." } },
-        team: { purpose: "Управление командой.", adv1: { title: "Планирование", desc: "Избегайте ошибок." }, adv2: { title: "Оценка", desc: "Отслеживайте доходы." }, adv3: { title: "Календари", desc: "Исключите конфликты." } },
-        booking: { purpose: "Онлайн-бронирование 24/7.", adv1: { title: "Экономия времени", desc: "Сосредоточьтесь на работе." }, adv2: { title: "Ноль ошибок", desc: "Без человеческого фактора." }, adv3: { title: "Сервис 24/7", desc: "Принимайте записи всегда." } },
-        app: { purpose: "Приложение для клиентов.", adv1: { title: "Опыт", desc: "Современный интерфейс." }, adv2: { title: "Отслеживание", desc: "Прошлые визиты." }, adv3: { title: "Обновления", desc: "Отмена записей." } },
-        marketing: { purpose: "Маркетинг.", adv1: { title: "Кампании", desc: "Скидки." }, adv2: { title: "SMS", desc: "Поздравления." }, adv3: { title: "Рост", desc: "Напоминания." } },
-        calendar: { purpose: "Календарь организует работу.", adv1: { title: "Защита", desc: "Без двойного бронирования." }, adv2: { title: "Оптимизация", desc: "Идеальное время." }, adv3: { title: "Легкость", desc: "Перетаскивание." } },
-        crm: { purpose: "Управление клиентами.", adv1: { title: "Профили", desc: "Последние визиты." }, adv2: { title: "Заметки", desc: "Предпочтения." }, adv3: { title: "Лояльность", desc: "Каждый клиент особенный." } },
-        boost: { purpose: "Продвижение с помощью ИИ.", adv1: { title: "Топ", desc: "Всегда вверху." }, adv2: { title: "На главной", desc: "'Рекомендуемые'." }, adv3: { title: "Имидж", desc: "Значки профиля." } },
-        stats: { purpose: "Статистика.", adv1: { title: "Доход", desc: "Заработок." }, adv2: { title: "Услуги", desc: "Прибыльные процедуры." }, adv3: { title: "Отчеты", desc: "Кто получает больше записей." } }
-      },
-      featUI: { purposeTitle: "Цель", benefitsTitle: "Преимущества", allFeaturesTitle: "Все функции", allFeaturesSub: "Всё для роста бизнеса." },
-      home: { eyebrow: "Платформа красоты #1", title1: "Позаботьтесь", title2: "о себе,", title3: "забронируйте", title4: "сейчас.", subtitle: "Найдите лучших мастеров, салоны и спа поблизости. Бронируйте в один клик.", searchPlace: "Поиск услуг...", searchLoc: "Где?", searchBtn: "ПОИСК", popTitle: "Популярные:", stats: {s1:"Активные", s2:"Клиенты", s3:"Записи", s4:"Удовлетворенность"} },
-      cats: { catTitle: "Категории", catSub: "Что вы ищете?", seeAll: "Все →", tattoo: "Тату", barber: "Барбер", hair: "Парикмахерская", nail: "Маникюр", club: "Бар", spa: "Спа", makeup: "Макияж", skincare: "Уход за кожей" },
-      homeInfo: { recLabel: "Популярные", recTitle: "В тренде 🔥", howLabel: "Как это работает?", howTitle: "Готово за 4 шага", how1Title: "Найти", how1Desc: "Найдите салоны.", how2Title: "Дата", how2Desc: "Свободное время.", how3Title: "Подтвердить", how3Desc: "Бронь подтверждена.", how4Title: "Наслаждаться", how4Desc: "Оставьте отзыв.", ctaLabel: "Владелец бизнеса?", ctaTitle1: "Развивайте бизнес", ctaTitle2: "с Bookcy.", ctaSub: "Оцифруйте бизнес." },
-      filters: { title: "Результаты", search: "Поиск...", region: "Где?", service: "Услуги", sortHigh: "С высоким рейтингом", sortLow: "С низким рейтингом", clear: "Очистить", count: "Найдено" },
-      reg: { title: "РЕГИСТРАЦИЯ", subtitle: "Для бизнеса", shopName: "Название", location: "Регион", address: "Адрес", maps: "Ссылка на Google Maps", desc: "Описание", email: "Email", contactPhone: "Телефон", contactInsta: "Ссылка на Instagram", contactEmail: "Контактный Email", user: "Имя пользователя", pass: "Пароль", pack: "Пакет", upload: "Логотип", submit: "ЗАВЕРШИТЬ", success: "ЗАЯВКА ПОЛУЧЕНА!", uploading: "ЗАГРУЗКА..." },
-      shops: { back: "НАЗАД", empty: "Не найдено." },
-      profile: { tabServices: "Услуги", tabEvents: "События", tabGallery: "Галерея", about: "О НАС", contactTitle: "КОНТАКТЫ", bookBtn: "ВЫБРАТЬ", noDesc: "Нет описания.", noServices: "Нет услуг.", noGallery: "Нет фото.", similarTitle: "ПОХОЖИЕ МЕСТА" },
-      book: { change: "Назад", selectService: "Выберите услугу", selectEvent: "Выберите событие", selectLoca: "Выберите зону", selectStaff: "ВЫБЕРИТЕ СПЕЦИАЛИСТА", anyStaff: "Любой", date: "Дата", time: "Время", name: "Имя", surname: "Фамилия", phone: "Телефон", email: "Email", submit: "ПОДТВЕРДИТЬ", success: "БРОНЬ ПОДТВЕРЖДЕНА", successSub: "Данные отправлены.", backHome: "НА ГЛАВНУЮ", total: "Итого", details: "Детали", service: "Услуга", event: "Событие", staff: "Специалист", dateTime: "Дата / Время", contactInfo: "Контакты", btnBook: "Забронировать →", shopClosed: "ЗАКРЫТО В ЭТУ ДАТУ." },
-      contact: { title: "КОНТАКТЫ", sub: "Мы здесь 24/7.", whatsapp: "WhatsApp", wpDesc: "Свяжитесь.", insta: "Instagram", instaDesc: "Подписывайтесь.", email: "Эл. почта", emailDesc: "Напишите нам.", btnWp: "НАПИСАТЬ", btnInsta: "ПОДПИСАТЬСЯ", btnEmail: "ОТПРАВИТЬ" },
-      footer: { desc: "Платформа бронирования на Северном Кипре.", links: "Платформа", cities: "Регион", legal: "О нас", terms: "Условия использования", privacy: "Политика конфиденциальности", kvkk: "KVKK", cookies: "Файлы cookie", copy: "Все права защищены. Сделано на Северном Кипре. 🇹🇷" },
-      legal: { privacyTitle: "Политика конфиденциальности", kvkkTitle: "KVKK", termsTitle: "Условия использования", cookiesTitle: "Файлы cookie", lastUpdated: "Последнее обновление: 10 апреля 2024 г." }
-    }
+    EN: { nav: { places: "Places", features: "Features", why: "Why Bookcy", contact: "Contact", about: "About", addShop: "Add Business", login: "Login", logout: "Logout", dashboard: "Dashboard" }, megaMenu: { col1Title: "Setup", col2Title: "Clients", col3Title: "Manage", col4Title: "Grow", btn: "All Features" }, featNames: {}, featDesc: {}, featDetails: {}, featUI: {}, home: { eyebrow: "Cyprus's #1", title1: "Take care", title2: "of yourself", title3: "book", title4: "now.", subtitle: "Find salons easily.", searchPlace: "Search...", searchLoc: "Where?", searchBtn: "Search", popTitle: "Popular:", stats: {s1:"Places", s2:"Clients", s3:"Bookings", s4:"Satisfaction"} }, cats: {}, homeInfo: {}, filters: {title:"Results", count:"Found"}, reg: {}, shops: {}, profile: {}, book: {}, contact: {}, about: {}, footer: {}, legal: {} },
+    RU: { nav: { places: "Места", features: "Функции", why: "Почему Bookcy", contact: "Контакты", about: "О нас", addShop: "Добавить", login: "Вход", logout: "Выйти", dashboard: "Панель" }, megaMenu: { col1Title: "Настройка", col2Title: "Клиенты", col3Title: "Бизнес", col4Title: "Развитие", btn: "Узнать все функции" }, featNames: {}, featDesc: {}, featDetails: {}, featUI: {}, home: { eyebrow: "Платформа #1", title1: "Позаботьтесь", title2: "о себе,", title3: "забронируйте", title4: "сейчас.", subtitle: "Бронируйте в один клик.", searchPlace: "Поиск...", searchLoc: "Где?", searchBtn: "ПОИСК", popTitle: "Популярные:", stats: {s1:"Места", s2:"Клиенты", s3:"Записи", s4:"Оценка"} }, cats: {}, homeInfo: {}, filters: {title:"Результаты", count:"Найдено"}, reg: {}, shops: {}, profile: {}, book: {}, contact: {}, about: {}, footer: {}, legal: {} }
   };
 
-  const megaMenuStructure = {
-      col1: ['profile', 'market', 'team'],
-      col2: ['booking', 'app'],
-      col3: ['marketing', 'calendar', 'crm'],
-      col4: ['boost', 'stats']
-  };
+  const handleBookingEmailChange = (e) => { const val = e.target.value; setFormData(prev => ({...prev, email: val})); setBookingEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
+  const handleBookingPhoneChange = (e) => { const val = e.target.value; setFormData(prev => ({...prev, phone: val})); setBookingPhoneValid(val === '' ? null : val.replace(/\s/g, '').length >= 7); };
+  const handleEmailChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, email: val})); setEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
+  const handleAdminEmailChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, contactEmail: val})); setAdminEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
+  const handlePhoneChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, contactPhone: val})); setPhoneValid(val === '' ? null : val.replace(/\s/g, '').length >= 7); };
 
-  const featureIcons = {
-      profile: <Briefcase size={40} className="theme-text-main mb-4"/>,
-      market: <Store size={40} className="theme-text-main mb-4"/>,
-      team: <Users size={40} className="theme-text-main mb-4"/>,
-      booking: <Target size={40} className="theme-text-main mb-4"/>,
-      app: <Smartphone size={40} className="theme-text-main mb-4"/>,
-      marketing: <Target size={40} className="theme-text-main mb-4"/>,
-      calendar: <Calendar size={40} className="theme-text-main mb-4"/>,
-      crm: <User size={40} className="theme-text-main mb-4"/>,
-      boost: <TrendingUp size={40} className="theme-text-main mb-4"/>,
-      stats: <PieChart size={40} className="theme-text-main mb-4"/>,
-  };
-
-  const featureIconsSmall = {
-      profile: <Briefcase size={20}/>, 
-      market: <Store size={20}/>, 
-      team: <Users size={20}/>, 
-      booking: <Target size={20}/>, 
-      app: <Smartphone size={20}/>, 
-      marketing: <Target size={20}/>, 
-      calendar: <Calendar size={20}/>, 
-      crm: <User size={20}/>, 
-      boost: <TrendingUp size={20}/>, 
-      stats: <PieChart size={20}/>,
-  };
-
-  const packages = [
-    { name: "Standart Paket", price: `60 STG ${lang==='TR'?'/ Aylık':lang==='EN'?'/ Month':'/ Месяц'}` }, 
-    { name: "Premium Paket", price: `100 STG ${lang==='TR'?'/ Aylık':lang==='EN'?'/ Month':'/ Месяц'}` }
-  ];
+  const featureIcons = { profile: <Briefcase size={40}/>, market: <Store size={40}/>, team: <Users size={40}/>, booking: <Target size={40}/>, app: <Smartphone size={40}/>, marketing: <Target size={40}/>, calendar: <Calendar size={40}/>, crm: <User size={40}/>, boost: <TrendingUp size={40}/>, stats: <PieChart size={40}/> };
+  const featureIconsSmall = { profile: <Briefcase size={20}/>, market: <Store size={20}/>, team: <Users size={20}/>, booking: <Target size={20}/>, app: <Smartphone size={20}/>, marketing: <Target size={20}/>, calendar: <Calendar size={20}/>, crm: <User size={20}/>, boost: <TrendingUp size={20}/>, stats: <PieChart size={20}/> };
+  const packages = [ { name: "Standart Paket", price: `60 STG / Aylık` }, { name: "Premium Paket", price: `100 STG / Aylık` } ];
   
   const categories = [ 
-      { key: "barber", dbName: "Berber", bg: "linear-gradient(135deg,#f8fafc,#e2e8f0)", emoji: "💈" }, 
-      { key: "hair", dbName: "Kuaför", bg: "linear-gradient(135deg,#fdf4ff,#fce7f3)", emoji: "✂️" }, 
-      { key: "nail", dbName: "Tırnak & Güzellik", bg: "linear-gradient(135deg,#fff1f2,#fbcfe8)", emoji: "💅" }, 
-      { key: "tattoo", dbName: "Dövme", bg: "linear-gradient(135deg,#f1f5f9,#cbd5e1)", emoji: "🖋️" }, 
-      { key: "spa", dbName: "Spa & Masaj", bg: "linear-gradient(135deg,#ecfdf5,#d1fae5)", emoji: "💆" }, 
-      { key: "skincare", dbName: "Cilt Bakımı", bg: "linear-gradient(135deg,#eff6ff,#dbeafe)", emoji: "🧴" }, 
-      { key: "makeup", dbName: "Makyaj", bg: "linear-gradient(135deg,#fff7ed,#ffedd5)", emoji: "💄" }, 
-      { key: "club", dbName: "Bar & Club", bg: "linear-gradient(135deg,#f3f4f6,#e5e7eb)", emoji: "🍸" } 
+    { key: "barber", dbName: "Berber", bg: "linear-gradient(135deg,#f8fafc,#e2e8f0)", emoji: "💈" }, { key: "hair", dbName: "Kuaför", bg: "linear-gradient(135deg,#fdf4ff,#fce7f3)", emoji: "✂️" }, 
+    { key: "nail", dbName: "Tırnak & Güzellik", bg: "linear-gradient(135deg,#fff1f2,#fbcfe8)", emoji: "💅" }, { key: "tattoo", dbName: "Dövme", bg: "linear-gradient(135deg,#f1f5f9,#cbd5e1)", emoji: "🖋️" }, 
+    { key: "spa", dbName: "Spa & Masaj", bg: "linear-gradient(135deg,#ecfdf5,#d1fae5)", emoji: "💆" }, { key: "skincare", dbName: "Cilt Bakımı", bg: "linear-gradient(135deg,#eff6ff,#dbeafe)", emoji: "🧴" }, 
+    { key: "makeup", dbName: "Makyaj", bg: "linear-gradient(135deg,#fff7ed,#ffedd5)", emoji: "💄" }, { key: "club", dbName: "Bar & Club", bg: "linear-gradient(135deg,#f3f4f6,#e5e7eb)", emoji: "🍸" } 
   ];
 
-  async function fetchGlobalAppointments() { 
-    const { data } = await supabase.from('appointments').select('customer_phone'); 
-    if (data) setGlobalAppointments(data); 
-  }
+  async function fetchGlobalAppointments() { const { data } = await supabase.from('appointments').select('customer_phone'); if (data) setGlobalAppointments(data); }
+  async function fetchShops() { const { data } = await supabase.from('shops').select('*'); if (data) setShops(data); }
+  async function fetchAppointments(shopId, date = null) { let query = supabase.from('appointments').select('*').eq('shop_id', shopId); if (date) query = query.eq('appointment_date', date); const { data } = await query; if (data) setAppointments(data); }
+  async function fetchClosedSlots(shopId, date = null) { let query = supabase.from('closed_slots').select('*').eq('shop_id', shopId); if (date) query = query.eq('date', date); const { data } = await query; if (data) setClosedSlots(data.map(item => item.slot)); }
 
   useEffect(() => { 
-      fetchShops(); 
-      fetchGlobalAppointments(); 
-      const session = localStorage.getItem('bookcy_biz_session');
-      if(session) setLoggedInShop(JSON.parse(session));
+    fetchShops(); fetchGlobalAppointments(); 
+    const session = localStorage.getItem('bookcy_biz_session'); if(session) setLoggedInShop(JSON.parse(session));
   }, []);
   
   useEffect(() => { 
-      if (selectedShop && bookingData.date) { 
-          fetchAppointments(selectedShop.id, bookingData.date); 
-          fetchClosedSlots(selectedShop.id, bookingData.date); 
-      } 
+    if (selectedShop && bookingData.date) { fetchAppointments(selectedShop.id, bookingData.date); fetchClosedSlots(selectedShop.id, bookingData.date); } 
   }, [selectedShop, bookingData.date]);
 
   const isClub = selectedShop?.category === 'Bar & Club';
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
     const reveals = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if(e.isIntersecting) { e.target.classList.add('visible'); }
-      });
-    }, { threshold: 0.12 });
+    const observer = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); } }); }, { threshold: 0.12 });
     reveals.forEach(r => observer.observe(r));
-
-    const handleScroll = () => {
-        const nav = document.querySelector('nav');
-        if(nav) {
-            if (window.scrollY > 50) {
-                nav.style.background = 'rgba(255,255,255,0.98)';
-                nav.style.boxShadow = '0 4px 20px rgba(0,0,0,0.05)';
-            } else {
-                nav.style.background = 'transparent';
-                nav.style.boxShadow = 'none';
-            }
-        }
-    };
-    window.addEventListener('scroll', handleScroll);
-
-    return () => {
-        window.removeEventListener('scroll', handleScroll);
-        observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, [step]);
 
-  async function fetchShops() { 
-    const { data } = await supabase.from('shops').select('*'); 
-    if (data) setShops(data); 
-  }
-
-  async function fetchAppointments(shopId, date = null) {
-    let query = supabase.from('appointments').select('*').eq('shop_id', shopId);
-    if (date) query = query.eq('appointment_date', date);
-    const { data } = await query;
-    if (data) setAppointments(data);
-  }
-
-  async function fetchClosedSlots(shopId, date = null) {
-     let query = supabase.from('closed_slots').select('*').eq('shop_id', shopId);
-     if (date) query = query.eq('date', date);
-     const { data } = await query;
-     if (data) setClosedSlots(data.map(item => item.slot));
-  }
-
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setIsLoginLoading(true);
-    const inputUser = loginUsername.trim().toLowerCase();
-    const inputPass = loginPassword.trim();
+    e.preventDefault(); setIsLoginLoading(true);
+    const inputUser = loginUsername.trim().toLowerCase(); const inputPass = loginPassword.trim();
     const shop = shops.find(s => s.admin_username?.toLowerCase() === inputUser);
-    
-    if (!shop) { 
-      alert("Hatalı İşletme Kullanıcı Adı!"); 
-      setIsLoginLoading(false); 
-      return; 
-    }
-    if (shop.status !== 'approved' && shop.status) { 
-      alert("Hesabınız henüz onaylanmamış! Lütfen dekontunuzu iletip onay bekleyiniz."); 
-      setIsLoginLoading(false); 
-      return; 
-    }
+    if (!shop) { alert("Hatalı İşletme Kullanıcı Adı!"); setIsLoginLoading(false); return; }
+    if (shop.status !== 'approved' && shop.status) { alert("Hesabınız henüz onaylanmamış! Lütfen dekontunuzu iletip onay bekleyiniz."); setIsLoginLoading(false); return; }
     
     if (loginType === 'owner') {
-      if (shop.admin_password !== inputPass) { 
-        alert("Hatalı Şifre!"); 
-        setIsLoginLoading(false); 
-        return; 
-      }
-      localStorage.setItem('bookcy_biz_session', JSON.stringify({ role: 'owner', shopData: shop }));
-      setShowLogin(false); 
-      setIsLoginLoading(false); 
-      router.push('/dashboard');
+      if (shop.admin_password !== inputPass) { alert("Hatalı Şifre!"); setIsLoginLoading(false); return; }
+      localStorage.setItem('bookcy_biz_session', JSON.stringify({ role: 'owner', shopData: shop })); setShowLogin(false); setIsLoginLoading(false); router.push('/dashboard');
     } else {
       const staffList = shop.staff || [];
       const validStaff = staffList.find(s => s.name.toLowerCase() === loginStaffName.trim().toLowerCase() && s.password === inputPass);
-      if (!validStaff) { 
-        alert("Hatalı Personel Adı veya Şifre!"); 
-        setIsLoginLoading(false); 
-        return; 
-      }
-      localStorage.setItem('bookcy_biz_session', JSON.stringify({ role: 'staff', staffName: validStaff.name, shopData: shop }));
-      setShowLogin(false); 
-      setIsLoginLoading(false); 
-      router.push('/dashboard');
+      if (!validStaff) { alert("Hatalı Personel Adı veya Şifre!"); setIsLoginLoading(false); return; }
+      localStorage.setItem('bookcy_biz_session', JSON.stringify({ role: 'staff', staffName: validStaff.name, shopData: shop })); setShowLogin(false); setIsLoginLoading(false); router.push('/dashboard');
     }
   };
 
-  const handleLogout = () => { 
-    localStorage.removeItem('bookcy_biz_session'); 
-    setLoggedInShop(null); 
-  };
-
-  const handleHeroSearch = (e) => { 
-    e.preventDefault(); 
-    setStep('all_shops'); 
-    window.scrollTo(0,0); 
-  };
-
-  const goToFeature = (featureKey) => { 
-    setActiveFeature(featureKey); 
-    setStep('feature_detail'); 
-    setShowFeaturesMenu(false); 
-    window.scrollTo(0,0); 
-  };
+  const handleLogout = () => { localStorage.removeItem('bookcy_biz_session'); setLoggedInShop(null); };
+  const handleHeroSearch = (e) => { e.preventDefault(); setStep('all_shops'); window.scrollTo(0,0); };
+  const goToFeature = (featureKey) => { setActiveFeature(featureKey); setStep('feature_detail'); setShowFeaturesMenu(false); window.scrollTo(0,0); };
 
   async function handleRegisterSubmit(e) {
     e.preventDefault();
-    if (emailValid === false || phoneValid === false || adminEmailValid === false) {
-      return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz.");
-    }
-    
-    setIsUploading(true);
-    let uploadedLogoUrl = null;
-    
-    if (newShop.logoFile) {
-      const fileName = `${Math.random()}.${newShop.logoFile.name.split('.').pop()}`;
-      const { error: uploadError } = await supabase.storage.from('logos').upload(fileName, newShop.logoFile);
-      if (!uploadError) {
-        uploadedLogoUrl = supabase.storage.from('logos').getPublicUrl(fileName).data.publicUrl;
-      }
-    }
-    
+    if (emailValid === false || phoneValid === false || adminEmailValid === false) return alert("İletişim bilgilerini kontrol edin.");
+    setIsUploading(true); let uploadedLogoUrl = null;
     const fullPhone = newShop.phoneCode + " " + newShop.contactPhone;
-
-    const { error } = await supabase.from('shops').insert([
-      { 
-        name: newShop.name, 
-        category: newShop.category, 
-        location: newShop.location, 
-        address: newShop.address, 
-        maps_link: newShop.maps_link, 
-        admin_email: newShop.email, 
-        admin_username: newShop.username, 
-        admin_password: newShop.password, 
-        description: newShop.description, 
-        logo_url: uploadedLogoUrl, 
-        package: newShop.package, 
-        status: 'pending', 
-        contact_phone: fullPhone, 
-        contact_insta: newShop.contactInsta, 
-        contact_email: newShop.contactEmail, 
-        services: [], 
-        staff: [], 
-        gallery: [], 
-        closed_dates: [], 
-        events: [] 
-      }
-    ]);
-    
+    const { error } = await supabase.from('shops').insert([{ name: newShop.name, category: newShop.category, location: newShop.location, address: newShop.address, maps_link: newShop.maps_link, admin_email: newShop.email, admin_username: newShop.username, admin_password: newShop.password, description: newShop.description, logo_url: uploadedLogoUrl, package: newShop.package, status: 'pending', contact_phone: fullPhone, contact_insta: newShop.contactInsta, contact_email: newShop.contactEmail, services: [], staff: [], gallery: [], closed_dates: [], events: [] }]);
     setIsUploading(false);
-    
-    if (!error) {
-        setRegisterSuccess(true);
-        const regEmailHtml = `
-          <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; background: #ffffff;">
-            <div style="background: #2D1B4E; padding: 32px 20px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 900;">BOOKCY<span style="color: #E8622A;">.</span></h1>
-            </div>
-            <div style="padding: 40px 32px;">
-              <h2 style="color: #2D1B4E; margin-top: 0; font-size: 22px;">Merhaba ${newShop.name},</h2>
-              <p style="color: #64748b; font-size: 16px; line-height: 1.6;">Bizi tercih ettiğiniz için teşekkür ederiz. İşletme profilinizin onaylanıp yayına alınabilmesi için lütfen ödeme dekontunuzu WhatsApp destek hattımız üzerinden bize iletiniz.</p>
-            </div>
-          </div>
-        `; 
-        try { 
-          await fetch('/api/email', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ 
-              to: newShop.email, 
-              subject: 'BOOKCY - Başvurunuz Alındı!', 
-              html: regEmailHtml, 
-              text: 'Başvurunuz alındı. İşlemler sürüyor. Dekontunuzu WhatsApp üzerinden iletmeyi unutmayınız.' 
-            }) 
-          }); 
-        } catch(err) {}
-    } else { 
-      alert("Hata oluştu. Lütfen tekrar deneyiniz."); 
-    }
+    if (!error) { setRegisterSuccess(true); } else { alert("Hata oluştu."); }
   }
 
   async function handleBooking(e) {
     e.preventDefault();
-    if (bookingEmailValid === false || bookingPhoneValid === false) {
-      return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz.");
-    }
-    
-    if(isClub) {
-      if(!bookingData.selectedEvent) { alert(t[lang].book.selectEvent); return; }
-      if(!bookingData.selectedShopService) { alert(t[lang].book.selectLoca); return; }
-    } else {
-      if(!bookingData.selectedShopService) { alert(t[lang].book.selectService); return; }
-      if(!bookingData.selectedStaff) { alert(t[lang].book.selectStaff); return; }
-    }
+    if (bookingEmailValid === false || bookingPhoneValid === false) return alert("Bilgileri kontrol edin.");
+    if(isClub) { if(!bookingData.selectedEvent || !bookingData.selectedShopService) return; } 
+    else { if(!bookingData.selectedShopService || !bookingData.selectedStaff) return; }
 
     const availableSlotsForBooking = getCurrentAvailableSlots();
     const startIndex = availableSlotsForBooking.indexOf(bookingData.time);
     const neededSlots = getRequiredSlots(bookingData.selectedShopService.duration);
     const occupied_slots = isClub ? [] : availableSlotsForBooking.slice(startIndex, startIndex + neededSlots);
-
     let assignedStaffName = isClub ? 'Rezervasyon' : bookingData.selectedStaff.name;
-    
-    if (!isClub && (assignedStaffName === t[lang].book.anyStaff || assignedStaffName === 'Fark Etmez')) {
-        if (selectedShop.staff && selectedShop.staff.length > 0) {
-            const availableStaff = selectedShop.staff.find(staff => {
-                return occupied_slots.every(checkSlot => {
-                    if (closedSlots.includes(checkSlot)) return false;
-                    const isBooked = appointments.some(a => a.staff_name === staff.name && (a.occupied_slots ? a.occupied_slots.includes(checkSlot) : a.appointment_time === checkSlot));
-                    return !isBooked;
-                });
-            });
-            assignedStaffName = availableStaff ? availableStaff.name : 'Genel';
-        }
-    }
-
     const fullPhone = formData.phoneCode + " " + formData.phone;
     const finalDate = isClub ? bookingData.selectedEvent.date : bookingData.date;
     const finalTime = isClub ? bookingData.selectedEvent.time : bookingData.time;
 
-    const { error } = await supabase.from('appointments').insert([{ 
-        shop_id: selectedShop.id, 
-        customer_name: formData.name, 
-        customer_surname: formData.surname, 
-        customer_phone: fullPhone, 
-        customer_email: formData.email, 
-        appointment_date: finalDate, 
-        appointment_time: finalTime, 
-        service_name: bookingData.selectedShopService.name, 
-        staff_name: assignedStaffName, 
-        occupied_slots: occupied_slots, 
-        status: 'Bekliyor'
-    }]);
-
-    if (!error) {
-        setStep('success'); 
-        window.scrollTo(0,0);
-        
-        const customerEmailHtml = `
-          <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; background: #ffffff;">
-            <div style="background: #2D1B4E; padding: 32px 20px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 900;">BOOKCY<span style="color: #E8622A;">.</span></h1>
-              <p style="color: #F5C5A3; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-top: 8px;">Rezervasyon Onay Belgesi</p>
-            </div>
-            <div style="padding: 40px 32px;">
-              <h2 style="color: #2D1B4E; margin-top: 0; font-size: 22px;">Merhaba ${formData.name},</h2>
-              <p style="color: #64748b; font-size: 16px; line-height: 1.6;"><strong>${selectedShop.name}</strong> işletmesinden aldığınız randevu başarıyla onaylanmıştır. Detaylar aşağıdadır:</p>
-              <div style="background: #f8fafc; border-left: 4px solid #E8622A; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
-                <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px;">📅 <strong>Tarih:</strong> ${finalDate}</p>
-                <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px;">⏰ <strong>Saat:</strong> ${finalTime}</p>
-                <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px;">✂️ <strong>Hizmet:</strong> ${bookingData.selectedShopService.name}</p>
-                ${!isClub ? `<p style="margin: 0 0 10px 0; color: #334155; font-size: 15px;">👤 <strong>Uzman:</strong> ${assignedStaffName}</p>` : ''}
-                <p style="margin: 0; color: #334155; font-size: 15px;">📍 <strong>Konum:</strong> ${selectedShop.address || selectedShop.location}</p>
-              </div>
-              <p style="color: #64748b; font-size: 14px;">Bizi tercih ettiğiniz için teşekkür ederiz!</p>
-            </div>
-          </div>
-        `;
-
-        try { 
-          await fetch('/api/email', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ 
-              to: formData.email, 
-              subject: 'BOOKCY - Rezervasyon Onayı', 
-              html: customerEmailHtml, 
-              text: `Randevunuz onaylandı.` 
-            }) 
-          }); 
-        } catch(err) {} 
-        
-        const adminEmailHtml = `
-          <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; background: #ffffff;">
-            <div style="background: #E8622A; padding: 32px 20px; text-align: center;">
-              <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 900;">YENİ REZERVASYON!</h1>
-              <p style="color: #fff8f1; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-top: 8px;">Bookcy Sistem Bildirimi</p>
-            </div>
-            <div style="padding: 40px 32px;">
-              <h2 style="color: #2D1B4E; margin-top: 0; font-size: 22px;">Merhaba ${selectedShop.name},</h2>
-              <p style="color: #64748b; font-size: 16px; line-height: 1.6;">Platformumuz üzerinden yeni bir rezervasyon aldınız.</p>
-              <div style="background: #f8fafc; border-left: 4px solid #2D1B4E; padding: 20px; margin: 24px 0; border-radius: 0 8px 8px 0;">
-                <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px;">👤 <strong>Müşteri:</strong> ${formData.name} ${formData.surname}</p>
-                <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px;">📱 <strong>Telefon:</strong> ${fullPhone}</p>
-                <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px;">📅 <strong>Tarih:</strong> ${finalDate}</p>
-                <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px;">⏰ <strong>Saat:</strong> ${finalTime}</p>
-                <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px;">🎟️ <strong>Hizmet:</strong> ${bookingData.selectedShopService.name}</p>
-                ${!isClub ? `<p style="margin: 0; color: #334155; font-size: 15px;">👨‍💼 <strong>Atanan Uzman:</strong> ${assignedStaffName}</p>` : ''}
-              </div>
-              <div style="text-align: center; margin-top: 30px;">
-                <a href="https://bookcy.co/dashboard" style="display: inline-block; background: #2D1B4E; color: white; text-decoration: none; padding: 14px 30px; border-radius: 8px; font-weight: bold; font-size: 14px;">Panele Git</a>
-              </div>
-            </div>
-          </div>
-        `;
-
-        if (selectedShop.admin_email) { 
-          try { 
-            await fetch('/api/email', { 
-              method: 'POST', 
-              headers: { 'Content-Type': 'application/json' }, 
-              body: JSON.stringify({ 
-                to: selectedShop.admin_email, 
-                subject: 'YENİ REZERVASYON! (Bookcy)', 
-                html: adminEmailHtml, 
-                text: `Yeni rezervasyon alındı.` 
-              }) 
-            }); 
-          } catch(err) {} 
-        }
-    } else {
-      alert("Rezervasyon alınırken bir hata oluştu!");
-    }
+    const { error } = await supabase.from('appointments').insert([{ shop_id: selectedShop.id, customer_name: formData.name, customer_surname: formData.surname, customer_phone: fullPhone, customer_email: formData.email, appointment_date: finalDate, appointment_time: finalTime, service_name: bookingData.selectedShopService.name, staff_name: assignedStaffName, occupied_slots: occupied_slots, status: 'Bekliyor' }]);
+    if (!error) { setStep('success'); window.scrollTo(0,0); } else { alert("Hata oluştu!"); }
   }
 
   async function submitFeedback(e) {
     e.preventDefault();
-    if(feedbackData.q1===null || feedbackData.q2===null || feedbackData.q3===null || feedbackData.q4===null) {
-      return alert("Lütfen tüm soruları puanlayınız.");
-    }
-    
+    if(feedbackData.q1===null || feedbackData.q2===null || feedbackData.q3===null || feedbackData.q4===null) return alert("Lütfen puanlayın.");
     setFeedbackSubmitted(true);
     const avg = Number(((feedbackData.q1 + feedbackData.q2 + feedbackData.q3 + feedbackData.q4) / 4).toFixed(1));
-
-    const { error } = await supabase.from('platform_feedback').insert([{
-        q1: feedbackData.q1,
-        q2: feedbackData.q2,
-        q3: feedbackData.q3,
-        q4: feedbackData.q4,
-        average_score: avg
-    }]);
-
-    if (error) {
-      console.error(error);
-    }
-
-    const emailHtml = `
-      <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; background: #ffffff;">
-        <div style="background: #2D1B4E; padding: 32px 20px; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 24px; font-weight: 900;">YENİ DEĞERLENDİRME</h1>
-        </div>
-        <div style="padding: 40px 32px;">
-          <h2 style="color: #E8622A; margin-top: 0; font-size: 28px; text-align: center;">Ortalama Puan: ${avg}/10</h2>
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; margin: 24px 0; border-radius: 12px;">
-            <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px;"><strong>Platformu nasıl buldu:</strong> ${feedbackData.q1}</p>
-            <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px;"><strong>Kullanımı kolay mı:</strong> ${feedbackData.q2}</p>
-            <p style="margin: 0 0 10px 0; color: #334155; font-size: 15px;"><strong>İşlemden memnun mu:</strong> ${feedbackData.q3}</p>
-            <p style="margin: 0; color: #334155; font-size: 15px;"><strong>Hızlı mıydı:</strong> ${feedbackData.q4}</p>
-          </div>
-        </div>
-      </div>
-    `;
-
-    try {
-      await fetch('/api/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: 'noreplybookcy@gmail.com', 
-          subject: 'BOOKCY - YENİ PLATFORM DEĞERLENDİRMESİ 🔥',
-          html: emailHtml,
-          text: `Yeni değerlendirme geldi. Ortalama: ${avg}`
-        })
-      });
-    } catch(err) {}
+    await supabase.from('platform_feedback').insert([{ q1: feedbackData.q1, q2: feedbackData.q2, q3: feedbackData.q3, q4: feedbackData.q4, average_score: avg }]);
   }
 
   const isSearching = searchQuery.trim().length > 0 || filterRegion !== 'All';
@@ -703,8 +227,8 @@ export default function Home() {
 
   const sortedShops = [...displayShops].sort((a, b) => {
       if (filterSort === 'High') {
-        if (a.package === 'Premium' && b.package !== 'Premium') return -1;
-        if (a.package !== 'Premium' && b.package === 'Premium') return 1;
+        if ((a.package === 'Premium' || a.package === 'Premium Paket') && (b.package !== 'Premium' && b.package !== 'Premium Paket')) return -1;
+        if ((a.package !== 'Premium' && a.package !== 'Premium Paket') && (b.package === 'Premium' || b.package === 'Premium Paket')) return 1;
         return 0;
       }
       return 0;
@@ -713,50 +237,35 @@ export default function Home() {
   const recommendedShops = approvedShops.filter(s => s.package === 'Premium Paket' || s.package === 'Premium').slice(0, 4);
 
   const getDayNameFromDate = (dateString) => {
-    const d = new Date(dateString);
     const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-    return days[d.getDay()];
+    return days[new Date(dateString).getDay()];
   };
 
   const getCurrentAvailableSlots = () => {
     if (!selectedShop || !bookingData.date || isClub) return allTimeSlots;
-    if (selectedShop.closed_dates && selectedShop.closed_dates.includes(bookingData.date)) return [];
-
+    if (selectedShop.closed_dates?.includes(bookingData.date)) return [];
     const dayName = getDayNameFromDate(bookingData.date);
     const workingHours = Array.isArray(selectedShop.working_hours) ? selectedShop.working_hours : defaultWorkingHours;
     const todayHours = workingHours.find(h => h.day === dayName);
-
-    if (todayHours && todayHours.isClosed) { 
-        return []; 
-    } else if (todayHours) {
-      return allTimeSlots.filter(slot => slot >= todayHours.open && slot < todayHours.close);
-    }
+    if (todayHours?.isClosed) return [];
+    if (todayHours) return allTimeSlots.filter(slot => slot >= todayHours.open && slot < todayHours.close);
     return allTimeSlots;
   };
 
   const currentAvailableSlots = getCurrentAvailableSlots();
   const isShopClosedToday = currentAvailableSlots.length === 0;
-
-  const similarShops = selectedShop 
-    ? approvedShops.filter(s => s.id !== selectedShop.id && s.category === selectedShop.category).slice(0, 3)
-    : [];
+  const similarShops = selectedShop ? approvedShops.filter(s => s.id !== selectedShop.id && s.category === selectedShop.category).slice(0, 3) : [];
 
   const renderFeedbackScale = (qKey) => (
-    <div className="flex gap-1 justify-center mt-3 mb-6 w-full max-w-full overflow-x-auto custom-scrollbar pb-2">
+    <div className="flex gap-1 justify-center mt-3 mb-6 w-full custom-scrollbar pb-2">
       {[0,1,2,3,4,5,6,7,8,9,10].map(num => (
-        <button
-          key={num} 
-          type="button" 
-          onClick={() => setFeedbackData({...feedbackData, [qKey]: num})}
-          className={`w-8 h-8 md:w-10 md:h-10 rounded-lg text-xs md:text-sm font-black transition-all border shrink-0 ${feedbackData[qKey] === num ? 'bg-[var(--terra)] text-white border-transparent scale-110 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:border-[#E8622A] cursor-pointer'}`}
-        >
-          {num}
-        </button>
+        <button key={num} type="button" onClick={() => setFeedbackData({...feedbackData, [qKey]: num})} className={`w-8 h-8 rounded-lg text-xs font-black transition-all border shrink-0 ${feedbackData[qKey] === num ? 'bg-[#E8622A] text-white border-transparent scale-110 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:border-[#E8622A]'}`}>{num}</button>
       ))}
     </div>
   );
 
   return (
+    // BÖLÜM 2 BURADAN BAŞLAYACAK (AŞAĞIDAKİ MESAJDA)
     <>
       <style dangerouslySetInnerHTML={{__html: `
         :root { 
@@ -769,159 +278,44 @@ export default function Home() {
           --c-text-main: #101010;
           --c-text-muted: #64748B;
         }
+        body { background: var(--c-bg-main) !important; color: var(--c-text-main) !important; font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
 
-        body { 
-            background: var(--c-bg-main) !important; 
-            color: var(--c-text-main) !important; 
-            font-family: 'DM Sans', sans-serif; 
-            overflow-x: hidden; 
-        }
-
-        /* --- NAVBAR --- */
-        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 0 48px; height: 72px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); transition: all 0.3s; border-bottom: 1px solid var(--c-border); }
+        /* --- NAVBAR (HER ZAMAN BEYAZ VE KESİN OKUNUR) --- */
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 48px; height: 72px; display: flex; align-items: center; justify-content: space-between; background: #FFFFFF !important; border-bottom: 1px solid var(--c-border) !important; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
         .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
         .nav-logo-icon { width: 36px; height: 36px; }
         .nav-logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; color: var(--fig); letter-spacing: -1px; display:flex; align-items:baseline; }
         .nav-logo-text span { color: var(--terra); }
-        .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; height: 100%; margin:0; padding:0; }
-        .nav-links button { text-decoration: none; font-size: 14px; font-weight: 700; color: var(--c-text-main); opacity: 0.8; transition: opacity 0.2s; position: relative; background:none; border:none; outline:none; font-family:'DM Sans', sans-serif; cursor:pointer;}
-        .nav-links button:hover, .nav-links button.active { opacity:1; color: var(--terra); }
-        .lang-pills { display: flex; flex-direction: row; gap: 4px; }
-        .lang-pill { font-size: 11px; font-weight:600; padding: 4px 10px; border-radius: 20px; border: 1px solid transparent; transition: all 0.2s; color: var(--c-text-muted); cursor:pointer;}
-        .lang-pill.active { background: var(--fig); color: white; border-color: var(--fig); }
-        .lang-pill:hover:not(.active) { border-color: var(--c-border); color: var(--c-text-main); }
-        .nav-right { display: flex; flex-direction: row; align-items: center; gap: 16px; flex-shrink: 0; white-space: nowrap; }
-        .btn-outline { font-family:'DM Sans',sans-serif; font-size: 13px; font-weight: 700; padding: 9px 20px; border-radius: 50px; border: 1.5px solid var(--c-text-main); background: transparent; color: var(--c-text-main); transition: all 0.25s; cursor:pointer;}
-        .btn-outline:hover { background:var(--c-text-main); color:var(--c-bg-card); }
-        .btn-primary { font-family:'DM Sans',sans-serif; font-size: 13px; font-weight: 800; padding: 12px 28px; border-radius: 50px; border: none; background: var(--terra); color: white; transition: all 0.25s; display:flex; align-items:center; gap:7px; cursor:pointer; text-transform:uppercase; box-shadow: 0 8px 20px rgba(232, 98, 42, 0.2);}
+        .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; margin:0; padding:0; }
+        .nav-links button { font-size: 14px; font-weight: 700; color: var(--fig) !important; background:none; border:none; cursor:pointer; transition: color 0.2s;}
+        .nav-links button:hover, .nav-links button.active { color: var(--terra) !important; }
+        .nav-right { display: flex; align-items: center; gap: 16px; }
+        .btn-outline { font-size: 13px; font-weight: 700; padding: 9px 20px; border-radius: 50px; border: 1.5px solid var(--fig); color: var(--fig); background:transparent; cursor:pointer;}
+        .btn-outline:hover { background: var(--fig); color: white; }
+        .btn-primary { font-size: 13px; font-weight: 800; padding: 12px 28px; border-radius: 50px; background: var(--terra); color: white; border:none; cursor:pointer; text-transform:uppercase; transition: all 0.25s;}
         .btn-primary:hover { background: #d4561f; transform: translateY(-2px); box-shadow: 0 12px 25px rgba(232,98,42,0.3); }
         
-        /* --- HERO (KOYU MOR & BEYAZ YAZI) --- */
-        .hero { position: relative; min-height: 85vh; background: var(--fig); overflow: hidden; display: flex; flex-direction:column; align-items: center; justify-content: center; padding-top: 140px; padding-bottom: 100px; }
-        .hero::before { content:''; position:absolute; inset:0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index:1; }
-        
-        .hero-content { position:relative; z-index:2; text-align:center; padding: 0 24px; max-width: 900px; animation: fadeUp 0.8s ease both; }
-        @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
-        
-        .hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius:50px; padding: 6px 16px 6px 8px; font-size:10px; font-weight:800; color:rgba(255,255,255,0.9); letter-spacing:1px; text-transform:uppercase; margin-bottom:28px; animation: fadeUp 0.8s 0.1s ease both; }
-        .hero-eyebrow-dot { width:8px; height:8px; border-radius:50%; background:var(--terra); animation: pulse 2s infinite; }
-        @keyframes pulse { 0%,100%{ box-shadow:0 0 0 0 rgba(232,98,42,0.6); } 50% { box-shadow:0 0 0 6px rgba(232,98,42,0); } }
-        
-        .hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size: clamp(48px, 6vw, 80px); font-weight:900; color: white; letter-spacing: -2px; line-height: 1.1; margin-bottom:24px; animation: fadeUp 0.8s 0.2s ease both; }
+        /* --- HERO (MOR ARKA PLAN) --- */
+        .hero { position: relative; min-height: 85vh; background: var(--fig); display: flex; flex-direction:column; align-items: center; justify-content: center; padding: 140px 24px 100px; }
+        .hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size: clamp(48px, 6vw, 80px); font-weight:900; color: white; letter-spacing: -2px; line-height: 1.1; margin-bottom:24px; text-align:center; }
         .hero-title .accent { color: var(--terra); }
-        
-        .hero-sub { font-size:16px; font-weight:600; color: rgba(255,255,255,0.65); line-height:1.6; margin-bottom: 48px; max-width:600px; margin-left:auto; margin-right:auto; animation: fadeUp 0.8s 0.3s ease both; }
-        
-        .search-wrap { display:flex; align-items:center; background: white; border-radius: 32px; padding: 12px; gap: 12px; max-width: 800px; width:100%; box-shadow: 0 24px 60px rgba(0,0,0,0.3); margin: 0 auto; animation: fadeUp 0.8s 0.4s ease both; transition: box-shadow 0.3s; border: none; }
-        .search-wrap:focus-within { box-shadow: 0 24px 60px rgba(0,0,0,0.4), 0 0 0 4px rgba(232,98,42,0.3); }
-        
+        .hero-sub { font-size:16px; font-weight:600; color: rgba(255,255,255,0.65); max-width:600px; margin:0 auto 48px; text-align:center; }
+        .search-wrap { display:flex; align-items:center; background: white; border-radius: 32px; padding: 12px; gap: 12px; max-width: 800px; width:100%; margin: 0 auto; box-shadow: 0 24px 60px rgba(0,0,0,0.3); border: none; }
         .search-field { flex:1.5; display:flex; align-items:center; gap:12px; padding: 0 16px; border-right: 1px solid var(--c-border); }
-        .search-icon { color: var(--terra); font-size:22px; flex-shrink:0; }
-        .search-field input { border:none; outline:none; width:100%; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; color:var(--c-text-main); background:transparent; }
-        .search-field input::placeholder { color:var(--c-text-muted); font-weight:600; }
-        
+        .search-field input { border:none; outline:none; width:100%; font-size:15px; font-weight:700; color:var(--c-text-main); }
         .search-location { display:flex; align-items:center; gap:12px; flex:1; padding: 0 16px; }
-        .search-location select { border:none; outline:none; width:100%; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; color:var(--c-text-main); background:transparent; cursor:pointer; }
+        .search-location select { border:none; outline:none; width:100%; font-size:15px; font-weight:700; cursor:pointer; }
+        .search-btn { border:none; background: var(--terra); color:white; font-size:15px; font-weight:800; padding: 16px 40px; border-radius:24px; cursor:pointer; }
+        .search-btn:hover { background:#d4561f; }
         
-        .search-btn { border:none; background: var(--terra); color:white; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:800; padding: 16px 40px; border-radius:24px; transition: all 0.25s; white-space:nowrap; display:flex; align-items:center; gap:8px; cursor:pointer; box-shadow: 0 8px 20px rgba(232,98,42,0.2); }
-        .search-btn:hover { background:#d4561f; transform:translateY(-2px); box-shadow: 0 12px 25px rgba(232,98,42,0.3); }
-        
-        .hero-popular { display:flex; align-items:center; gap:10px; margin-top:30px; flex-wrap:wrap; justify-content:center; animation: fadeUp 0.8s 0.5s ease both; }
-        .hero-popular span { font-size:12px; color:rgba(255,255,255,0.5); font-weight:700; letter-spacing:0.5px; }
-        .pop-tag { font-size:12px; font-weight:700; padding:8px 16px; border-radius:50px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.8); transition:all 0.2s; cursor:pointer; }
-        .pop-tag:hover { background:var(--terra); border-color:var(--terra); color:white; }
-        
-        .hero-stats { display:flex; gap:0; margin-top: 60px; margin-bottom: 20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:40px; width:100%; max-width:800px; animation: fadeUp 0.8s 0.6s ease both; position: relative; z-index: 10; }
-        .stat { flex:1; text-align:center; border-right:1px solid rgba(255,255,255,0.1); }
-        .stat:last-child { border-right:none; }
-        .stat-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:36px; font-weight:900; color:white; letter-spacing:-1px; line-height:1; }
-        .stat-num span { color:var(--terra); }
-        .stat-label { font-size:11px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px; margin-top:8px; }
-        
-        /* --- DİĞER BÖLÜMLER (BEYAZ TEMA) --- */
-        .section-categories { padding: 80px 48px 60px; background: var(--c-bg-card); position:relative; z-index:2; }
-        .section-header { display:flex; align-items:flex-end; justify-content:space-between; max-width:1200px; margin:0 auto 48px; }
-        .section-label-sm { font-size:11px; font-weight:800; letter-spacing:4px; text-transform:uppercase; color:var(--terra); margin-bottom:8px; }
-        .section-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:36px; font-weight:900; color:var(--fig); letter-spacing:-1px; line-height:1.1; }
-        
-        .see-all { font-size:14px; font-weight:800; color:var(--terra); text-decoration:none; display:flex; align-items:center; gap:6px; transition:gap 0.2s; background:none; border:none; padding:0; cursor:pointer;}
-        .see-all:hover { gap:10px; }
-        
-        .categories-grid { display:grid; grid-template-columns: repeat(8, 1fr); gap:16px; max-width:1200px; margin:0 auto; }
-        .cat-card { display:flex; flex-direction:column; align-items:center; gap:12px; transition:transform 0.25s; cursor:pointer;}
+        .cat-card { display:flex; flex-direction:column; align-items:center; gap:12px; cursor:pointer; transition:transform 0.25s;}
         .cat-card:hover { transform:translateY(-6px); }
-        .cat-img-wrap { width:100%; aspect-ratio:1; border-radius:24px; overflow:hidden; position:relative; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition:all 0.3s; border: 1px solid var(--c-border); background:white;}
-        .cat-card:hover .cat-img-wrap { box-shadow: 0 12px 30px rgba(45,27,78,0.1); border-color: var(--terra); }
+        .cat-img-wrap { width:100%; aspect-ratio:1; border-radius:24px; background:white; border: 1px solid var(--c-border); }
         .cat-emoji-bg { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:40px; border-radius:24px; }
-        .cat-name { font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--c-text-main); text-align:center; }
-        
-        .section-featured { background: var(--c-bg-main); padding: 80px 48px; border-top: 1px solid var(--c-border); }
-        .featured-grid { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:24px; max-width:1200px; margin:0 auto; }
-        .venue-card { border-radius:24px; overflow:hidden; background: white; transition:transform 0.3s, box-shadow 0.3s; position:relative; display:flex; flex-direction:column; cursor:pointer; border: 1px solid var(--c-border);}
-        .venue-card:hover { transform:translateY(-8px); box-shadow:0 24px 50px rgba(45,27,78,0.08); border-color: var(--terra);}
-        .venue-card.featured { grid-row: span 2; }
-        .venue-img { width:100%; height:200px; background:var(--c-bg-sub); position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:60px; }
-        .venue-card.featured .venue-img { height:320px; }
-        .venue-img img { width:100%; height:100%; object-fit:cover; }
-        .venue-badge { position:absolute; top:14px; left:14px; background:var(--terra); color:white; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:6px 12px; border-radius:50px; z-index:10; }
-        .venue-badge.hot { background:linear-gradient(135deg,#E8622A,#c94e1f); display:flex; align-items:center; gap:4px; box-shadow: 0 4px 10px rgba(232,98,42,0.3);}
-        .venue-fav { position:absolute; top:14px; right:14px; width:36px; height:36px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; transition:transform 0.2s; z-index:10; color: var(--fig); box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
-        .venue-fav:hover { transform:scale(1.15); color: red; }
-        
-        .venue-info { padding:24px; display:flex; flex-direction:column; flex:1; }
-        .venue-cat { font-size:10px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:var(--terra); margin-bottom:8px; }
-        .venue-name { font-family:'Plus Jakarta Sans',sans-serif; font-size:20px; font-weight:800; color:var(--fig); letter-spacing:-0.5px; margin-bottom:12px; }
-        .venue-meta { display:flex; align-items:center; gap:16px; font-size:13px; font-weight:600; color:var(--c-text-muted); }
-        
-        .venue-book-btn { width:100%; margin-top:auto; padding:14px; background:var(--fig); color:white; border:none; border-radius:16px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:800; text-transform:uppercase; transition:all 0.25s; display:flex; align-items:center; justify-content:center; cursor:pointer;}
-        .venue-book-btn:hover { background:var(--terra); }
-        
-        .section-how { background: var(--c-bg-card); padding: 100px 48px; position:relative; overflow:hidden; border-top: 1px solid var(--c-border); }
-        .how-inner { max-width:1200px; margin:0 auto; position:relative; z-index:1; }
-        .how-header { text-align:center; margin-bottom:72px; }
-        .how-header .section-title { color:var(--fig); }
-        
-        .steps-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:32px; position:relative; }
-        .steps-grid::before { content:''; position:absolute; top:40px; left:12.5%; right:12.5%; height:2px; background: var(--c-border-sub); z-index:0; }
-        .step { text-align:center; position:relative; z-index:1; animation: fadeUp 0.6s ease both; }
-        .step-icon { width:80px; height:80px; border-radius:24px; display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 20px; position:relative; background: white; border: 2px solid var(--c-border); box-shadow: 0 10px 20px rgba(0,0,0,0.03); }
-        .step-num { position:absolute; top:-10px; right:-10px; width:28px; height:28px; border-radius:50%; background:var(--terra); color:white; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; border: 3px solid white;}
-        .step-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:18px; font-weight:800; color:var(--fig); margin-bottom:10px; letter-spacing:-0.5px; }
-        .step-desc { font-size:14px; font-weight:500; line-height:1.6; color:var(--c-text-muted); }
-        
-        .section-cta { padding:80px 48px; background: var(--c-bg-main); border-top: 1px solid var(--c-border); }
-        .cta-inner { max-width:1200px; margin:0 auto; background:white; border-radius:32px; padding:72px 80px; display:flex; align-items:center; gap:64px; position:relative; overflow:hidden; border: 1px solid var(--c-border); box-shadow: 0 20px 40px rgba(45,27,78,0.05); }
-        .cta-inner::before { content:''; position:absolute; right:-100px; top:-100px; width:400px; height:400px; border-radius:50%; background:radial-gradient(circle, rgba(232,98,42,0.1), transparent 70%); }
-        .cta-text { flex:1; position:relative; z-index:1; }
-        .cta-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:42px; font-weight:900; color:var(--fig); letter-spacing:-2px; line-height:1.1; margin:12px 0 16px; }
-        .cta-title span { color:var(--terra); }
-        .cta-sub { font-size:16px; font-weight:500; color:var(--c-text-muted); line-height:1.6; max-width:400px; }
-        .cta-actions { display:flex; gap:14px; position:relative; z-index:1; flex-shrink:0; }
-        .app-badge { display:flex; align-items:center; gap:12px; background:var(--c-bg-sub); border:1px solid var(--c-border); border-radius:16px; padding:16px 24px; transition:all 0.25s; color:var(--fig); text-decoration:none; cursor:pointer;}
-        .app-badge:hover { border-color:var(--terra); transform:translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .app-badge-icon { font-size:28px; }
-        .app-badge-text { line-height:1.2; text-align:left; }
-        .app-badge-text .small { font-size:11px; font-weight:700; color:var(--c-text-muted); letter-spacing:0.5px; text-transform:uppercase; }
-        .app-badge-text .big { font-size:16px; font-weight:800; color:var(--fig); }
-        
-        @media(max-width:900px){
-          nav { padding:0 20px; background: white !important; border-bottom: 1px solid var(--c-border) !important;}
-          .hero { padding-top: 100px; }
-          .search-wrap { flex-direction: column; border-radius:24px; padding:16px; gap:12px; }
-          .search-field { border-right: none; border-bottom: 1px solid var(--c-border); padding-bottom: 12px; }
-          .nav-links { display:none; }
-          .categories-grid { grid-template-columns:repeat(4,1fr); }
-          .featured-grid { grid-template-columns:1fr; }
-          .steps-grid { grid-template-columns:1fr 1fr; }
-          .steps-grid::before { display:none; }
-          .cta-inner { flex-direction:column; gap:32px; padding:48px 32px; text-align:center;}
-          .cta-actions { flex-direction:column; width:100%; }
-          .footer-top { grid-template-columns:1fr 1fr; }
-          .hero-stats { flex-direction:column; gap:24px; }
-          .stat { border-right:none; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:24px; }
-          .nav-right .btn-outline { display:none; }
-          .nav-right .btn-primary span { display:none; }
-        }
+        .cat-name { font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--c-text-main); }
+
+        .venue-card { border-radius:24px; background: white; border: 1px solid var(--c-border); cursor:pointer; transition:transform 0.3s;}
+        .venue-card:hover { transform:translateY(-8px); border-color: var(--terra); box-shadow:0 24px 50px rgba(45,27,78,0.08);}
       `}} />
 
       <nav>
@@ -933,69 +327,16 @@ export default function Home() {
             <path d="M14 15.5 Q23 15.5 23 20 Q23 24.5 14 24.5" stroke="#F5C5A3" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
             <path d="M14 24.5 Q25 24.5 25 29 Q25 33.5 14 33.5" stroke="#E8622A" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
             <circle cx="28" cy="8" r="4.5" fill="#E8622A"/>
-            <polyline points="25.5,8 27.5,10 31,6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
           </svg>
           <span className="nav-logo-text">bookcy<span>.</span></span>
         </div>
 
         <ul className="nav-links">
-          <li>
-            <button onClick={() => {setStep('all_shops'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={['all_shops', 'shops', 'shop_profile', 'booking'].includes(step) ? 'active' : ''}>
-              {t[lang].nav.places}
-            </button>
-          </li>
-          <li style={{height:'100%', display:'flex', alignItems:'center'}}>
-              <div className="relative h-full flex items-center group" onMouseEnter={() => setShowFeaturesMenu(true)} onMouseLeave={() => setShowFeaturesMenu(false)}>
-                  <button onClick={() => {setStep('all_features'); setShowFeaturesMenu(false); window.scrollTo(0,0);}} className={`flex items-center gap-1 transition-colors h-full ${['features', 'feature_detail', 'all_features'].includes(step) || showFeaturesMenu ? 'active' : ''}`}>
-                      {t[lang].nav.features} <ChevronDown size={14} className={`transition-transform duration-200 ${showFeaturesMenu ? 'rotate-180' : ''}`} />
-                  </button>
-                  {showFeaturesMenu && (
-                      <div className="absolute top-[72px] left-1/2 -translate-x-1/2 w-screen bg-white text-[#2D1B4E] shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-t border-slate-200 cursor-default animate-in slide-in-from-top-2 duration-200">
-                          <div className="max-w-[1000px] mx-auto py-12 px-8">
-                              <div className="grid grid-cols-4 gap-8 mb-10 text-left">
-                                  <div>
-                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{t[lang].megaMenu.col1Title}</h4>
-                                    <ul className="space-y-5 font-bold text-slate-600 capitalize text-sm">
-                                      {megaMenuStructure.col1.map(key => <li key={key} onClick={() => goToFeature(key)} className="hover:text-[#2D1B4E] cursor-pointer transition-colors flex items-center gap-2"><ChevronRight size={14} className="text-[#E8622A]"/> {t[lang].featNames[key]}</li>)}
-                                    </ul>
-                                  </div>
-                                  <div>
-                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{t[lang].megaMenu.col2Title}</h4>
-                                    <ul className="space-y-5 font-bold text-slate-600 capitalize text-sm">
-                                      {megaMenuStructure.col2.map(key => <li key={key} onClick={() => goToFeature(key)} className="hover:text-[#2D1B4E] cursor-pointer transition-colors flex items-center gap-2"><ChevronRight size={14} className="text-[#E8622A]"/> {t[lang].featNames[key]}</li>)}
-                                    </ul>
-                                  </div>
-                                  <div>
-                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{t[lang].megaMenu.col3Title}</h4>
-                                    <ul className="space-y-5 font-bold text-slate-600 capitalize text-sm">
-                                      {megaMenuStructure.col3.map(key => <li key={key} onClick={() => goToFeature(key)} className="hover:text-[#2D1B4E] cursor-pointer transition-colors flex items-center gap-2"><ChevronRight size={14} className="text-[#E8622A]"/> {t[lang].featNames[key]}</li>)}
-                                    </ul>
-                                  </div>
-                                  <div>
-                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{t[lang].megaMenu.col4Title}</h4>
-                                    <ul className="space-y-5 font-bold text-slate-600 capitalize text-sm">
-                                      {megaMenuStructure.col4.map(key => <li key={key} onClick={() => goToFeature(key)} className="hover:text-[#2D1B4E] cursor-pointer transition-colors flex items-center gap-2"><ChevronRight size={14} className="text-[#E8622A]"/> {t[lang].featNames[key]}</li>)}
-                                    </ul>
-                                  </div>
-                              </div>
-                              <div className="flex justify-center border-t border-slate-100 pt-8">
-                                <button onClick={() => {setStep('all_features'); setShowFeaturesMenu(false); window.scrollTo(0,0);}} className="border border-slate-200 bg-white text-[#2D1B4E] px-8 py-3 rounded-xl font-black uppercase text-xs tracking-widest hover:border-[#E8622A] hover:text-[#E8622A] transition-colors">{t[lang].megaMenu.btn}</button>
-                              </div>
-                          </div>
-                      </div>
-                  )}
-              </div>
-          </li>
-          <li>
-            <button onClick={() => {setStep('about'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'about' ? 'active' : ''}>
-              {t[lang].nav.about}
-            </button>
-          </li>
-          <li>
-            <button onClick={() => {setStep('contact'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'contact' ? 'active' : ''}>
-              {t[lang].nav.contact}
-            </button>
-          </li>
+          <li><button onClick={() => {setStep('all_shops'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={['all_shops', 'shops', 'shop_profile', 'booking'].includes(step) ? 'active' : ''}>{t[lang].nav.places}</button></li>
+          <li><button onClick={() => {setStep('all_features'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'all_features' ? 'active' : ''}>{t[lang].nav.features}</button></li>
+          <li><button onClick={() => {setStep('why_bookcy'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'why_bookcy' ? 'active' : ''}>{t[lang].nav.why}</button></li>
+          <li><button onClick={() => {setStep('about'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'about' ? 'active' : ''}>{t[lang].nav.about}</button></li>
+          <li><button onClick={() => {setStep('contact'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'contact' ? 'active' : ''}>{t[lang].nav.contact}</button></li>
         </ul>
 
         <div className="nav-right">
@@ -1004,21 +345,15 @@ export default function Home() {
             <div onClick={()=>setLang('EN')} className={`lang-pill ${lang==='EN' ? 'active' : ''}`}>EN</div>
             <div onClick={()=>setLang('RU')} className={`lang-pill ${lang==='RU' ? 'active' : ''}`}>RU</div>
           </div>
-          
           {loggedInShop ? (
                <div className="flex gap-2 items-center">
                    <button onClick={handleLogout} className="btn-outline">{t[lang].nav.logout}</button>
-                   <button onClick={() => router.push('/dashboard')} className="btn-primary">
-                      <UserCircle size={18}/> <span>{t[lang].nav.dashboard}</span>
-                   </button>
+                   <button onClick={() => router.push('/dashboard')} className="btn-primary"><UserCircle size={18}/> <span>{t[lang].nav.dashboard}</span></button>
                </div>
           ) : (
               <>
                   <button onClick={() => setShowRegister(true)} className="btn-outline">{t[lang].nav.addShop}</button>
-                  <button onClick={() => setShowLogin(true)} className="btn-primary">
-                      <UserCircle size={18}/>
-                      <span>{t[lang].nav.login}</span>
-                  </button>
+                  <button onClick={() => setShowLogin(true)} className="btn-primary"><UserCircle size={18}/><span>{t[lang].nav.login}</span></button>
               </>
           )}
         </div>
@@ -1039,8 +374,6 @@ export default function Home() {
                           <p className="font-bold text-sm">Banka: <span className="font-normal">İş Bankası</span></p>
                           <p className="font-bold text-sm">Alıcı: <span className="font-normal">BOOKCY LTD.</span></p>
                           <p className="font-bold text-sm">IBAN: <span className="text-[#E8622A]">TR99 0006 4000 0012 3456 7890 12</span></p>
-                          
-                          <p className="text-sm font-bold text-slate-500 mt-6 mb-4 text-center">Bizi tercih ettiğiniz için teşekkür ederiz. İşletme profilinizin onaylanıp yayına alınabilmesi için lütfen ödeme dekontunuzu WhatsApp destek hattımız üzerinden bize iletiniz.</p>
                           <a href="https://wa.me/905555555555?text=Merhaba,%20Bookcy%20işletme%20kaydımı%20yaptım.%20Dekontumu%20iletiyorum." target="_blank" rel="noreferrer" className="w-full bg-[#25D366] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg shadow-green-500/30 flex justify-center items-center gap-2 text-decoration-none text-xs border-none cursor-pointer">
                               <MessageCircle size={18}/> DEKONTU WHATSAPP'TAN İLET
                           </a>
@@ -1138,7 +471,7 @@ export default function Home() {
                   </>
               )}
             </div>
-        </div>
+          </div>
       )}
 
       {/* GİRİŞ MODALI */}
@@ -1167,13 +500,12 @@ export default function Home() {
         </div>
       )}
 
-      <main className="flex-1 w-full relative z-10" style={{minHeight: '80vh'}}>
+      <main className="flex-1 w-full relative z-10 min-h-[80vh] mt-[72px]">
         
         {/* === ANA SAYFA === */}
         {step === 'services' && (
             <div className="w-full animate-in fade-in">
                 <section className="hero">
-                  
                   <div className="hero-content">
                     <div className="hero-eyebrow">
                       <div className="hero-eyebrow-dot"></div>
@@ -1234,11 +566,6 @@ export default function Home() {
                           </div>
                       );
                   })()}
-                  
-                  {/* Beyaz Dalga (Alt kısımla kusursuz birleşmesi için) */}
-                  <svg className="absolute bottom-[-1px] left-0 w-full h-auto z-10 pointer-events-none" viewBox="0 0 1440 80" preserveAspectRatio="none" fill="var(--c-bg-card)">
-                    <path d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z"/>
-                  </svg>
                 </section>
 
                 <section className="section-categories">
@@ -1339,6 +666,59 @@ export default function Home() {
                   </div>
                 </div>
               </section>
+            </div>
+        )}
+
+        {/* === NEDEN BOOKCY (YENİ SAYFA) === */}
+        {step === 'why_bookcy' && (
+            <div className="w-full bg-[#FAF7F2] animate-in fade-in overflow-hidden pb-24">
+                <div className="bg-[#2D1B4E] pt-32 pb-24 px-4 md:px-8 text-center relative overflow-hidden border-b border-slate-800">
+                    <div className="absolute top-0 left-0 w-64 md:w-96 h-64 md:h-96 bg-[#E8622A]/20 rounded-full blur-[100px] pointer-events-none"></div>
+                    <div className="absolute bottom-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-[#F5C5A3]/20 rounded-full blur-[100px] pointer-events-none"></div>
+                    
+                    <span className="bg-white/10 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 inline-block border border-white/20 relative z-10">Farkı Keşfedin</span>
+                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-6 relative z-10">Neden <span className="text-[#E8622A]">Binlerce Kişi</span><br/>Bookcy Kullanıyor?</h1>
+                    <p className="text-lg md:text-xl font-medium text-slate-300 max-w-2xl mx-auto leading-relaxed relative z-10">Sadece bir randevu sistemi değil, kişisel bakım yolculuğunuzun en güvenilir ortağıyız.</p>
+                </div>
+                
+                <div className="max-w-[1200px] mx-auto px-4 md:px-8 -mt-10 relative z-20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
+                            <div className="w-16 h-16 bg-orange-50 text-[#E8622A] rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-orange-100"><Crown size={32}/></div>
+                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Öncü Platform</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed">Kıbrıs’ta ilk ve öncü randevu platformlarından biri olarak, sektöre yön veriyoruz.</p>
+                        </div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
+                            <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100"><Grid size={32}/></div>
+                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Entegre Sistem</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed">Farklı sektörleri tek çatı altında toplayarak kapsamlı bir arama ve randevu deneyimi sunuyoruz.</p>
+                        </div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
+                            <div className="w-16 h-16 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-green-100"><Users size={32}/></div>
+                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Gerçek Müşteri</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed">İşletmelere gerçek müşteri kazandıran, dönüşüm odaklı aktif ve büyük bir trafik sağlıyoruz.</p>
+                        </div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
+                            <div className="w-16 h-16 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-purple-100"><Smartphone size={32}/></div>
+                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Üst Düzey Arayüz</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed">Karmaşadan uzak; sade, son derece hızlı ve kullanıcı dostu modern bir arayüz sunuyoruz.</p>
+                        </div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
+                            <div className="w-16 h-16 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-pink-100"><TrendingUp size={32}/></div>
+                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Maksimum Kazanç</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed">İşletmeler için adil, şeffaf ve komisyonsuz modelimiz ile gelirinizi katlamanızı sağlıyoruz.</p>
+                        </div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
+                            <div className="w-16 h-16 bg-teal-50 text-teal-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-teal-100"><MessageSquare size={32}/></div>
+                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Gelişmiş Otomasyon</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed">Yüksek performanslı altyapımızla yakında eklenecek SMS ve gelişmiş bildirim sistemleri.</p>
+                        </div>
+                    </div>
+                    
+                    <div className="mt-16 text-center">
+                        <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="bg-[#E8622A] hover:bg-[#d4561f] text-white px-12 py-5 rounded-full font-black uppercase tracking-widest text-sm shadow-[0_0_40px_rgba(232,98,42,0.4)] border-none cursor-pointer transition-transform hover:scale-105 inline-flex items-center gap-2">Hemen Aramıza Katıl <ArrowRight size={18}/></button>
+                    </div>
+                </div>
             </div>
         )}
 
@@ -2306,57 +1686,23 @@ export default function Home() {
 
       </main>
 
-      <footer className="w-full overflow-hidden" style={{background:'var(--fig)', padding:'60px 24px 32px', color:'rgba(255,255,255,0.6)', zIndex:10, position:'relative'}}>
-        <div className="footer-top grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 max-w-6xl mx-auto mb-12 w-full">
-          
-          <div className="footer-brand w-full">
-            <div className="footer-brand-name flex items-baseline font-extrabold text-white tracking-tighter mb-3" style={{fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:'24px'}}>
-              bookcy<span style={{color:'var(--terra)'}}>.</span>
-            </div>
-            <p className="footer-desc text-[13px] leading-relaxed max-w-full md:max-w-[260px] break-words">{t[lang].footer.desc}</p>
-            <div className="footer-socials mt-6 flex gap-3">
-              <a href="https://instagram.com/bookcy" target="_blank" rel="noopener noreferrer" className="social-btn flex items-center justify-center w-9 h-9 rounded-lg bg-white/5 border border-white/10 text-white transition-all hover:bg-white/10"><InstagramIcon size={18}/></a>
-              <a href="https://wa.me/905555555555" target="_blank" rel="noopener noreferrer" className="social-btn flex items-center justify-center w-9 h-9 rounded-lg bg-white/5 border border-white/10 text-white transition-all hover:bg-white/10"><MessageCircle size={18}/></a>
-              <a href="mailto:info@bookcy.co" className="social-btn flex items-center justify-center w-9 h-9 rounded-lg bg-white/5 border border-white/10 text-white transition-all hover:bg-white/10"><Mail size={18}/></a>
+      <footer className="w-full bg-[#2D1B4E] pt-16 pb-8 px-6 text-white/60 text-sm">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 border-b border-white/10 pb-8">
+          <div>
+            <div className="text-2xl font-black text-white mb-4 flex items-baseline" style={{fontFamily:"'Plus Jakarta Sans',sans-serif"}}>bookcy<span className="text-[#E8622A]">.</span></div>
+            <p className="mb-4">{t[lang].footer.desc}</p>
+            <div className="flex gap-3">
+              <a href="https://instagram.com/bookcy" target="_blank" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-white hover:bg-[#E8622A]"><InstagramIcon size={16}/></a>
+              <a href="https://wa.me/905555555555" target="_blank" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-white hover:bg-[#E8622A]"><MessageCircle size={16}/></a>
+              <a href="mailto:info@bookcy.co" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-white hover:bg-[#E8622A]"><Mail size={16}/></a>
             </div>
           </div>
-
-          <div className="w-full">
-            <div className="footer-col-title text-[11px] font-bold tracking-[2px] uppercase text-white mb-5">{t[lang].footer.links}</div>
-            <ul className="footer-links flex flex-col gap-2.5 p-0 m-0 list-none">
-              <li><button onClick={() => {setStep('services'); window.scrollTo(0,0);}} className="text-[13px] text-white/60 bg-transparent border-none text-left p-0 cursor-pointer hover:text-white transition-colors">{t[lang].nav.places}</button></li>
-              <li><button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="text-[13px] text-white font-bold bg-transparent border-none text-left p-0 cursor-pointer hover:text-[var(--terra)] transition-colors">{t[lang].nav.addShop}</button></li>
-              <li><button onClick={() => {setShowLogin(true); window.scrollTo(0,0);}} className="text-[13px] text-white/60 bg-transparent border-none text-left p-0 cursor-pointer hover:text-white transition-colors">{t[lang].nav.login}</button></li>
-            </ul>
-          </div>
-
-          <div className="w-full">
-            <div className="footer-col-title text-[11px] font-bold tracking-[2px] uppercase text-white mb-5">{t[lang].footer.cities}</div>
-            <ul className="footer-links flex flex-col gap-2.5 p-0 m-0 list-none">
-              {cyprusRegions.map(region => (
-                  <li key={region}><button onClick={() => {setFilterRegion(region); setStep('all_shops'); window.scrollTo(0,0);}} className="text-[13px] text-white/60 bg-transparent border-none text-left p-0 cursor-pointer hover:text-white transition-colors">{region}</button></li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="w-full">
-            <div className="footer-col-title text-[11px] font-bold tracking-[2px] uppercase text-white mb-5">{t[lang].footer.legal}</div>
-            <ul className="footer-links flex flex-col gap-2.5 p-0 m-0 list-none">
-              <li><button onClick={() => {setStep('terms'); window.scrollTo(0,0);}} className="text-[13px] text-white/60 bg-transparent border-none text-left p-0 cursor-pointer hover:text-white transition-colors">{t[lang].footer.terms}</button></li>
-              <li><button onClick={() => {setStep('privacy'); window.scrollTo(0,0);}} className="text-[13px] text-white/60 bg-transparent border-none text-left p-0 cursor-pointer hover:text-white transition-colors">{t[lang].footer.privacy}</button></li>
-              <li><button onClick={() => {setStep('kvkk'); window.scrollTo(0,0);}} className="text-[13px] text-white/60 bg-transparent border-none text-left p-0 cursor-pointer hover:text-white transition-colors">{t[lang].footer.kvkk}</button></li>
-              <li><button onClick={() => {setStep('cookies'); window.scrollTo(0,0);}} className="text-[13px] text-white/60 bg-transparent border-none text-left p-0 cursor-pointer hover:text-white transition-colors">{t[lang].footer.cookies}</button></li>
-            </ul>
-          </div>
-
+          <div><h4 className="text-white font-black mb-4 tracking-widest">{t[lang].footer.links}</h4><button onClick={()=>setStep('services')} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">Ana Sayfa</button><button onClick={()=>setStep('about')} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">Hakkımızda</button><button onClick={()=>setShowRegister(true)} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-[#E8622A]">İşletme Ekle</button></div>
+          <div><h4 className="text-white font-black mb-4 tracking-widest">{t[lang].footer.cities}</h4>{cyprusRegions.map(r => <button key={r} onClick={()=>{setFilterRegion(r); setStep('all_shops'); window.scrollTo(0,0);}} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">{r}</button>)}</div>
+          <div><h4 className="text-white font-black mb-4 tracking-widest">{t[lang].footer.legal}</h4><button onClick={()=>{setStep('privacy'); window.scrollTo(0,0);}} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">Gizlilik Politikası</button><button onClick={()=>{setStep('kvkk'); window.scrollTo(0,0);}} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">KVKK</button><button onClick={()=>{setStep('terms'); window.scrollTo(0,0);}} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">Kullanım Şartları</button><button onClick={()=>{setStep('cookies'); window.scrollTo(0,0);}} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">Çerez Politikası</button></div>
         </div>
-
-        <div className="footer-bottom max-w-6xl mx-auto border-t border-white/10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-[12px] text-center sm:text-left w-full">
-          <div>© {new Date().getFullYear()} BOOKCY KIBRIS. {t[lang].footer.copy}</div>
-          <div>One Click Booking™</div>
-        </div>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4"><p>© {new Date().getFullYear()} BOOKCY KIBRIS. {t[lang].footer.copy}</p><p className="font-black text-[#E8622A]">One Click Booking™</p></div>
       </footer>
-
     </>
   );
 }
