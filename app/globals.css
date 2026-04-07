@@ -1,34 +1,100 @@
 @import "tailwindcss";
 
-/* VERCEL İÇİN KESİN KARANLIK MOD İPTALİ VE YENİ AYDINLIK TEMA */
-:root, 
-.dark, 
-[data-theme='dark'], 
-html.dark {
-  color-scheme: light !important;
-  
-  /* Kurumsal Bookcy Renkleri */
-  --fig: #2D1B4E;      /* Koyu Mor */
-  --terra: #E8622A;    /* Turuncu */
-  --blush: #F5C5A3;    /* Yavruağzı/Somon */
-  --sand: #FAF7F2;     /* Krem Arka Plan */
-  
-  --c-bg-main: #FAF7F2 !important;
-  --c-bg-card: #FFFFFF !important;
-  --c-text-main: #101010 !important;
+:root { 
+  --fig: #2D1B4E; 
+  --terra: #E8622A; 
+  --blush: #F5C5A3; 
+  --c-bg-main: #FAF7F2;
+  --c-bg-card: #FFFFFF;
+  --c-border: #E2E8F0;
+  --c-text-main: #101010;
+  --c-text-muted: #64748B;
 }
 
-html, body {
-  background-color: #FAF7F2 !important;
-  color: #101010 !important;
-  font-family: 'DM Sans', sans-serif;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
+body { background: var(--c-bg-main) !important; color: var(--c-text-main) !important; font-family: 'DM Sans', sans-serif; overflow-x: hidden; margin: 0; padding: 0; }
 
-/* Not: Diğer tüm buton, hero, arama çubuğu ve navigasyon tasarımlarını 
-  zaten page.js dosyasının içine modern Tailwind yapısıyla gömdük. 
-  Burayı temiz tutuyoruz ki Vercel kafayı yemesin! 
-*/
+/* --- NAVBAR --- */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 48px; height: 72px; display: flex; align-items: center; justify-content: space-between; background: #FFFFFF !important; border-bottom: 1px solid var(--c-border) !important; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+.nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
+.nav-logo-icon { width: 36px; height: 36px; }
+.nav-logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; color: var(--fig); letter-spacing: -1px; display:flex; align-items:baseline; }
+.nav-logo-text span { color: var(--terra); }
+.nav-links { display: flex; align-items: center; gap: 36px; list-style: none; margin:0; padding:0; }
+.nav-links button { font-size: 14px; font-weight: 700; color: var(--fig) !important; background:none; border:none; cursor:pointer; transition: color 0.2s;}
+.nav-links button:hover, .nav-links button.active { color: var(--terra) !important; }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.lang-pills { display: flex; gap: 4px; }
+.lang-pill { font-size: 11px; font-weight:600; padding: 4px 10px; border-radius: 20px; transition: all 0.2s; color: var(--c-text-muted); cursor:pointer; border: 1px solid transparent;}
+.lang-pill.active { background: var(--fig); color: white; border-color: var(--fig); }
+.lang-pill:hover:not(.active) { border-color: var(--c-border); color: var(--c-text-main); }
+.btn-outline { font-size: 13px; font-weight: 700; padding: 9px 20px; border-radius: 50px; border: 1.5px solid var(--fig); color: var(--fig); background:transparent; cursor:pointer;}
+.btn-outline:hover { background: var(--fig); color: white; }
+.btn-primary { font-size: 13px; font-weight: 800; padding: 12px 28px; border-radius: 50px; background: var(--terra); color: white; border:none; cursor:pointer; text-transform:uppercase; transition: all 0.25s;}
+.btn-primary:hover { background: #d4561f; transform: translateY(-2px); box-shadow: 0 12px 25px rgba(232,98,42,0.3); }
+
+/* --- HERO (MOR ARKA PLAN) --- */
+.hero { position: relative; min-height: 85vh; background: var(--fig); display: flex; flex-direction:column; align-items: center; justify-content: center; padding: 140px 24px 100px; overflow:hidden;}
+.hero::before { content:''; position:absolute; inset:0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index:1; }
+.hero-content { position:relative; z-index:2; text-align:center; padding: 0 24px; max-width: 900px; }
+.hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius:50px; padding: 6px 16px 6px 8px; font-size:10px; font-weight:800; color:rgba(255,255,255,0.9); letter-spacing:1px; text-transform:uppercase; margin-bottom:28px; }
+.hero-eyebrow-dot { width:8px; height:8px; border-radius:50%; background:var(--terra); }
+.hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size: clamp(48px, 6vw, 80px); font-weight:900; color: white; letter-spacing: -2px; line-height: 1.1; margin-bottom:24px; text-align:center; }
+.hero-title .accent { color: var(--terra); }
+.hero-sub { font-size:16px; font-weight:600; color: rgba(255,255,255,0.65); max-width:600px; margin:0 auto 48px; text-align:center; line-height:1.6;}
+.search-wrap { display:flex; align-items:center; background: white; border-radius: 32px; padding: 12px; gap: 12px; max-width: 800px; width:100%; margin: 0 auto; box-shadow: 0 24px 60px rgba(0,0,0,0.3); border: none; }
+.search-field { flex:1.5; display:flex; align-items:center; gap:12px; padding: 0 16px; border-right: 1px solid var(--c-border); }
+.search-icon { color: var(--terra); font-size:22px; flex-shrink:0; }
+.search-field input { border:none; outline:none; width:100%; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; color:var(--c-text-main); background:transparent; }
+.search-location { display:flex; align-items:center; gap:12px; flex:1; padding: 0 16px; }
+.search-location select { border:none; outline:none; width:100%; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; background:transparent;}
+.search-btn { border:none; background: var(--terra); color:white; font-size:15px; font-weight:800; padding: 16px 40px; border-radius:24px; cursor:pointer; }
+.search-btn:hover { background:#d4561f; }
+
+.hero-popular { display:flex; align-items:center; gap:10px; margin-top:30px; flex-wrap:wrap; justify-content:center; }
+.hero-popular span { font-size:12px; color:rgba(255,255,255,0.5); font-weight:700; letter-spacing:0.5px; }
+.pop-tag { font-size:12px; font-weight:700; padding:8px 16px; border-radius:50px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.8); transition:all 0.2s; cursor:pointer; }
+.pop-tag:hover { background:var(--terra); border-color:var(--terra); color:white; }
+
+.hero-stats { display:flex; gap:0; margin-top: 60px; margin-bottom: 20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:40px; width:100%; max-width:800px; position: relative; z-index: 10; }
+.stat { flex:1; text-align:center; border-right:1px solid rgba(255,255,255,0.1); }
+.stat:last-child { border-right:none; }
+.stat-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:36px; font-weight:900; color:white; letter-spacing:-1px; line-height:1; }
+.stat-label { font-size:11px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px; margin-top:8px; }
+
+/* --- DİĞER KARTLAR --- */
+.section-categories { padding: 80px 48px 60px; background: var(--c-bg-card); position:relative; z-index:2; }
+.section-header { display:flex; align-items:flex-end; justify-content:space-between; max-width:1200px; margin:0 auto 48px; }
+.section-label-sm { font-size:11px; font-weight:800; letter-spacing:4px; text-transform:uppercase; color:var(--terra); margin-bottom:8px; }
+.section-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:36px; font-weight:900; color:var(--fig); letter-spacing:-1px; line-height:1.1; }
+.see-all { font-size:14px; font-weight:800; color:var(--terra); text-decoration:none; display:flex; align-items:center; gap:6px; transition:gap 0.2s; background:none; border:none; padding:0; cursor:pointer;}
+.categories-grid { display:grid; grid-template-columns: repeat(8, 1fr); gap:16px; max-width:1200px; margin:0 auto; }
+.cat-card { display:flex; flex-direction:column; align-items:center; gap:12px; cursor:pointer; transition:transform 0.25s;}
+.cat-card:hover { transform:translateY(-6px); }
+.cat-img-wrap { width:100%; aspect-ratio:1; border-radius:24px; background:white; border: 1px solid var(--c-border); overflow:hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition:all 0.3s;}
+.cat-card:hover .cat-img-wrap { box-shadow: 0 12px 30px rgba(45,27,78,0.1); border-color: var(--terra); }
+.cat-emoji-bg { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:40px; border-radius:24px; }
+.cat-name { font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--c-text-main); }
+
+.venue-card { border-radius:24px; background: white; border: 1px solid var(--c-border); cursor:pointer; transition:transform 0.3s, box-shadow 0.3s; display:flex; flex-direction:column; position:relative;}
+.venue-card:hover { transform:translateY(-8px); border-color: var(--terra); box-shadow:0 24px 50px rgba(45,27,78,0.08);}
+.venue-badge { position:absolute; top:14px; left:14px; background:var(--terra); color:white; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:6px 12px; border-radius:50px; z-index:10; }
+.venue-fav { position:absolute; top:14px; right:14px; width:36px; height:36px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; transition:transform 0.2s; z-index:10; color: var(--fig); box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
+.venue-book-btn { width:100%; margin-top:auto; padding:14px; background:var(--fig); color:white; border:none; border-radius:16px; font-size:13px; font-weight:800; text-transform:uppercase; transition:all 0.25s; cursor:pointer;}
+.venue-book-btn:hover { background:var(--terra); }
+
+.step-icon { width:80px; height:80px; border-radius:24px; display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 20px; background: white; border: 2px solid var(--c-border); box-shadow: 0 10px 20px rgba(0,0,0,0.03); position:relative;}
+.step-num { position:absolute; top:-10px; right:-10px; width:28px; height:28px; border-radius:50%; background:var(--terra); color:white; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; border: 3px solid white;}
+
+/* MOBİL UYUM */
+@media(max-width:900px){
+  nav { padding:0 20px; }
+  .hero { padding-top: 100px; }
+  .search-wrap { flex-direction: column; border-radius:24px; padding:16px; gap:12px; }
+  .search-field { border-right: none; border-bottom: 1px solid var(--c-border); padding-bottom: 12px; }
+  .nav-links { display:none; }
+  .categories-grid { grid-template-columns:repeat(4,1fr); }
+  .hero-stats { flex-direction:column; gap:24px; }
+  .stat { border-right:none; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:24px; }
+  .nav-right .btn-outline, .nav-right .lang-pills { display:none; }
+  .nav-right .btn-primary span { display:none; }
+}
