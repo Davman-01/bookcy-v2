@@ -1,29 +1,10 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  MapPin, Star, ArrowRight, CheckCircle2, XCircle, ChevronLeft, ChevronRight, ChevronDown, 
-  Phone, Calendar, Clock, Lock, Upload, Briefcase, MessageSquare, Mail, Target, TrendingUp, 
-  Users, Crown, Search, Sliders, MessageCircle, Scissors, User, UserCircle, Smartphone, 
-  Grid, X, Gem, Check, PieChart, Store, CalendarOff, Music, Ticket, ShieldCheck, HeartHandshake
-} from 'lucide-react';
+import { MapPin, Star, ArrowRight, CheckCircle2, XCircle, ChevronLeft, ChevronDown, Phone, Calendar, Clock, Lock, Upload, Briefcase, MessageSquare, Mail, Target, TrendingUp, Users, Crown, Search, Sliders, MessageCircle, Scissors, User, UserCircle, Smartphone, Grid, X, Gem, Check, PieChart, Store, CalendarOff, Music, Ticket, HeartHandshake } from 'lucide-react';
 
-const supabase = {
-  from: () => ({
-    select: () => ({ eq: async () => ({ data: [] }), then: (cb) => cb({ data: [] }) }),
-    insert: async () => ({ error: null })
-  }),
-  storage: { from: () => ({ upload: async () => ({ error: null }), getPublicUrl: () => ({ data: { publicUrl: '' } }) }) }
-};
-
-const InstagramIcon = ({ size = 24, className = "" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-  </svg>
-);
-
-function parseDuration(durationStr) { const match = (durationStr||'').match(/\d+/); return match ? parseInt(match[0]) : 30; }
-function getRequiredSlots(durationStr) { return Math.ceil(parseDuration(durationStr) / 30); }
+const supabase = { from: () => ({ select: () => ({ eq: async () => ({ data: [] }), then: (cb) => cb({ data: [] }) }), insert: async () => ({ error: null }) }), storage: { from: () => ({ upload: async () => ({ error: null }), getPublicUrl: () => ({ data: { publicUrl: '' } }) }) } };
+const InstagramIcon = ({ size = 24, className = "" }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg> );
 
 const allTimeSlots = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30","00:00","00:30","01:00","01:30","02:00"];
 const defaultWorkingHours = [{ day: 'Pazartesi', open: '09:00', close: '19:00', isClosed: false }, { day: 'Salı', open: '09:00', close: '19:00', isClosed: false }, { day: 'Çarşamba', open: '09:00', close: '19:00', isClosed: false }, { day: 'Perşembe', open: '09:00', close: '19:00', isClosed: false }, { day: 'Cuma', open: '09:00', close: '19:00', isClosed: false }, { day: 'Cumartesi', open: '09:00', close: '19:00', isClosed: false }, { day: 'Pazar', open: '09:00', close: '19:00', isClosed: true }];
@@ -31,78 +12,32 @@ const cyprusRegions = ["Girne", "Lefkoşa", "Mağusa", "İskele", "Güzelyurt", 
 
 export default function Home() {
   const router = useRouter(); 
-  const [step, setStep] = useState('services'); 
-  const [shops, setShops] = useState([]);
-  const [lang, setLang] = useState('TR');
-  const [showFeaturesMenu, setShowFeaturesMenu] = useState(false);
-  const [activeFeature, setActiveFeature] = useState(null);
-  const approvedShops = shops.filter(shop => shop.status === 'approved');
-  const [selectedShop, setSelectedShop] = useState(null);
+  const [step, setStep] = useState('services'); const [shops, setShops] = useState([]); const [lang, setLang] = useState('TR'); const [selectedShop, setSelectedShop] = useState(null);
   const [bookingData, setBookingData] = useState({ date: new Date().toISOString().split('T')[0], time: '', selectedShopService: null, selectedStaff: null, selectedEvent: null });
-  const [formData, setFormData] = useState({ name: '', surname: '', phoneCode: '+90', phone: '', email: '' });
-  const [bookingPhase, setBookingPhase] = useState(1);
-  const [bookingEmailValid, setBookingEmailValid] = useState(null);
-  const [bookingPhoneValid, setBookingPhoneValid] = useState(null);
-  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
-  const [feedbackData, setFeedbackData] = useState({ q1: null, q2: null, q3: null, q4: null });
-  const [showRegister, setShowRegister] = useState(false);
-  const [loggedInShop, setLoggedInShop] = useState(null);
-  const [showLogin, setShowLogin] = useState(false);
-  const [loginType, setLoginType] = useState('owner');
-  const [loginUsername, setLoginUsername] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [loginStaffName, setLoginStaffName] = useState('');
-  const [isLoginLoading, setIsLoginLoading] = useState(false);
-  const [filterRegion, setFilterRegion] = useState('All');
-  const [filterService, setFilterService] = useState('All');
-  const [filterSort, setFilterSort] = useState('High'); 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [formData, setFormData] = useState({ name: '', surname: '', phoneCode: '+90', phone: '', email: '' }); const [bookingPhase, setBookingPhase] = useState(1);
+  const [bookingEmailValid, setBookingEmailValid] = useState(null); const [bookingPhoneValid, setBookingPhoneValid] = useState(null);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false); const [feedbackData, setFeedbackData] = useState({ q1: null, q2: null, q3: null, q4: null });
+  const [showRegister, setShowRegister] = useState(false); const [loggedInShop, setLoggedInShop] = useState(null);
+  const [showLogin, setShowLogin] = useState(false); const [loginType, setLoginType] = useState('owner'); const [loginUsername, setLoginUsername] = useState(''); const [loginPassword, setLoginPassword] = useState(''); const [loginStaffName, setLoginStaffName] = useState(''); const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [filterRegion, setFilterRegion] = useState('All'); const [filterService, setFilterService] = useState('All'); const [filterSort, setFilterSort] = useState('High'); const [searchQuery, setSearchQuery] = useState('');
   const [newShop, setNewShop] = useState({ name: '', category: 'Berber', location: 'Girne', address: '', maps_link: '', phoneCode: '+90', contactPhone: '', contactInsta: '', contactEmail: '', username: '', password: '', email: '', description: '', logoFile: null, package: 'Standart Paket' });
-  const [isUploading, setIsUploading] = useState(false);
-  const [registerSuccess, setRegisterSuccess] = useState(false);
-  const [emailValid, setEmailValid] = useState(null);
-  const [phoneValid, setPhoneValid] = useState(null);
-  const [adminEmailValid, setAdminEmailValid] = useState(null);
-  const [appointments, setAppointments] = useState([]);
-  const [globalAppointments, setGlobalAppointments] = useState([]); 
-  const [closedSlots, setClosedSlots] = useState([]);
-  const [profileTab, setProfileTab] = useState('services'); 
-  const [lightboxImg, setLightboxImg] = useState(null);
+  const [isUploading, setIsUploading] = useState(false); const [registerSuccess, setRegisterSuccess] = useState(false);
+  const [emailValid, setEmailValid] = useState(null); const [phoneValid, setPhoneValid] = useState(null); const [adminEmailValid, setAdminEmailValid] = useState(null);
+  const [appointments, setAppointments] = useState([]); const [globalAppointments, setGlobalAppointments] = useState([]); const [closedSlots, setClosedSlots] = useState([]); const [profileTab, setProfileTab] = useState('services');
+  const approvedShops = shops.filter(shop => shop.status === 'approved');
 
   const t = {
-    TR: {
-      nav: { places: "Mekanlar", features: "Özellikler", why: "Neden Bookcy", contact: "İletişim", about: "Hakkımızda", addShop: "İşletme Ekle", login: "Giriş", logout: "Çıkış", dashboard: "Panel" },
-      megaMenu: { col1Title: "Kurulum", col2Title: "Müşterileri Etkile", col3Title: "Yönet", col4Title: "Büyü", btn: "Tüm Özellikler" },
-      featNames: { profile: "Profil", market: "Pazaryeri", team: "Ekip", booking: "Randevu", app: "Uygulama", marketing: "Pazarlama", calendar: "Takvim", crm: "Müşteri Yönetimi", boost: "Öne Çık", stats: "Raporlar" },
-      featDesc: { profile: "Dijital vitrin", market: "Müşteriye ulaşın", team: "Saatleri yönetin", booking: "7/24 randevu", app: "Mobil uygulama", marketing: "Mesaj gönderin", calendar: "Çakışmaları önleyin", crm: "Geçmişi saklayın", boost: "Üst sıralara çıkın", stats: "Kazancınızı görün" },
-      featDetails: {
-        profile: { purpose: "Dijital vitrininiz.", adv1: { title: "İmaj", desc: "İlk intibayı güçlendirir." }, adv2: { title: "Güven", desc: "Yorumlarla güven kazanın." }, adv3: { title: "Keşfedilebilirlik", desc: "Aramalarda bulunun." } },
-        market: { purpose: "Müşteriyi buluşturur.", adv1: { title: "Yeni Müşteriler", desc: "Aktif kullanıcılara ulaşın." }, adv2: { title: "Boşlukları Doldurun", desc: "İptalleri sergileyin." }, adv3: { title: "Rekabet", desc: "Önde yer alın." } },
-        team: { purpose: "Personeli koordine edin.", adv1: { title: "Planlama", desc: "Vardiyaları düzenleyin." }, adv2: { title: "Performans", desc: "Gelirleri görün." }, adv3: { title: "Takvimler", desc: "Çakışmaları kaldırın." } },
-        booking: { purpose: "7/24 randevu.", adv1: { title: "Zaman Tasarrufu", desc: "İşinize odaklanın." }, adv2: { title: "Sıfır Hata", desc: "Hataları indirin." }, adv3: { title: "Kesintisiz Hizmet", desc: "Sürekli rezervasyon alın." } },
-        app: { purpose: "Müşteri ile bağ.", adv1: { title: "Deneyim", desc: "Kullanıcı dostu arayüz." }, adv2: { title: "Takip", desc: "Yaklaşan randevular." }, adv3: { title: "İptal", desc: "İptaller yansısın." } },
-        marketing: { purpose: "İletişim asistanı.", adv1: { title: "Kampanyalar", desc: "Özel fırsatlar." }, adv2: { title: "Mesajlar", desc: "Otomatik mesajlar." }, adv3: { title: "Ciro Artışı", desc: "Sıklığı artırın." } },
-        calendar: { purpose: "Randevu organizasyonu.", adv1: { title: "Koruması", desc: "İki randevuyu engeller." }, adv2: { title: "Optimizasyon", desc: "Boşlukları analiz eder." }, adv3: { title: "Sürükle", desc: "Anında değiştirin." } },
-        crm: { purpose: "Müşteri arşivi.", adv1: { title: "Profil", desc: "Geçmişi görün." }, adv2: { title: "Özel Notlar", desc: "Sisteme kaydedin." }, adv3: { title: "Sadakat", desc: "Bağ oluşturun." } },
-        boost: { purpose: "Görünürlük paketi.", adv1: { title: "Zirve", desc: "En üstte yer alın." }, adv2: { title: "Vitrin", desc: "Önerilenlerde gösterilin." }, adv3: { title: "İmaj", desc: "Kalitenizi vurgulayın." } },
-        stats: { purpose: "Veri sistemi.", adv1: { title: "Ciro", desc: "Anlık takip." }, adv2: { title: "Analiz", desc: "Strateji belirleyin." }, adv3: { title: "Raporlar", desc: "Performansı görün." } }
-      },
-      featUI: { purposeTitle: "Ne İşe Yarar?", benefitsTitle: "Avantajları", allFeaturesTitle: "Özellikler", allFeaturesSub: "Her şey burada." },
+    TR: { nav: { places: "Mekanlar", why: "Neden Bookcy", contact: "İletişim", about: "Hakkımızda", addShop: "İşletme Ekle", login: "Giriş", logout: "Çıkış", dashboard: "Panel" },
       home: { eyebrow: "Kıbrıs'ın #1 Platformu", title1: "Kendine", title2: "iyi bak,", title3: "hemen", title4: "randevu al.", subtitle: "Kuaför, berber, spa, masaj ve daha fazlasını saniyeler içinde keşfet.", searchPlace: "Hizmet veya mekan ara...", searchLoc: "Nerede?", searchBtn: "Ara", popTitle: "Popüler:", stats: {s1:"İşletme", s2:"Müşteri", s3:"İşlem", s4:"Memnuniyet"} },
-      cats: { catTitle: "Kategoriler", catSub: "Ne yaptırmak istersiniz?", seeAll: "Tümünü Gör →", tattoo: "Dövme", barber: "Berber", hair: "Kuaför", nail: "Tırnak & Güzellik", club: "Bar & Club", spa: "Spa & Masaj", makeup: "Makyaj", skincare: "Cilt Bakımı" },
+      cats: { catTitle: "Kategoriler", catSub: "Ne yaptırmak istersiniz?", seeAll: "Tümünü Gör →" },
       homeInfo: { recLabel: "Öne Çıkanlar", recTitle: "Bu Hafta 🔥", howLabel: "Nasıl Çalışır?", howTitle: "4 Adımda Hazır", how1Title: "Keşfet", how1Desc: "Mekanları incele.", how2Title: "Tarih Seç", how2Desc: "Zamanı seç.", how3Title: "Onayla", how3Desc: "Saniyeler içinde onay.", how4Title: "Keyif Çıkar", how4Desc: "Hizmetini al.", ctaLabel: "İşletme Misiniz?", ctaTitle1: "Bookcy ile", ctaTitle2: "Dijitalleş.", ctaSub: "Yeni müşteri kazan." },
       filters: { title: "Sonuçlar", search: "Mekan Ara...", region: "Bölge", service: "Kategori", sortHigh: "En Yüksek", sortLow: "En Düşük", clear: "Temizle", count: "Mekan" },
       reg: { title: "KAYIT", subtitle: "Sadece Sahipler İçin", shopName: "Adı", location: "Bölge", address: "Adres", maps: "Maps Linki", desc: "Hakkımızda", email: "E-Posta", contactPhone: "Telefon", contactInsta: "Instagram", contactEmail: "İletişim Maili", user: "Kullanıcı Adı", pass: "Şifre", pack: "Paket", upload: "Logo", submit: "BAŞVUR", success: "ALINDI!", uploading: "YÜKLENİYOR..." },
-      shops: { back: "GERİ DÖN", empty: "Bulunamadı." },
-      profile: { tabServices: "Hizmetler", tabEvents: "Etkinlikler", tabGallery: "Galeri", about: "Hakkında", contactTitle: "İLETİŞİM", bookBtn: "SEÇ", noDesc: "Açıklama yok.", noServices: "Liste yok.", noGallery: "Fotoğraf yok.", similarTitle: "BENZER MEKANLAR" },
+      shops: { back: "GERİ DÖN", empty: "Bulunamadı." }, profile: { tabServices: "Hizmetler", tabEvents: "Etkinlikler", tabGallery: "Galeri", about: "Hakkında", contactTitle: "İLETİŞİM", bookBtn: "SEÇ", noDesc: "Açıklama yok.", noServices: "Liste yok.", noGallery: "Fotoğraf yok.", similarTitle: "BENZER MEKANLAR" },
       book: { change: "Geri", selectService: "Hizmet seçin.", selectEvent: "Etkinlik seçin.", selectLoca: "VIP seçin.", selectStaff: "UZMAN SEÇİN", anyStaff: "Fark Etmez", date: "Tarih", time: "Saat", name: "Adınız", surname: "Soyadınız", phone: "Telefon", email: "E-Posta", submit: "ONAYLA", success: "ONAYLANDI", successSub: "İletildi.", backHome: "ANA SAYFA", total: "Toplam", details: "Detaylar", service: "Hizmet", event: "Etkinlik", staff: "Uzman", dateTime: "Zaman", contactInfo: "İletişim", btnBook: "Randevu Al →", shopClosed: "KAPALIDIR." },
-      about: { title: "Dijital Devrim", subtitle: "Büyütün.", missionDesc: "Telefon trafiğinden kurtulun.", bizTitle: "Çözümler", biz1: "7/24 Rezervasyon", biz1Desc: "Sistem randevu alır.", biz2: "Boş Koltuklara Son", biz2Desc: "İptalleri indirin.", biz3: "Sıfır Komisyon", biz3Desc: "Komisyon kesilmez.", biz4: "Lider Olun", biz4Desc: "Öne geçin.", usrTitle: "Neden Biz?", usr1: "Sırada Beklemeye Son", usr1Desc: "Beklemeyin.", usr2: "Şeffaf", usr2Desc: "Ne ödeyeceğinizi bilin.", usr3: "Yorumlar", usr3Desc: "Deneyimleri okuyun.", packTitle: "Paketler", packSub: "Sürpriz yok.", pkg1Name: "Standart Paket", pkg1Price: "60 STG", pkg1Period: "/ Ay", pkg1Feat1: "Sınırsız Randevu", pkg1Feat2: "Sosyal Medya", pkg1Feat3: "Panel", pkg1Feat4: "Personel Yönetimi", pkg1Feat5: "7/24 Destek", pkg2Name: "Premium Paket", pkg2Price: "100 STG", pkg2Period: "/ Ay", pkg2Feat1: "Standart Özellikler", pkg2Feat2: "Vitrini", pkg2Feat3: "Üst Sıra", pkg2Feat4: "VIP Çerçeve", pkg2Feat5: "Sponsorlu Reklam", ctaTitle: "Katlayın", ctaBtn: "EKLEYİN" },
-      contact: { title: "BİZE ULAŞIN", sub: "7/24 ulaşabilirsiniz.", whatsapp: "WhatsApp", wpDesc: "Anında yanıt.", insta: "Instagram", instaDesc: "Keşfedin.", email: "E-Posta", emailDesc: "Görüşmeler.", btnWp: "MESAJ AT", btnInsta: "TAKİP ET", btnEmail: "MAİL GÖNDER" },
       footer: { desc: "Tek rezervasyon platformu.", links: "Platform", cities: "Bölgeler", legal: "Sözleşmeler", terms: "Kullanım Şartları", privacy: "Gizlilik", kvkk: "KVKK", cookies: "Çerez Politikası", copy: "Tüm hakları saklıdır. Kıbrıs 🇹🇷" },
       legal: { privacyTitle: "Gizlilik Politikası", kvkkTitle: "KVKK", termsTitle: "Kullanım Şartları", cookiesTitle: "Çerez Politikası", lastUpdated: "Son güncellenme: 10 Nisan 2024" }
-    },
-    EN: { nav: { places: "Places", features: "Features", why: "Why Bookcy", contact: "Contact", about: "About", addShop: "Add Business", login: "Login", logout: "Logout", dashboard: "Dashboard" }, megaMenu: { col1Title: "Setup", col2Title: "Clients", col3Title: "Manage", col4Title: "Grow", btn: "All Features" }, featNames: {}, featDesc: {}, featDetails: {}, featUI: {}, home: { eyebrow: "Cyprus's #1", title1: "Take care", title2: "of yourself", title3: "book", title4: "now.", subtitle: "Find salons easily.", searchPlace: "Search...", searchLoc: "Where?", searchBtn: "Search", popTitle: "Popular:", stats: {s1:"Places", s2:"Clients", s3:"Bookings", s4:"Satisfaction"} }, cats: {}, homeInfo: {}, filters: {title:"Results", count:"Found"}, reg: {}, shops: {}, profile: {}, book: {}, contact: {}, about: {}, footer: {}, legal: {} },
-    RU: { nav: { places: "Места", features: "Функции", why: "Почему Bookcy", contact: "Контакты", about: "О нас", addShop: "Добавить", login: "Вход", logout: "Выйти", dashboard: "Панель" }, megaMenu: { col1Title: "Настройка", col2Title: "Клиенты", col3Title: "Бизнес", col4Title: "Развитие", btn: "Узнать все функции" }, featNames: {}, featDesc: {}, featDetails: {}, featUI: {}, home: { eyebrow: "Платформа #1", title1: "Позаботьтесь", title2: "о себе,", title3: "забронируйте", title4: "сейчас.", subtitle: "Бронируйте в один клик.", searchPlace: "Поиск...", searchLoc: "Где?", searchBtn: "ПОИСК", popTitle: "Популярные:", stats: {s1:"Места", s2:"Клиенты", s3:"Записи", s4:"Оценка"} }, cats: {}, homeInfo: {}, filters: {title:"Результаты", count:"Найдено"}, reg: {}, shops: {}, profile: {}, book: {}, contact: {}, about: {}, footer: {}, legal: {} }
+    }
   };
 
   const handleBookingEmailChange = (e) => { const val = e.target.value; setFormData(prev => ({...prev, email: val})); setBookingEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
@@ -111,122 +46,101 @@ export default function Home() {
   const handleAdminEmailChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, contactEmail: val})); setAdminEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
   const handlePhoneChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, contactPhone: val})); setPhoneValid(val === '' ? null : val.replace(/\s/g, '').length >= 7); };
 
-  const featureIcons = { profile: <Briefcase size={40}/>, market: <Store size={40}/>, team: <Users size={40}/>, booking: <Target size={40}/>, app: <Smartphone size={40}/>, marketing: <Target size={40}/>, calendar: <Calendar size={40}/>, crm: <User size={40}/>, boost: <TrendingUp size={40}/>, stats: <PieChart size={40}/> };
-  const featureIconsSmall = { profile: <Briefcase size={20}/>, market: <Store size={20}/>, team: <Users size={20}/>, booking: <Target size={20}/>, app: <Smartphone size={20}/>, marketing: <Target size={20}/>, calendar: <Calendar size={20}/>, crm: <User size={20}/>, boost: <TrendingUp size={20}/>, stats: <PieChart size={20}/> };
   const packages = [ { name: "Standart Paket", price: `60 STG / Aylık` }, { name: "Premium Paket", price: `100 STG / Aylık` } ];
-  
-  const categories = [ 
-    { key: "barber", dbName: "Berber", bg: "linear-gradient(135deg,#f8fafc,#e2e8f0)", emoji: "💈" }, { key: "hair", dbName: "Kuaför", bg: "linear-gradient(135deg,#fdf4ff,#fce7f3)", emoji: "✂️" }, 
-    { key: "nail", dbName: "Tırnak & Güzellik", bg: "linear-gradient(135deg,#fff1f2,#fbcfe8)", emoji: "💅" }, { key: "tattoo", dbName: "Dövme", bg: "linear-gradient(135deg,#f1f5f9,#cbd5e1)", emoji: "🖋️" }, 
-    { key: "spa", dbName: "Spa & Masaj", bg: "linear-gradient(135deg,#ecfdf5,#d1fae5)", emoji: "💆" }, { key: "skincare", dbName: "Cilt Bakımı", bg: "linear-gradient(135deg,#eff6ff,#dbeafe)", emoji: "🧴" }, 
-    { key: "makeup", dbName: "Makyaj", bg: "linear-gradient(135deg,#fff7ed,#ffedd5)", emoji: "💄" }, { key: "club", dbName: "Bar & Club", bg: "linear-gradient(135deg,#f3f4f6,#e5e7eb)", emoji: "🍸" } 
-  ];
-
-  async function fetchGlobalAppointments() { const { data } = await supabase.from('appointments').select('customer_phone'); if (data) setGlobalAppointments(data); }
-  async function fetchShops() { const { data } = await supabase.from('shops').select('*'); if (data) setShops(data); }
-  async function fetchAppointments(shopId, date = null) { let query = supabase.from('appointments').select('*').eq('shop_id', shopId); if (date) query = query.eq('appointment_date', date); const { data } = await query; if (data) setAppointments(data); }
-  async function fetchClosedSlots(shopId, date = null) { let query = supabase.from('closed_slots').select('*').eq('shop_id', shopId); if (date) query = query.eq('date', date); const { data } = await query; if (data) setClosedSlots(data.map(item => item.slot)); }
+  const categories = [ { key: "barber", dbName: "Berber", bg: "linear-gradient(135deg,#f8fafc,#e2e8f0)", emoji: "💈" }, { key: "hair", dbName: "Kuaför", bg: "linear-gradient(135deg,#fdf4ff,#fce7f3)", emoji: "✂️" }, { key: "nail", dbName: "Tırnak & Güzellik", bg: "linear-gradient(135deg,#fff1f2,#fbcfe8)", emoji: "💅" }, { key: "tattoo", dbName: "Dövme", bg: "linear-gradient(135deg,#f1f5f9,#cbd5e1)", emoji: "🖋️" }, { key: "spa", dbName: "Spa & Masaj", bg: "linear-gradient(135deg,#ecfdf5,#d1fae5)", emoji: "💆" }, { key: "skincare", dbName: "Cilt Bakımı", bg: "linear-gradient(135deg,#eff6ff,#dbeafe)", emoji: "🧴" }, { key: "makeup", dbName: "Makyaj", bg: "linear-gradient(135deg,#fff7ed,#ffedd5)", emoji: "💄" }, { key: "club", dbName: "Bar & Club", bg: "linear-gradient(135deg,#f3f4f6,#e5e7eb)", emoji: "🍸" } ];
 
   useEffect(() => { 
-    fetchShops(); fetchGlobalAppointments(); 
+    const fetchData = async () => {
+      const { data: sData } = await supabase.from('shops').select('*'); if (sData) setShops(sData);
+      const { data: aData } = await supabase.from('appointments').select('customer_phone'); if (aData) setGlobalAppointments(aData);
+    };
+    fetchData(); 
     const session = localStorage.getItem('bookcy_biz_session'); if(session) setLoggedInShop(JSON.parse(session));
   }, []);
   
   useEffect(() => { 
-    if (selectedShop && bookingData.date) { fetchAppointments(selectedShop.id, bookingData.date); fetchClosedSlots(selectedShop.id, bookingData.date); } 
+    if (selectedShop && bookingData.date) { 
+      const fetchAppts = async () => {
+        const { data: ap } = await supabase.from('appointments').select('*').eq('shop_id', selectedShop.id).eq('appointment_date', bookingData.date); if(ap) setAppointments(ap);
+        const { data: cs } = await supabase.from('closed_slots').select('*').eq('shop_id', selectedShop.id).eq('date', bookingData.date); if(cs) setClosedSlots(cs.map(i => i.slot));
+      }; fetchAppts();
+    } 
   }, [selectedShop, bookingData.date]);
 
   const isClub = selectedShop?.category === 'Bar & Club';
 
   const handleLogin = async (e) => {
     e.preventDefault(); setIsLoginLoading(true);
-    const inputUser = loginUsername.trim().toLowerCase(); const inputPass = loginPassword.trim();
-    const shop = shops.find(s => s.admin_username?.toLowerCase() === inputUser);
+    const shop = shops.find(s => s.admin_username?.toLowerCase() === loginUsername.trim().toLowerCase());
     if (!shop) { alert("Hatalı İşletme Kullanıcı Adı!"); setIsLoginLoading(false); return; }
-    if (shop.status !== 'approved' && shop.status) { alert("Hesabınız henüz onaylanmamış! Lütfen dekontunuzu iletip onay bekleyiniz."); setIsLoginLoading(false); return; }
-    
+    if (shop.status !== 'approved' && shop.status) { alert("Hesabınız onay bekliyor."); setIsLoginLoading(false); return; }
     if (loginType === 'owner') {
-      if (shop.admin_password !== inputPass) { alert("Hatalı Şifre!"); setIsLoginLoading(false); return; }
+      if (shop.admin_password !== loginPassword.trim()) { alert("Hatalı Şifre!"); setIsLoginLoading(false); return; }
       localStorage.setItem('bookcy_biz_session', JSON.stringify({ role: 'owner', shopData: shop })); setShowLogin(false); setIsLoginLoading(false); router.push('/dashboard');
     } else {
-      const staffList = shop.staff || [];
-      const validStaff = staffList.find(s => s.name.toLowerCase() === loginStaffName.trim().toLowerCase() && s.password === inputPass);
-      if (!validStaff) { alert("Hatalı Personel Adı veya Şifre!"); setIsLoginLoading(false); return; }
+      const validStaff = (shop.staff || []).find(s => s.name.toLowerCase() === loginStaffName.trim().toLowerCase() && s.password === loginPassword.trim());
+      if (!validStaff) { alert("Hatalı Personel!"); setIsLoginLoading(false); return; }
       localStorage.setItem('bookcy_biz_session', JSON.stringify({ role: 'staff', staffName: validStaff.name, shopData: shop })); setShowLogin(false); setIsLoginLoading(false); router.push('/dashboard');
     }
   };
 
   const handleLogout = () => { localStorage.removeItem('bookcy_biz_session'); setLoggedInShop(null); };
   const handleHeroSearch = (e) => { e.preventDefault(); setStep('all_shops'); window.scrollTo(0,0); };
-  const goToFeature = (featureKey) => { setActiveFeature(featureKey); setStep('feature_detail'); setShowFeaturesMenu(false); window.scrollTo(0,0); };
 
   async function handleRegisterSubmit(e) {
     e.preventDefault();
-    if (emailValid === false || phoneValid === false || adminEmailValid === false) return alert("İletişim bilgilerini kontrol edin.");
+    if (emailValid === false || phoneValid === false || adminEmailValid === false) return alert("Bilgileri kontrol edin.");
     setIsUploading(true); let uploadedLogoUrl = null;
     const fullPhone = newShop.phoneCode + " " + newShop.contactPhone;
     const { error } = await supabase.from('shops').insert([{ name: newShop.name, category: newShop.category, location: newShop.location, address: newShop.address, maps_link: newShop.maps_link, admin_email: newShop.email, admin_username: newShop.username, admin_password: newShop.password, description: newShop.description, logo_url: uploadedLogoUrl, package: newShop.package, status: 'pending', contact_phone: fullPhone, contact_insta: newShop.contactInsta, contact_email: newShop.contactEmail, services: [], staff: [], gallery: [], closed_dates: [], events: [] }]);
     setIsUploading(false);
-    if (!error) { setRegisterSuccess(true); } else { alert("Hata oluştu."); }
+    if (!error) setRegisterSuccess(true); else alert("Hata oluştu.");
   }
 
   async function handleBooking(e) {
     e.preventDefault();
     if (bookingEmailValid === false || bookingPhoneValid === false) return alert("Bilgileri kontrol edin.");
-    if(isClub) { if(!bookingData.selectedEvent || !bookingData.selectedShopService) return; } 
-    else { if(!bookingData.selectedShopService || !bookingData.selectedStaff) return; }
+    if(isClub) { if(!bookingData.selectedEvent || !bookingData.selectedShopService) return; } else { if(!bookingData.selectedShopService || !bookingData.selectedStaff) return; }
 
     const availableSlotsForBooking = getCurrentAvailableSlots();
-    const startIndex = availableSlotsForBooking.indexOf(bookingData.time);
-    const neededSlots = getRequiredSlots(bookingData.selectedShopService.duration);
-    const occupied_slots = isClub ? [] : availableSlotsForBooking.slice(startIndex, startIndex + neededSlots);
+    const neededSlots = Math.ceil((bookingData.selectedShopService.duration || 30) / 30);
+    const occupied_slots = isClub ? [] : availableSlotsForBooking.slice(availableSlotsForBooking.indexOf(bookingData.time), availableSlotsForBooking.indexOf(bookingData.time) + neededSlots);
     let assignedStaffName = isClub ? 'Rezervasyon' : bookingData.selectedStaff.name;
     const fullPhone = formData.phoneCode + " " + formData.phone;
     const finalDate = isClub ? bookingData.selectedEvent.date : bookingData.date;
     const finalTime = isClub ? bookingData.selectedEvent.time : bookingData.time;
 
     const { error } = await supabase.from('appointments').insert([{ shop_id: selectedShop.id, customer_name: formData.name, customer_surname: formData.surname, customer_phone: fullPhone, customer_email: formData.email, appointment_date: finalDate, appointment_time: finalTime, service_name: bookingData.selectedShopService.name, staff_name: assignedStaffName, occupied_slots: occupied_slots, status: 'Bekliyor' }]);
-    if (!error) { setStep('success'); window.scrollTo(0,0); } else { alert("Hata oluştu!"); }
+    if (!error) { setStep('success'); window.scrollTo(0,0); } else alert("Hata oluştu!");
   }
 
   async function submitFeedback(e) {
     e.preventDefault();
-    if(feedbackData.q1===null || feedbackData.q2===null || feedbackData.q3===null || feedbackData.q4===null) return alert("Lütfen puanlayın.");
+    if(feedbackData.q1===null || feedbackData.q2===null || feedbackData.q3===null || feedbackData.q4===null) return alert("Puan verin.");
     setFeedbackSubmitted(true);
     const avg = Number(((feedbackData.q1 + feedbackData.q2 + feedbackData.q3 + feedbackData.q4) / 4).toFixed(1));
     await supabase.from('platform_feedback').insert([{ q1: feedbackData.q1, q2: feedbackData.q2, q3: feedbackData.q3, q4: feedbackData.q4, average_score: avg }]);
   }
 
-  const isSearching = searchQuery.trim().length > 0 || filterRegion !== 'All';
-  const displayShops = approvedShops.filter(shop => {
-      const matchRegion = filterRegion === 'All' || (shop.location && shop.location.toLowerCase().includes(filterRegion.toLowerCase()));
-      const matchService = filterService === 'All' || shop.category === filterService;
-      const matchSearch = shop.name.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchRegion && matchService && matchSearch;
-  });
-
-  const sortedShops = [...displayShops].sort((a, b) => {
+  const sortedShops = [...approvedShops.filter(shop => {
+      return (filterRegion === 'All' || shop.location?.toLowerCase().includes(filterRegion.toLowerCase())) &&
+             (filterService === 'All' || shop.category === filterService) &&
+             (shop.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  })].sort((a, b) => {
       if (filterSort === 'High') {
         if ((a.package === 'Premium' || a.package === 'Premium Paket') && (b.package !== 'Premium' && b.package !== 'Premium Paket')) return -1;
         if ((a.package !== 'Premium' && a.package !== 'Premium Paket') && (b.package === 'Premium' || b.package === 'Premium Paket')) return 1;
-        return 0;
       }
       return 0;
   });
   
   const recommendedShops = approvedShops.filter(s => s.package === 'Premium Paket' || s.package === 'Premium').slice(0, 4);
 
-  const getDayNameFromDate = (dateString) => {
-    const days = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-    return days[new Date(dateString).getDay()];
-  };
-
   const getCurrentAvailableSlots = () => {
     if (!selectedShop || !bookingData.date || isClub) return allTimeSlots;
     if (selectedShop.closed_dates?.includes(bookingData.date)) return [];
-    const dayName = getDayNameFromDate(bookingData.date);
-    const workingHours = Array.isArray(selectedShop.working_hours) ? selectedShop.working_hours : defaultWorkingHours;
-    const todayHours = workingHours.find(h => h.day === dayName);
+    const dayName = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'][new Date(bookingData.date).getDay()];
+    const todayHours = (Array.isArray(selectedShop.working_hours) ? selectedShop.working_hours : defaultWorkingHours).find(h => h.day === dayName);
     if (todayHours?.isClosed) return [];
     if (todayHours) return allTimeSlots.filter(slot => slot >= todayHours.open && slot < todayHours.close);
     return allTimeSlots;
@@ -234,119 +148,121 @@ export default function Home() {
 
   const currentAvailableSlots = getCurrentAvailableSlots();
   const isShopClosedToday = currentAvailableSlots.length === 0;
-  const similarShops = selectedShop ? approvedShops.filter(s => s.id !== selectedShop.id && s.category === selectedShop.category).slice(0, 3) : [];
-
-  const renderFeedbackScale = (qKey) => (
-    <div className="flex gap-1 justify-center mt-3 mb-6 w-full custom-scrollbar pb-2">
-      {[0,1,2,3,4,5,6,7,8,9,10].map(num => (
-        <button key={num} type="button" onClick={() => setFeedbackData({...feedbackData, [qKey]: num})} className={`w-8 h-8 rounded-lg text-xs font-black transition-all border shrink-0 ${feedbackData[qKey] === num ? 'bg-[#E8622A] text-white border-transparent scale-110 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:border-[#E8622A]'}`}>{num}</button>
-      ))}
-    </div>
-  );
 
   return (
     <>
+      <style dangerouslySetInnerHTML={{__html: `
+        :root { --fig: #2D1B4E; --terra: #E8622A; --blush: #F5C5A3; --c-bg-main: #FAF7F2; --c-bg-card: #FFFFFF; --c-border: #E2E8F0; --c-text-main: #101010; --c-text-muted: #64748B; }
+        body { background: var(--c-bg-main) !important; color: var(--c-text-main) !important; font-family: 'DM Sans', sans-serif; overflow-x: hidden; margin:0; padding:0; }
+        
+        /* --- NAVBAR KESİN BEYAZ --- */
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 48px; height: 72px; display: flex; align-items: center; justify-content: space-between; background: #FFFFFF !important; border-bottom: 1px solid var(--c-border) !important; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
+        .nav-logo-icon { width: 36px; height: 36px; }
+        .nav-logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; color: var(--fig); letter-spacing: -1px; display:flex; align-items:baseline; }
+        .nav-logo-text span { color: var(--terra); }
+        .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; margin:0; padding:0; }
+        .nav-links button { font-size: 14px; font-weight: 700; color: var(--fig) !important; background:none; border:none; cursor:pointer; transition: color 0.2s;}
+        .nav-links button:hover, .nav-links button.active { color: var(--terra) !important; }
+        .nav-right { display: flex; align-items: center; gap: 16px; }
+        .btn-outline { font-size: 13px; font-weight: 700; padding: 9px 20px; border-radius: 50px; border: 1.5px solid var(--fig); color: var(--fig); background:transparent; cursor:pointer;}
+        .btn-outline:hover { background: var(--fig); color: white; }
+        .btn-primary { font-size: 13px; font-weight: 800; padding: 12px 28px; border-radius: 50px; background: var(--terra); color: white; border:none; cursor:pointer; text-transform:uppercase; transition: all 0.25s;}
+        .btn-primary:hover { background: #d4561f; transform: translateY(-2px); box-shadow: 0 12px 25px rgba(232,98,42,0.3); }
+        
+        /* --- HERO (KUSURSUZ MOR ARKA PLAN VE ARAMA) --- */
+        .hero { position: relative; min-height: 85vh; background: var(--fig); display: flex; flex-direction:column; align-items: center; justify-content: center; padding: 140px 24px 100px; overflow:hidden;}
+        .hero-content { position:relative; z-index:2; text-align:center; padding: 0 24px; max-width: 900px; }
+        .hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius:50px; padding: 6px 16px 6px 8px; font-size:10px; font-weight:800; color:rgba(255,255,255,0.9); letter-spacing:1px; text-transform:uppercase; margin-bottom:28px; }
+        .hero-eyebrow-dot { width:8px; height:8px; border-radius:50%; background:var(--terra); }
+        .hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size: clamp(48px, 6vw, 80px); font-weight:900; color: white; letter-spacing: -2px; line-height: 1.1; margin-bottom:24px; text-align:center; }
+        .hero-title .accent { color: var(--terra); }
+        .hero-sub { font-size:16px; font-weight:600; color: rgba(255,255,255,0.65); max-width:600px; margin:0 auto 48px; text-align:center; line-height:1.6;}
+        
+        .search-wrap { display:flex; align-items:center; background: white; border-radius: 32px; padding: 12px; gap: 12px; max-width: 800px; width:100%; margin: 0 auto; box-shadow: 0 24px 60px rgba(0,0,0,0.3); border: none; }
+        .search-field { flex:1.5; display:flex; align-items:center; gap:12px; padding: 0 16px; border-right: 1px solid var(--c-border); }
+        .search-icon { color: var(--terra); font-size:22px; flex-shrink:0; }
+        .search-field input { border:none; outline:none; width:100%; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; color:var(--c-text-main); background:transparent; }
+        .search-location { display:flex; align-items:center; gap:12px; flex:1; padding: 0 16px; }
+        .search-location select { border:none; outline:none; width:100%; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; cursor:pointer; background:transparent;}
+        .search-btn { border:none; background: var(--terra); color:white; font-size:15px; font-weight:800; padding: 16px 40px; border-radius:24px; cursor:pointer; }
+        .search-btn:hover { background:#d4561f; }
+        
+        .hero-popular { display:flex; align-items:center; gap:10px; margin-top:30px; flex-wrap:wrap; justify-content:center; }
+        .hero-popular span { font-size:12px; color:rgba(255,255,255,0.5); font-weight:700; letter-spacing:0.5px; }
+        .pop-tag { font-size:12px; font-weight:700; padding:8px 16px; border-radius:50px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.8); transition:all 0.2s; cursor:pointer; }
+        .pop-tag:hover { background:var(--terra); border-color:var(--terra); color:white; }
+        
+        .cat-card { display:flex; flex-direction:column; align-items:center; gap:12px; cursor:pointer; transition:transform 0.25s;}
+        .cat-card:hover { transform:translateY(-6px); }
+        .cat-img-wrap { width:100%; aspect-ratio:1; border-radius:24px; background:white; border: 1px solid var(--c-border); overflow:hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition:all 0.3s;}
+        .cat-card:hover .cat-img-wrap { box-shadow: 0 12px 30px rgba(45,27,78,0.1); border-color: var(--terra); }
+        .cat-emoji-bg { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:40px; border-radius:24px; }
+        .cat-name { font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--c-text-main); }
+
+        .venue-card { border-radius:24px; background: white; border: 1px solid var(--c-border); cursor:pointer; transition:transform 0.3s, box-shadow 0.3s; display:flex; flex-direction:column; position:relative;}
+        .venue-card:hover { transform:translateY(-8px); border-color: var(--terra); box-shadow:0 24px 50px rgba(45,27,78,0.08);}
+
+        @media(max-width:900px){
+          nav { padding:0 20px; }
+          .hero { padding-top: 100px; }
+          .search-wrap { flex-direction: column; border-radius:24px; padding:16px; gap:12px; }
+          .search-field { border-right: none; border-bottom: 1px solid var(--c-border); padding-bottom: 12px; }
+          .nav-links { display:none; }
+          .nav-right .btn-outline { display:none; }
+          .nav-right .btn-primary span { display:none; }
+        }
+      `}} />
+
       <nav>
         <div className="nav-logo" onClick={() => {setStep('services'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}}>
-          <svg className="nav-logo-icon" viewBox="0 0 36 36" fill="none">
-            <rect width="36" height="36" rx="10" fill="#2D1B4E"/>
-            <circle cx="18" cy="10" r="4.5" fill="#F5C5A3"/>
-            <rect x="10" y="15.5" width="4" height="15" rx="2" fill="#F5C5A3"/>
-            <path d="M14 15.5 Q23 15.5 23 20 Q23 24.5 14 24.5" stroke="#F5C5A3" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-            <path d="M14 24.5 Q25 24.5 25 29 Q25 33.5 14 33.5" stroke="#E8622A" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-            <circle cx="28" cy="8" r="4.5" fill="#E8622A"/>
-          </svg>
+          <svg className="nav-logo-icon" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="10" fill="#2D1B4E"/><circle cx="18" cy="10" r="4.5" fill="#F5C5A3"/><rect x="10" y="15.5" width="4" height="15" rx="2" fill="#F5C5A3"/><path d="M14 15.5 Q23 15.5 23 20 Q23 24.5 14 24.5" stroke="#F5C5A3" strokeWidth="3.5" fill="none" strokeLinecap="round"/><path d="M14 24.5 Q25 24.5 25 29 Q25 33.5 14 33.5" stroke="#E8622A" strokeWidth="3.5" fill="none" strokeLinecap="round"/><circle cx="28" cy="8" r="4.5" fill="#E8622A"/></svg>
           <span className="nav-logo-text">bookcy<span>.</span></span>
         </div>
-
         <ul className="nav-links">
           <li><button onClick={() => {setStep('all_shops'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={['all_shops', 'shops', 'shop_profile', 'booking'].includes(step) ? 'active' : ''}>{t[lang].nav.places}</button></li>
-          <li><button onClick={() => {setStep('all_features'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'all_features' ? 'active' : ''}>{t[lang].nav.features}</button></li>
           <li><button onClick={() => {setStep('why_bookcy'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'why_bookcy' ? 'active' : ''}>{t[lang].nav.why}</button></li>
           <li><button onClick={() => {setStep('about'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'about' ? 'active' : ''}>{t[lang].nav.about}</button></li>
           <li><button onClick={() => {setStep('contact'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'contact' ? 'active' : ''}>{t[lang].nav.contact}</button></li>
         </ul>
-
         <div className="nav-right">
-          <div className="lang-pills hidden md:flex">
-            <div onClick={()=>setLang('TR')} className={`lang-pill ${lang==='TR' ? 'active' : ''}`}>TR</div>
-            <div onClick={()=>setLang('EN')} className={`lang-pill ${lang==='EN' ? 'active' : ''}`}>EN</div>
-            <div onClick={()=>setLang('RU')} className={`lang-pill ${lang==='RU' ? 'active' : ''}`}>RU</div>
-          </div>
           {loggedInShop ? (
-               <div className="flex gap-2 items-center">
-                   <button onClick={handleLogout} className="btn-outline">{t[lang].nav.logout}</button>
-                   <button onClick={() => router.push('/dashboard')} className="btn-primary"><UserCircle size={18}/> <span>{t[lang].nav.dashboard}</span></button>
-               </div>
+               <div className="flex gap-2 items-center"><button onClick={handleLogout} className="btn-outline">{t[lang].nav.logout}</button><button onClick={() => router.push('/dashboard')} className="btn-primary"><UserCircle size={18}/> <span>{t[lang].nav.dashboard}</span></button></div>
           ) : (
-              <>
-                  <button onClick={() => setShowRegister(true)} className="btn-outline">{t[lang].nav.addShop}</button>
-                  <button onClick={() => setShowLogin(true)} className="btn-primary"><UserCircle size={18}/><span>{t[lang].nav.login}</span></button>
-              </>
+              <><button onClick={() => setShowRegister(true)} className="btn-outline">{t[lang].nav.addShop}</button><button onClick={() => setShowLogin(true)} className="btn-primary"><UserCircle size={18}/><span>{t[lang].nav.login}</span></button></>
           )}
         </div>
       </nav>
 
       {showRegister && (
           <div className="fixed inset-0 w-screen h-screen bg-[#2D1B4E]/80 backdrop-blur-md z-[9999] flex items-center justify-center p-4 overflow-y-auto pt-20">
-            <div className="bg-white border border-slate-200 w-full max-w-[800px] rounded-[32px] p-8 relative shadow-2xl my-auto">
+            <div className="bg-white border border-slate-200 w-full max-w-[800px] rounded-[32px] p-8 md:p-10 relative shadow-2xl my-auto animate-in zoom-in-95 duration-300">
               <button onClick={() => {setShowRegister(false); setRegisterSuccess(false);}} className="absolute top-6 right-6 text-slate-400 hover:text-[#2D1B4E] bg-transparent border-none cursor-pointer"><X size={24}/></button>
               {registerSuccess ? (
-                  <div className="text-center py-10">
+                  <div className="text-center py-20">
                       <CheckCircle2 size={64} className="mx-auto text-[#00c48c] mb-6" />
-                      <h2 className="text-2xl font-black text-[#E8622A] uppercase italic mb-4">{t[lang].reg.success}</h2>
+                      <h2 className="text-2xl font-black text-[#E8622A] uppercase mb-4">{t[lang].reg.success}</h2>
                       <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 inline-block text-left mt-4 text-[#2D1B4E] w-full max-w-sm">
                           <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">Banka Bilgileri / Bank Details:</p>
                           <p className="font-bold text-sm">Banka: <span className="font-normal">İş Bankası</span></p>
                           <p className="font-bold text-sm">Alıcı: <span className="font-normal">BOOKCY LTD.</span></p>
                           <p className="font-bold text-sm">IBAN: <span className="text-[#E8622A]">TR99 0006 4000 0012 3456 7890 12</span></p>
-                          <a href="https://wa.me/905555555555" target="_blank" rel="noreferrer" className="w-full bg-[#25D366] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-green-600 transition-colors mt-6 flex justify-center items-center gap-2 text-decoration-none text-xs border-none cursor-pointer"><MessageCircle size={18}/> DEKONTU İLET</a>
+                          <a href="https://wa.me/905555555555" target="_blank" rel="noreferrer" className="w-full bg-[#25D366] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg flex justify-center items-center gap-2 text-decoration-none text-xs border-none cursor-pointer mt-4"><MessageCircle size={18}/> DEKONTU İLET</a>
                       </div>
                   </div>
               ) : (
                   <>
-                      <div className="flex flex-col mb-8 text-center">
-                          <h2 className="text-2xl font-black uppercase tracking-tight italic text-[#2D1B4E]">{t[lang].reg.title}</h2>
-                          <p className="text-[10px] text-[#E8622A] font-bold uppercase tracking-[0.2em] mt-2 flex items-center justify-center gap-2"><Lock size={12}/> {t[lang].reg.subtitle}</p>
-                      </div>
+                      <div className="flex flex-col mb-8 text-center"><h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-[#2D1B4E]">{t[lang].reg.title}</h2><p className="text-[10px] text-[#E8622A] font-bold uppercase tracking-[0.2em] mt-2 flex items-center justify-center gap-2"><Lock size={12}/> {t[lang].reg.subtitle}</p></div>
                       <form onSubmit={handleRegisterSubmit} className="flex flex-col gap-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <input required placeholder={t[lang].reg.shopName} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.name} onChange={e => setNewShop({...newShop, name: e.target.value})} />
-                              <select className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold text-[#2D1B4E] outline-none" value={newShop.category} onChange={e => setNewShop({...newShop, category: e.target.value})}>
-                                  {categories.map(c => <option key={c.dbName} value={c.dbName}>{t[lang].cats[c.key]}</option>)}
-                              </select>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <select required className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold text-[#2D1B4E] outline-none" value={newShop.location} onChange={e => setNewShop({...newShop, location: e.target.value})}>
-                                  {cyprusRegions.map(r => <option key={r} value={r}>{r}</option>)}
-                              </select>
-                              <input required placeholder={t[lang].reg.address} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.address} onChange={e => setNewShop({...newShop, address: e.target.value})} />
-                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><input required placeholder={t[lang].reg.shopName} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.name} onChange={e => setNewShop({...newShop, name: e.target.value})} /><select className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold text-[#2D1B4E] outline-none" value={newShop.category} onChange={e => setNewShop({...newShop, category: e.target.value})}>{categories.map(c => <option key={c.dbName} value={c.dbName}>{t[lang].cats[c.key]}</option>)}</select></div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><select required className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold text-[#2D1B4E] outline-none" value={newShop.location} onChange={e => setNewShop({...newShop, location: e.target.value})}>{cyprusRegions.map(region => <option key={region} value={region}>{region}</option>)}</select><input required placeholder={t[lang].reg.address} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.address} onChange={e => setNewShop({...newShop, address: e.target.value})} /></div>
                           <input type="url" placeholder={t[lang].reg.maps} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.maps_link} onChange={e => setNewShop({...newShop, maps_link: e.target.value})} />
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-4">
-                              <div className="flex gap-2 w-full relative">
-                                <select className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-2 outline-none font-bold text-xs text-[#2D1B4E] w-20" value={newShop.phoneCode} onChange={e => setNewShop({...newShop, phoneCode: e.target.value})}><option value="+90">TR</option></select>
-                                <input required type="tel" placeholder={t[lang].reg.contactPhone} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 outline-none font-bold text-xs text-[#2D1B4E]" value={newShop.contactPhone} onChange={handlePhoneChange} />
-                              </div>
-                              <input placeholder={t[lang].reg.contactInsta} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.contactInsta} onChange={e => setNewShop({...newShop, contactInsta: e.target.value})} />
-                              <input type="email" placeholder={t[lang].reg.contactEmail} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.contactEmail} onChange={handleAdminEmailChange} />
-                          </div>
-                          <input required type="email" placeholder={t[lang].reg.email} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E] mt-2" value={newShop.email} onChange={handleEmailChange} />
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {packages.map(p => (
-                                  <div key={p.name} onClick={() => setNewShop({...newShop, package: p.name})} className={`cursor-pointer p-4 rounded-xl border ${newShop.package === p.name ? 'bg-orange-50 border-[#E8622A]' : 'bg-white border-slate-200'}`}>
-                                      <h4 className={`text-sm font-black uppercase ${newShop.package === p.name ? 'text-[#E8622A]' : 'text-[#2D1B4E]'}`}>{p.name}</h4>
-                                      <p className="text-xs font-bold text-slate-500">{p.price}</p>
-                                  </div>
-                              ))}
-                          </div>
-                          <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
-                              <input required placeholder={t[lang].reg.user} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.username} onChange={e => setNewShop({...newShop, username: e.target.value})} />
-                              <input required placeholder={t[lang].reg.pass} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.password} onChange={e => setNewShop({...newShop, password: e.target.value})} />
-                          </div>
-                          <button type="submit" disabled={isUploading || emailValid === false || phoneValid === false || adminEmailValid === false} className="w-full btn-primary justify-center py-4 rounded-xl mt-2 shadow-lg border-none cursor-pointer">
-                            {isUploading ? t[lang].reg.uploading : t[lang].reg.submit}
-                          </button>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-4"><div className="flex gap-2 w-full"><select className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-2 outline-none font-bold text-xs text-[#2D1B4E] w-20" value={newShop.phoneCode} onChange={e => setNewShop({...newShop, phoneCode: e.target.value})}><option value="+90">TR</option></select><input required type="tel" placeholder={t[lang].reg.contactPhone} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 outline-none font-bold text-xs text-[#2D1B4E]" value={newShop.contactPhone} onChange={handlePhoneChange} /></div><input placeholder={t[lang].reg.contactInsta} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.contactInsta} onChange={e => setNewShop({...newShop, contactInsta: e.target.value})} /><input type="email" placeholder={t[lang].reg.contactEmail} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.contactEmail} onChange={handleAdminEmailChange} /></div>
+                          <input required type="email" placeholder={t[lang].reg.email} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.email} onChange={handleEmailChange} />
+                          <textarea placeholder={t[lang].reg.desc} rows="2" className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none resize-none text-[#2D1B4E]" value={newShop.description} onChange={e => setNewShop({...newShop, description: e.target.value})}></textarea>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 pt-4">{packages.map(p => (<div key={p.name} onClick={() => setNewShop({...newShop, package: p.name})} className={`cursor-pointer p-4 rounded-xl border ${newShop.package === p.name ? 'bg-orange-50 border-[#E8622A]' : 'bg-white border-slate-200'}`}><h4 className={`text-sm font-black uppercase ${newShop.package === p.name ? 'text-[#E8622A]' : 'text-[#2D1B4E]'}`}>{p.name}</h4><p className="text-xs font-bold text-slate-500">{p.price}</p></div>))}</div>
+                          <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4"><input required placeholder={t[lang].reg.user} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.username} onChange={e => setNewShop({...newShop, username: e.target.value})} /><input required placeholder={t[lang].reg.pass} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.password} onChange={e => setNewShop({...newShop, password: e.target.value})} /></div>
+                          <button type="submit" disabled={isUploading || emailValid === false || phoneValid === false || adminEmailValid === false} className="w-full btn-primary justify-center py-4 rounded-xl mt-2 shadow-lg border-none cursor-pointer">{isUploading ? t[lang].reg.uploading : t[lang].reg.submit}</button>
                       </form>
                   </>
               )}
@@ -358,29 +274,21 @@ export default function Home() {
         <div className="fixed inset-0 bg-[#2D1B4E]/80 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-[400px] rounded-[32px] p-8 relative shadow-2xl border border-slate-200">
             <button onClick={() => setShowLogin(false)} className="absolute top-6 right-6 text-slate-400 bg-transparent border-none cursor-pointer"><X size={24}/></button>
-            <div className="text-center mb-6">
-              <h1 className="text-2xl font-black text-[#2D1B4E] uppercase mb-2">GİRİŞ YAP</h1>
-              <p className="text-slate-400 font-bold text-xs uppercase">İŞ ORTAĞI PANELİ</p>
-            </div>
-            <div className="flex bg-slate-50 p-1 rounded-xl mb-6">
-              <button onClick={() => setLoginType('owner')} className={`flex-1 py-3 text-xs font-black rounded-lg border-none cursor-pointer ${loginType === 'owner' ? 'bg-white text-[#E8622A] shadow-sm' : 'bg-transparent text-slate-400'}`}>YÖNETİCİ</button>
-              <button onClick={() => setLoginType('staff')} className={`flex-1 py-3 text-xs font-black rounded-lg border-none cursor-pointer ${loginType === 'staff' ? 'bg-white text-[#E8622A] shadow-sm' : 'bg-transparent text-slate-400'}`}>PERSONEL</button>
-            </div>
+            <div className="text-center mb-6"><h1 className="text-2xl font-black text-[#2D1B4E] uppercase mb-2">GİRİŞ YAP</h1><p className="text-slate-400 font-bold text-xs uppercase">İŞ ORTAĞI PANELİ</p></div>
+            <div className="flex bg-slate-50 p-1 rounded-xl mb-6"><button onClick={() => setLoginType('owner')} className={`flex-1 py-3 text-xs font-black rounded-lg border-none cursor-pointer ${loginType === 'owner' ? 'bg-white text-[#E8622A] shadow-sm' : 'bg-transparent text-slate-400'}`}>YÖNETİCİ</button><button onClick={() => setLoginType('staff')} className={`flex-1 py-3 text-xs font-black rounded-lg border-none cursor-pointer ${loginType === 'staff' ? 'bg-white text-[#E8622A] shadow-sm' : 'bg-transparent text-slate-400'}`}>PERSONEL</button></div>
             <form onSubmit={handleLogin} className="space-y-4">
               <input type="text" required placeholder="Kullanıcı Adı" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm outline-none text-[#2D1B4E]" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} />
               {loginType === 'staff' && <input type="text" required placeholder="Personel Adı" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm outline-none text-[#2D1B4E]" value={loginStaffName} onChange={(e) => setLoginStaffName(e.target.value)} />}
               <input type="password" required placeholder="Şifre" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm outline-none text-[#2D1B4E]" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
-              <button type="submit" disabled={isLoginLoading} className="w-full btn-primary py-4 rounded-xl font-black uppercase tracking-widest text-xs flex justify-center items-center gap-2 mt-4 border-none cursor-pointer">{isLoginLoading ? 'Bekleyin...' : 'PANELE GİT'}</button>
+              <button type="submit" disabled={isLoginLoading} className="w-full btn-primary py-4 rounded-xl font-black uppercase tracking-widest text-xs flex justify-center items-center mt-4 border-none cursor-pointer">{isLoginLoading ? 'Bekleyin...' : 'PANELE GİT'}</button>
             </form>
           </div>
         </div>
       )}
 
       <main className="flex-1 w-full relative z-10 min-h-[80vh] mt-[72px]">
-        
-        {/* ANA SAYFA */}
         {step === 'services' && (
-            <div className="w-full">
+            <div className="w-full animate-in fade-in">
                 <section className="hero">
                   <div className="hero-content">
                     <div className="hero-eyebrow"><div className="hero-eyebrow-dot"></div>{t[lang].home.eyebrow}</div>
@@ -393,27 +301,24 @@ export default function Home() {
                     </form>
                     <div className="hero-popular">
                       <span>{t[lang].home.popTitle}</span>
-                      <div className="pop-tag" onClick={()=>{setFilterService('Berber'); setStep('all_shops');}}>💈 {t[lang].cats.barber}</div>
-                      <div className="pop-tag" onClick={()=>{setFilterService('Tırnak & Güzellik'); setStep('all_shops');}}>💅 {t[lang].cats.nail}</div>
-                      <div className="pop-tag" onClick={()=>{setFilterService('Spa & Masaj'); setStep('all_shops');}}>💆 {t[lang].cats.spa}</div>
-                      <div className="pop-tag" onClick={()=>{setFilterService('Bar & Club'); setStep('all_shops');}}>🍸 {t[lang].cats.club}</div>
+                      {categories.slice(0,4).map(c=><div key={c.key} className="pop-tag" onClick={()=>{setFilterService(c.dbName); setStep('all_shops');}}>{c.emoji} {c.dbName}</div>)}
                     </div>
                   </div>
                   <div className="hero-stats">
                       <div className="stat"><div className="stat-num">{approvedShops.length}</div><div className="stat-label">{t[lang].home.stats.s1}</div></div>
-                      <div className="stat"><div className="stat-num">{new Set(globalAppointments.map(a => a.customer_phone)).size}</div><div className="stat-label">{t[lang].home.stats.s2}</div></div>
-                      <div className="stat"><div className="stat-num">{globalAppointments.length}</div><div className="stat-label">{t[lang].home.stats.s3}</div></div>
+                      <div className="stat"><div className="stat-num">{globalAppointments.length*3+150}</div><div className="stat-label">{t[lang].home.stats.s2}</div></div>
+                      <div className="stat"><div className="stat-num">{globalAppointments.length*5+320}</div><div className="stat-label">{t[lang].home.stats.s3}</div></div>
                       <div className="stat"><div className="stat-num">%98</div><div className="stat-label">{t[lang].home.stats.s4}</div></div>
                   </div>
                 </section>
 
-                <section className="section-categories">
-                  <div className="section-header">
-                    <div><div className="section-label-sm">{t[lang].cats.catTitle}</div><div className="section-title">{t[lang].cats.catSub}</div></div>
-                    <button className="see-all" onClick={()=>{setFilterService('All'); setStep('all_shops'); window.scrollTo(0,0);}}>{t[lang].cats.seeAll}</button>
+                <section className="bg-white py-20 px-8">
+                  <div className="max-w-6xl mx-auto flex justify-between items-end mb-10">
+                    <div><div className="text-[11px] font-black text-[#E8622A] uppercase tracking-[0.3em] mb-2">{t[lang].cats.catTitle}</div><div className="text-3xl font-black text-[#2D1B4E]">{t[lang].cats.catSub}</div></div>
+                    <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer" onClick={()=>{setFilterService('All'); setStep('all_shops'); window.scrollTo(0,0);}}>{t[lang].cats.seeAll}</button>
                   </div>
-                  <div className="categories-grid">
-                    {categories.map((c, i) => (
+                  <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                    {categories.map((c) => (
                         <div key={c.key} onClick={() => { setFilterService(c.dbName); setStep('all_shops'); window.scrollTo(0,0); }} className="cat-card">
                           <div className="cat-img-wrap"><div className="cat-emoji-bg" style={{background: c.bg}}>{c.emoji}</div></div>
                           <div className="cat-name">{t[lang].cats[c.key]}</div>
@@ -423,14 +328,14 @@ export default function Home() {
                 </section>
 
                {recommendedShops.length > 0 && (
-                  <section className="section-featured bg-[#FAF7F2] py-20 px-12 border-t border-slate-200">
-                    <div className="section-header">
-                      <div><div className="section-label-sm">{t[lang].homeInfo.recLabel}</div><div className="section-title text-4xl font-black text-[#2D1B4E]">{t[lang].homeInfo.recTitle}</div></div>
-                      <button className="see-all text-[#E8622A] font-bold bg-transparent border-none cursor-pointer" onClick={()=>{setFilterSort('High'); setStep('all_shops'); window.scrollTo(0,0);}}>{t[lang].cats.seeAll}</button>
+                  <section className="bg-slate-50 py-20 px-8 border-t border-slate-200">
+                    <div className="max-w-6xl mx-auto flex justify-between items-end mb-10">
+                      <div><div className="text-[11px] font-black text-[#E8622A] uppercase tracking-[0.3em] mb-2">{t[lang].homeInfo.recLabel}</div><div className="text-3xl font-black text-[#2D1B4E]">{t[lang].homeInfo.recTitle}</div></div>
+                      <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer" onClick={()=>{setFilterSort('High'); setStep('all_shops'); window.scrollTo(0,0);}}>{t[lang].cats.seeAll}</button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                       {recommendedShops.map((shop, idx) => (
-                          <div key={shop.id} onClick={() => { setSelectedShop(shop); setStep('shop_profile'); setProfileTab(shop.category === 'Bar & Club' ? 'events' : 'services'); setBookingPhase(1); window.scrollTo(0,0); }} className={`venue-card flex flex-col bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer ${idx === 0 ? 'md:row-span-2' : ''}`}>
+                          <div key={shop.id} onClick={() => { setSelectedShop(shop); setStep('shop_profile'); setProfileTab(shop.category === 'Bar & Club' ? 'events' : 'services'); setBookingPhase(1); window.scrollTo(0,0); }} className={`venue-card flex flex-col bg-white rounded-[32px] overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer ${idx === 0 ? 'md:row-span-2' : ''}`}>
                             <div className={`w-full bg-slate-100 flex items-center justify-center text-6xl relative ${idx === 0 ? 'h-[300px]' : 'h-[200px]'}`}>
                               {shop.cover_url || shop.logo_url ? <img loading="lazy" decoding="async" src={shop.cover_url || shop.logo_url} className="w-full h-full object-cover"/> : categories.find(c=>c.dbName===shop.category)?.emoji}
                               {idx === 0 && <div className="absolute top-4 left-4 bg-gradient-to-r from-[#E8622A] to-orange-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full">🔥 VIP</div>}
@@ -447,7 +352,7 @@ export default function Home() {
                   </section>
                )}
 
-              <section className="bg-white py-24 px-12 border-t border-slate-200">
+              <section className="bg-white py-24 px-8 border-t border-slate-200">
                 <div className="max-w-6xl mx-auto text-center">
                   <div className="text-[#E8622A] font-black text-sm tracking-widest uppercase mb-4">{t[lang].homeInfo.howLabel}</div>
                   <div className="text-4xl md:text-5xl font-black text-[#2D1B4E] mb-16">{t[lang].homeInfo.howTitle}</div>
@@ -498,9 +403,15 @@ export default function Home() {
                     <div className="flex-1 w-full flex flex-col gap-5">
                         {sortedShops.map((shop) => (
                             <div key={shop.id} onClick={() => { setSelectedShop(shop); setStep('shop_profile'); setProfileTab(shop.category === 'Bar & Club' ? 'events' : 'services'); setBookingPhase(1); window.scrollTo(0,0); }} className="flex flex-col md:flex-row items-center p-5 bg-white border border-slate-200 hover:border-[#E8622A] rounded-[24px] cursor-pointer transition-colors">
-                                <div className="w-20 h-20 rounded-full bg-slate-50 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center text-xs font-black text-[#E8622A]">{shop.logo_url ? <img loading="lazy" decoding="async" src={shop.logo_url} className="w-full h-full object-cover" /> : "LOGO"}</div>
+                                <div className="w-20 h-20 rounded-full bg-slate-50 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center text-xs font-black text-[#E8622A] relative">
+                                    {(shop.package === 'Premium Paket' || shop.package === 'Premium') && <div className="absolute inset-0 border-4 border-yellow-400 rounded-full"></div>}
+                                    {shop.logo_url ? <img loading="lazy" decoding="async" src={shop.logo_url} className="w-full h-full object-cover" /> : "LOGO"}
+                                </div>
                                 <div className="flex-1 md:ml-6 mt-4 md:mt-0 text-center md:text-left">
-                                    <h3 className="text-xl font-black uppercase text-[#2D1B4E]">{shop.name}</h3>
+                                    <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                                        <h3 className="text-xl font-black uppercase text-[#2D1B4E]">{shop.name}</h3>
+                                        {(shop.package === 'Premium Paket' || shop.package === 'Premium') && <Gem size={14} className="text-yellow-500 fill-yellow-500"/>}
+                                    </div>
                                     <div className="flex justify-center md:justify-start gap-3 mt-2 text-slate-500 text-[10px] font-bold uppercase"><span className="bg-slate-100 px-2 py-1 rounded-md">{shop.category}</span><span>📍 {shop.location}</span></div>
                                 </div>
                                 <button className="mt-4 md:mt-0 btn-primary border-none cursor-pointer">SEÇ</button>
@@ -517,10 +428,16 @@ export default function Home() {
                 <button onClick={() => {setStep('all_shops'); window.scrollTo(0,0);}} className="flex items-center text-slate-400 hover:text-[#E8622A] mb-6 text-[10px] font-black uppercase tracking-[0.2em] bg-transparent border-none cursor-pointer"><ChevronLeft size={16} className="mr-2"/> {t[lang].shops.back}</button>
                 <div className="w-full h-[250px] rounded-[32px] overflow-hidden relative mb-16 border border-slate-200 bg-slate-50">
                     {selectedShop.cover_url && <img loading="lazy" decoding="async" src={selectedShop.cover_url} className="w-full h-full object-cover" />}
-                    <div className="absolute -bottom-10 left-8 w-24 h-24 rounded-full bg-white border-4 border-white shadow-lg overflow-hidden flex items-center justify-center text-[#E8622A] font-black">{selectedShop.logo_url ? <img src={selectedShop.logo_url} className="w-full h-full object-cover" /> : "LOGO"}</div>
+                    <div className="absolute -bottom-10 left-8 w-24 h-24 rounded-full bg-white border-4 border-white shadow-lg overflow-hidden flex items-center justify-center text-[#E8622A] font-black relative">
+                        {(selectedShop.package === 'Premium Paket' || selectedShop.package === 'Premium') && <div className="absolute inset-0 border-4 border-yellow-400 rounded-full"></div>}
+                        {selectedShop.logo_url ? <img src={selectedShop.logo_url} className="w-full h-full object-cover" /> : "LOGO"}
+                    </div>
                 </div>
                 <div className="mb-8 border-b border-slate-200 pb-8">
-                    <h1 className="text-3xl font-black uppercase text-[#2D1B4E]">{selectedShop.name}</h1>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-3xl font-black uppercase text-[#2D1B4E]">{selectedShop.name}</h1>
+                        {(selectedShop.package === 'Premium Paket' || selectedShop.package === 'Premium') && <Gem size={24} className="text-yellow-500 fill-yellow-500"/>}
+                    </div>
                     <div className="flex items-center gap-3 text-xs font-bold text-slate-500 mt-2"><span className="text-[#E8622A]">{selectedShop.category}</span><span>📍 {selectedShop.address || selectedShop.location}</span></div>
                 </div>
                 <div className="flex gap-8 border-b border-slate-200 mb-8 overflow-x-auto custom-scrollbar">
@@ -678,28 +595,99 @@ export default function Home() {
         )}
 
         {/* DİNAMİK ÖZELLİK, TÜM ÖZELLİKLER, İLETİŞİM, HAKKIMIZDA, YASAL */}
-        {step === 'feature_detail' && activeFeature && (
-            <div className="w-full bg-[#FAF7F2] pb-24"><div className="bg-[#2D1B4E] pt-32 pb-40 text-center"><h1 className="text-4xl font-black text-white">{t[lang].featNames[activeFeature]}</h1></div></div>
-        )}
-        {step === 'all_features' && (
-            <div className="w-full bg-[#FAF7F2] pb-24">
-                <div className="bg-white pt-24 pb-20 text-center border-b border-slate-200"><h1 className="text-4xl font-black text-[#2D1B4E]">Tüm Özellikler</h1></div>
-            </div>
-        )}
-        {step === 'contact' && (
-            <div className="w-full bg-[#FAF7F2] pb-24">
-                <div className="bg-[#2D1B4E] pt-24 pb-24 text-center"><h1 className="text-4xl font-black text-white">İLETİŞİM</h1></div>
-            </div>
-        )}
         {step === 'about' && (
             <div className="w-full bg-[#FAF7F2] pb-24">
-                <div className="bg-[#2D1B4E] pt-24 pb-24 text-center"><h1 className="text-4xl font-black text-white">HAKKIMIZDA</h1></div>
+                <div className="bg-[#2D1B4E] pt-32 pb-32 px-4 text-center">
+                    <span className="bg-white/10 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase mb-6 inline-block">Bookcy Hakkında</span>
+                    <h1 className="text-4xl md:text-6xl font-black text-white mb-6">İşletmeni Dijitale Taşı,<br/><span className="text-[#E8622A]">Müşterilerini Katla</span></h1>
+                    <p className="text-lg text-slate-300 max-w-2xl mx-auto">Kıbrıs’taki en iyi işletmeler artık Bookcy’de.</p>
+                </div>
+                <div className="max-w-[1200px] mx-auto px-4 -mt-10">
+                    <div className="bg-white p-10 rounded-[32px] shadow-xl border border-slate-200 mb-16 text-center">
+                        <h2 className="text-sm font-black text-[#E8622A] uppercase tracking-[0.3em] mb-4">Biz Kimiz?</h2>
+                        <p className="text-2xl text-[#2D1B4E] font-black leading-tight mb-6">Bookcy, Kıbrıs’ta kurulan ilk ve tek kapsamlı online randevu platformlarından biri olarak, işletmelerin dijital dönüşümünü hızlandırmak için geliştirilmiştir.</p>
+                        <p className="text-lg text-slate-500 font-medium mb-8">Güzellikten bakıma, spadan yaşam tarzı hizmetlerine kadar birçok sektörü tek çatı altında buluşturarak, hem işletmelere hem müşterilere yeni nesil bir deneyim sunuyoruz.</p>
+                        <div className="bg-[#2D1B4E] text-white p-6 rounded-2xl inline-block font-bold text-lg shadow-xl">Biz sadece bir randevu sistemi değiliz — <br/><span className="text-[#E8622A]">işletmelerin büyümesini sağlayan dijital altyapıyız.</span></div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="bg-white p-8 rounded-[32px] border border-slate-200">
+                            <h2 className="text-2xl font-black uppercase text-[#2D1B4E] mb-6 flex items-center gap-3"><Store className="text-[#E8622A]"/> İşletmeler İçin</h2>
+                            <div className="flex flex-col gap-4">
+                                <div className="flex gap-3"><CheckCircle2 className="text-[#E8622A] shrink-0"/><div><h4 className="font-bold text-[#2D1B4E]">Daha Fazla Müşteri</h4><p className="text-sm text-slate-500">Binlerce potansiyel müşteriye anında ulaşın.</p></div></div>
+                                <div className="flex gap-3"><CheckCircle2 className="text-[#E8622A] shrink-0"/><div><h4 className="font-bold text-[#2D1B4E]">Tüm Yönetim Tek Panelde</h4><p className="text-sm text-slate-500">Randevularınızı kolayca yönetin.</p></div></div>
+                                <div className="flex gap-3"><CheckCircle2 className="text-[#E8622A] shrink-0"/><div><h4 className="font-bold text-[#2D1B4E]">Güçlü Dijital Kimlik</h4><p className="text-sm text-slate-500">Profesyonel ve güvenilir bir imaj oluşturun.</p></div></div>
+                            </div>
+                        </div>
+                        <div className="bg-white p-8 rounded-[32px] border border-slate-200">
+                            <h2 className="text-2xl font-black uppercase text-[#2D1B4E] mb-6 flex items-center gap-3"><User className="text-[#E8622A]"/> Müşteriler İçin</h2>
+                            <div className="flex flex-col gap-4">
+                                <div className="flex gap-3"><Star className="text-yellow-500 shrink-0"/><div><h4 className="font-bold text-[#2D1B4E]">En İyileri Keşfet</h4><p className="text-sm text-slate-500">En yüksek puanlı işletmeleri bul.</p></div></div>
+                                <div className="flex gap-3"><Clock className="text-[#E8622A] shrink-0"/><div><h4 className="font-bold text-[#2D1B4E]">7/24 Randevu Özgürlüğü</h4><p className="text-sm text-slate-500">İstediğin zaman randevunu oluştur.</p></div></div>
+                                <div className="flex gap-3"><MessageCircle className="text-[#E8622A] shrink-0"/><div><h4 className="font-bold text-[#2D1B4E]">Gerçek Yorumlar</h4><p className="text-sm text-slate-500">Sadece hizmet almış kullanıcıları oku.</p></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-16 text-center">
+                        <h2 className="text-3xl font-black text-[#2D1B4E] mb-8 uppercase">Paketlerimiz</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+                            <div className="bg-white p-8 rounded-[32px] border border-slate-200">
+                                <h3 className="text-2xl font-black text-[#2D1B4E]">Standart Paket</h3>
+                                <p className="text-3xl font-black text-[#E8622A] mt-2 mb-6">60 STG <span className="text-sm text-slate-500">/ Ay</span></p>
+                                <ul className="space-y-3 mb-8">
+                                    <li className="flex items-center gap-2 text-sm font-bold text-slate-600"><Check size={16} className="text-[#E8622A]"/> Online randevu sistemi</li>
+                                    <li className="flex items-center gap-2 text-sm font-bold text-slate-600"><Check size={16} className="text-[#E8622A]"/> Sınırsız randevu</li>
+                                    <li className="flex items-center gap-2 text-sm font-bold text-slate-600"><Check size={16} className="text-[#E8622A]"/> İşletme profil sayfası</li>
+                                </ul>
+                                <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="w-full py-4 bg-slate-100 font-black rounded-xl text-[#2D1B4E] border-none cursor-pointer hover:text-[#E8622A]">Hemen Başla</button>
+                            </div>
+                            <div className="bg-[#2D1B4E] p-8 rounded-[32px] border-2 border-[#E8622A] relative text-white transform md:scale-105">
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#E8622A] text-white px-4 py-1 rounded-full text-xs font-black uppercase">En Popüler</div>
+                                <h3 className="text-2xl font-black">Premium Paket</h3>
+                                <p className="text-3xl font-black text-[#E8622A] mt-2 mb-6">100 STG <span className="text-sm text-slate-400">/ Ay</span></p>
+                                <ul className="space-y-3 mb-8">
+                                    <li className="flex items-center gap-2 text-sm font-bold"><CheckCircle2 size={16} className="text-[#E8622A]"/> Tüm Standart özellikler</li>
+                                    <li className="flex items-center gap-2 text-sm font-bold"><CheckCircle2 size={16} className="text-[#E8622A]"/> Öncelikli listeleme</li>
+                                    <li className="flex items-center gap-2 text-sm font-bold"><CheckCircle2 size={16} className="text-[#E8622A]"/> Öne çıkan işletme rozeti</li>
+                                </ul>
+                                <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="w-full py-4 bg-[#E8622A] text-white font-black rounded-xl border-none cursor-pointer">Premium'a Geç</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         )}
+
+        {step === 'contact' && (
+            <div className="w-full bg-[#FAF7F2] pb-24">
+                <div className="bg-[#2D1B4E] pt-32 pb-32 px-4 text-center relative border-b border-slate-800">
+                    <span className="bg-[#E8622A]/10 text-[#E8622A] px-4 py-1.5 rounded-full text-[10px] font-black uppercase mb-6 inline-block border border-[#E8622A]/20">7/24 Destek</span>
+                    <h1 className="text-4xl md:text-5xl font-black uppercase text-white mb-4">BİZE ULAŞIN</h1>
+                    <p className="text-lg text-slate-300 max-w-xl mx-auto">Sorularınız ve destek talepleriniz için bize ulaşabilirsiniz.</p>
+                </div>
+                <div className="max-w-[1000px] mx-auto px-4 -mt-16">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-white p-8 rounded-[32px] text-center shadow-xl border border-slate-200"><div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4"><MessageCircle size={32}/></div><h3 className="font-black text-[#2D1B4E] mb-2">WhatsApp</h3><a href="https://wa.me/905555555555" className="block bg-[#25D366] text-white py-3 rounded-xl font-black mt-6 no-underline">MESAJ AT</a></div>
+                        <div className="bg-white p-8 rounded-[32px] text-center shadow-xl border border-slate-200"><div className="w-16 h-16 bg-pink-50 text-pink-500 rounded-full flex items-center justify-center mx-auto mb-4"><InstagramIcon size={32}/></div><h3 className="font-black text-[#2D1B4E] mb-2">Instagram</h3><a href="https://instagram.com/bookcy" className="block bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-black mt-6 no-underline">TAKİP ET</a></div>
+                        <div className="bg-white p-8 rounded-[32px] text-center shadow-xl border border-slate-200"><div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"><Mail size={32}/></div><h3 className="font-black text-[#2D1B4E] mb-2">E-Posta</h3><a href="mailto:info@bookcy.co" className="block bg-[#2D1B4E] text-white py-3 rounded-xl font-black mt-6 no-underline">MAİL AT</a></div>
+                    </div>
+                </div>
+            </div>
+        )}
+
         {['privacy', 'kvkk', 'terms', 'cookies'].includes(step) && (
             <div className="w-full bg-[#FAF7F2] pb-24">
-                <div className="bg-white pt-24 pb-20 text-center border-b border-slate-200"><h1 className="text-3xl font-black text-[#2D1B4E] uppercase">{t[lang].legal[`${step}Title`]}</h1></div>
-                <div className="max-w-3xl mx-auto mt-12 bg-white p-8 rounded-[32px] border border-slate-200">Sayfa İçeriği Burada...</div>
+                <div className="bg-white pt-32 pb-20 text-center border-b border-slate-200">
+                    <h1 className="text-3xl md:text-5xl font-black text-[#2D1B4E] uppercase">{t[lang].legal[`${step}Title`]}</h1>
+                    <p className="text-sm font-bold text-slate-500 mt-4">{t[lang].legal.lastUpdated}</p>
+                </div>
+                <div className="max-w-3xl mx-auto mt-12 bg-white p-8 md:p-12 rounded-[32px] border border-slate-200 text-slate-600 font-medium">
+                    {step === 'privacy' && (<div className="space-y-6"><h3 className="text-xl font-black text-[#2D1B4E]">Giriş</h3><p>Bu politika kişisel verilerinizi nasıl koruduğumuzu açıklar.</p></div>)}
+                    {step === 'kvkk' && (<div className="space-y-6"><h3 className="text-xl font-black text-[#2D1B4E]">Veri Sorumlusu</h3><p>Veri sorumlusu bookcy.co platformudur.</p></div>)}
+                    {step === 'terms' && (<div className="space-y-6"><h3 className="text-xl font-black text-[#2D1B4E]">Hizmet Tanımı</h3><p>Online randevu almanızı sağlayan bir platformdur.</p></div>)}
+                    {step === 'cookies' && (<div className="space-y-6"><h3 className="text-xl font-black text-[#2D1B4E]">Çerezler</h3><p>Kullanıcı deneyimini geliştirmek için kullanılır.</p></div>)}
+                </div>
             </div>
         )}
 
@@ -707,14 +695,21 @@ export default function Home() {
 
       <footer className="w-full bg-[#2D1B4E] pt-16 pb-8 px-6 text-white/60 text-sm">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 border-b border-white/10 pb-8">
-          <div><div className="text-2xl font-black text-white mb-4">bookcy<span className="text-[#E8622A]">.</span></div><p>Kuzey Kıbrıs'ın tek rezervasyon platformu.</p></div>
-          <div><h4 className="text-white font-black mb-4">PLATFORM</h4><button onClick={()=>setStep('services')} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer">Ana Sayfa</button><button onClick={()=>setStep('about')} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer">Hakkımızda</button></div>
-          <div><h4 className="text-white font-black mb-4">BÖLGELER</h4>{cyprusRegions.map(r => <button key={r} onClick={()=>{setFilterRegion(r); setStep('all_shops');}} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer">{r}</button>)}</div>
-          <div><h4 className="text-white font-black mb-4">YASAL</h4><button onClick={()=>setStep('privacy')} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer">Gizlilik Politikası</button><button onClick={()=>setStep('kvkk')} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer">KVKK</button></div>
+          <div>
+            <div className="text-2xl font-black text-white mb-4 flex items-baseline" style={{fontFamily:"'Plus Jakarta Sans',sans-serif"}}>bookcy<span className="text-[#E8622A]">.</span></div>
+            <p className="mb-4">{t[lang].footer.desc}</p>
+            <div className="flex gap-3">
+              <a href="https://instagram.com/bookcy" target="_blank" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-white hover:bg-[#E8622A]"><InstagramIcon size={16}/></a>
+              <a href="https://wa.me/905555555555" target="_blank" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-white hover:bg-[#E8622A]"><MessageCircle size={16}/></a>
+              <a href="mailto:info@bookcy.co" className="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-white hover:bg-[#E8622A]"><Mail size={16}/></a>
+            </div>
+          </div>
+          <div><h4 className="text-white font-black mb-4 tracking-widest">{t[lang].footer.links}</h4><button onClick={()=>setStep('services')} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">Ana Sayfa</button><button onClick={()=>setStep('about')} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">Hakkımızda</button><button onClick={()=>setShowRegister(true)} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-[#E8622A]">İşletme Ekle</button></div>
+          <div><h4 className="text-white font-black mb-4 tracking-widest">{t[lang].footer.cities}</h4>{cyprusRegions.map(r => <button key={r} onClick={()=>{setFilterRegion(r); setStep('all_shops'); window.scrollTo(0,0);}} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">{r}</button>)}</div>
+          <div><h4 className="text-white font-black mb-4 tracking-widest">{t[lang].footer.legal}</h4><button onClick={()=>{setStep('privacy'); window.scrollTo(0,0);}} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">Gizlilik Politikası</button><button onClick={()=>{setStep('kvkk'); window.scrollTo(0,0);}} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">KVKK</button><button onClick={()=>{setStep('terms'); window.scrollTo(0,0);}} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">Kullanım Şartları</button><button onClick={()=>{setStep('cookies'); window.scrollTo(0,0);}} className="block mb-2 bg-transparent border-none text-white/60 cursor-pointer hover:text-white">Çerez Politikası</button></div>
         </div>
-        <div className="max-w-6xl mx-auto flex justify-between items-center"><p>© {new Date().getFullYear()} BOOKCY KIBRIS.</p><p>One Click Booking™</p></div>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4"><p>© {new Date().getFullYear()} BOOKCY KIBRIS. {t[lang].footer.copy}</p><p className="font-black text-[#E8622A]">One Click Booking™</p></div>
       </footer>
-
     </>
   );
 }
