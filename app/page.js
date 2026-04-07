@@ -26,7 +26,7 @@ const supabase = {
   }
 };
 
-// VERCEL'İN BULAMADIĞI INSTAGRAM İKONUNUN MANUEL ÇİZİMİ (Hata vermesini engeller)
+// VERCEL'İN BULAMADIĞI INSTAGRAM İKONUNUN MANUEL ÇİZİMİ
 const InstagramIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
@@ -174,7 +174,7 @@ export default function Home() {
         stats: { purpose: "Verilerle doğru kararlar almanızı sağlayan sistemdir.", adv1: { title: "Gerçek Zamanlı Ciro", desc: "Kazançlarınızı anlık olarak takip edin." }, adv2: { title: "Hizmet Analizi", desc: "Stratejinizi belirleyin." }, adv3: { title: "Personel Raporları", desc: "Uzman performansını görün." } }
       },
       featUI: { purposeTitle: "Amacı ve Ne İşe Yarar?", benefitsTitle: "Avantajları", allFeaturesTitle: "Tüm Özellikler", allFeaturesSub: "İşletmenizi büyütmek için ihtiyacınız olan her şey." },
-      home: { eyebrow: "Kıbrıs'ın #1 Güzellik Platformu", title1: "Kendine", title2: "iyi bak,", title3: "hemen", title4: "randevu al.", subtitle: "Yakınındaki en iyi berber, kuaför, spa ve güzellik uzmanlarını bul. Tek tıkla randevu al, zamanın senin olsun.", searchPlace: "Hizmet veya mekan ara...", searchLoc: "Nerede?", searchBtn: "Ara", popTitle: "Popüler Aramalar:", stats: {s1:"Aktif İşletme", s2:"Mutlu Müşteri", s3:"Tamamlanan İşlem", s4:"Memnuniyet"} },
+      home: { eyebrow: "Kıbrıs'ın #1 Güzellik Platformu", title1: "Kendine", title2: "iyi bak,", title3: "hemen", title4: "rezerve et.", subtitle: "Yakınındaki en iyi berber, kuaför, spa ve güzellik uzmanlarını bul. Tek tıkla randevu al, zamanın senin olsun.", searchPlace: "Hizmet veya mekan ara...", searchLoc: "Nerede?", searchBtn: "Ara", popTitle: "Popüler:", stats: {s1:"Aktif İşletme", s2:"Mutlu Müşteri", s3:"Tamamlanan İşlem", s4:"Memnuniyet"} },
       cats: { catTitle: "Kategoriler", catSub: "Bugün ne yaptırmak istersiniz?", seeAll: "Tümünü Gör →", tattoo: "Dövme", barber: "Berber", hair: "Kuaför", nail: "Tırnak & Güzellik", club: "Bar & Club", spa: "Spa & Masaj", makeup: "Makyaj", skincare: "Cilt Bakımı" },
       homeInfo: { recLabel: "Öne Çıkanlar", recTitle: "Kıbrıs'ta Bu Hafta 🔥", howLabel: "Nasıl Çalışır?", howTitle: "4 Basit Adımda Randevun Hazır", how1Title: "Keşfet", how1Desc: "Yakındaki mekanları incele ve filtrele.", how2Title: "Tarih Seç", how2Desc: "Sana en uygun zamanı tek tıkla seç.", how3Title: "Onayla", how3Desc: "Saniyeler içinde rezervasyonun onaylanır.", how4Title: "Keyif Çıkar", how4Desc: "Git, hizmetini al ve puan ver.", ctaLabel: "İşletme Sahibi misiniz?", ctaTitle1: "Bookcy ile İşletmeni", ctaTitle2: "Dijitalleştir.", ctaSub: "Randevu sistemini kolaylaştır, yeni müşteri kazan." },
       filters: { title: "Arama Sonuçları", search: "Mekan Ara...", region: "Bölge", service: "Kategori", sortHigh: "En Yüksek Puan", sortLow: "En Düşük Puan", clear: "Temizle", count: "Mekan Bulundu" },
@@ -333,11 +333,11 @@ export default function Home() {
         const nav = document.querySelector('nav');
         if(nav) {
             if (window.scrollY > 50) {
-                nav.style.background = 'rgba(255,255,255,0.97)';
-                nav.style.borderBottom = '1px solid #E2E8F0';
+                nav.style.background = 'rgba(255,255,255,0.98)';
+                nav.style.boxShadow = '0 4px 20px rgba(0,0,0,0.05)';
             } else {
-                nav.style.background = 'transparent';
-                nav.style.borderBottom = '1px solid transparent';
+                nav.style.background = 'rgba(255,255,255,0.95)';
+                nav.style.boxShadow = 'none';
             }
         }
     };
@@ -745,7 +745,7 @@ export default function Home() {
           key={num} 
           type="button" 
           onClick={() => setFeedbackData({...feedbackData, [qKey]: num})}
-          className={`w-8 h-8 md:w-10 md:h-10 rounded-lg text-xs md:text-sm font-black transition-all border shrink-0 ${feedbackData[qKey] === num ? 'theme-bg-accent text-white border-transparent scale-110 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:border-[#E8622A] cursor-pointer'}`}
+          className={`w-8 h-8 md:w-10 md:h-10 rounded-lg text-xs md:text-sm font-black transition-all border shrink-0 ${feedbackData[qKey] === num ? 'bg-[var(--terra)] text-white border-transparent scale-110 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:border-[#E8622A] cursor-pointer'}`}
         >
           {num}
         </button>
@@ -760,18 +760,11 @@ export default function Home() {
           --fig: #2D1B4E; 
           --terra: #E8622A; 
           --blush: #F5C5A3; 
-          --sand: #FAF7F2; 
-          --white: #FFFFFF; 
-
-          /* VERCEL İÇİN %100 AYDINLIK TEMA (Karanlık Mod Yok Edildi) */
           --c-bg-main: #FAF7F2;
           --c-bg-card: #FFFFFF;
-          --c-bg-sub: #F8FAFC;
           --c-border: #E2E8F0;
-          --c-border-sub: #F1F5F9;
           --c-text-main: #101010;
           --c-text-muted: #64748B;
-          --c-text-light: #94A3B8;
         }
 
         body { 
@@ -780,19 +773,9 @@ export default function Home() {
             font-family: 'DM Sans', sans-serif; 
             overflow-x: hidden; 
         }
-        
-        /* Tema Siniflari (Sadece Açık Renk Çalışır) */
-        .theme-bg-main { background-color: var(--c-bg-main); }
-        .theme-bg-card { background-color: var(--c-bg-card); }
-        .theme-bg-sub { background-color: var(--c-bg-sub); }
-        .theme-bg-accent { background-color: var(--terra); }
-        .theme-border { border-color: var(--c-border); border-style: solid; border-width: 1px; }
-        .theme-border-sub { border-color: var(--c-border-sub); border-style: solid; border-width: 1px; }
-        .theme-text-main { color: var(--c-text-main); }
-        .theme-text-muted { color: var(--c-text-muted); }
-        .theme-text-light { color: var(--c-text-light); }
 
-        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 0 48px; height: 72px; display: flex; align-items: center; justify-content: space-between; background: transparent; transition: all 0.3s; border-bottom: 1px solid transparent; }
+        /* --- NAVBAR --- */
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 0 48px; height: 72px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); transition: all 0.3s; border-bottom: 1px solid var(--c-border); }
         .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
         .nav-logo-icon { width: 36px; height: 36px; }
         .nav-logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; color: var(--fig); letter-spacing: -1px; display:flex; align-items:baseline; }
@@ -810,27 +793,29 @@ export default function Home() {
         .btn-primary { font-family:'DM Sans',sans-serif; font-size: 13px; font-weight: 800; padding: 12px 28px; border-radius: 50px; border: none; background: var(--terra); color: white; transition: all 0.25s; display:flex; align-items:center; gap:7px; cursor:pointer; text-transform:uppercase; box-shadow: 0 8px 20px rgba(232, 98, 42, 0.2);}
         .btn-primary:hover { background: #d4561f; transform: translateY(-2px); box-shadow: 0 12px 25px rgba(232,98,42,0.3); }
         
-        .hero { position: relative; min-height: 85vh; background: var(--c-bg-main); overflow: hidden; display: flex; flex-direction:column; align-items: center; justify-content: center; padding-top: 140px; padding-bottom: 80px; border-bottom: 1px solid var(--c-border); }
+        /* --- HERO (KOYU MOR & BEYAZ YAZI) --- */
+        .hero { position: relative; min-height: 85vh; background: var(--fig); overflow: hidden; display: flex; flex-direction:column; align-items: center; justify-content: center; padding-top: 140px; padding-bottom: 100px; }
+        .hero::before { content:''; position:absolute; inset:0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index:1; }
         
         .hero-content { position:relative; z-index:2; text-align:center; padding: 0 24px; max-width: 900px; animation: fadeUp 0.8s ease both; }
         @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
         
-        .hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background: white; border: 1px solid var(--c-border); border-radius:50px; padding: 6px 16px 6px 8px; font-size:10px; font-weight:800; color:var(--c-text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:28px; animation: fadeUp 0.8s 0.1s ease both; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius:50px; padding: 6px 16px 6px 8px; font-size:10px; font-weight:800; color:rgba(255,255,255,0.9); letter-spacing:1px; text-transform:uppercase; margin-bottom:28px; animation: fadeUp 0.8s 0.1s ease both; }
         .hero-eyebrow-dot { width:8px; height:8px; border-radius:50%; background:var(--terra); animation: pulse 2s infinite; }
         @keyframes pulse { 0%,100%{ box-shadow:0 0 0 0 rgba(232,98,42,0.6); } 50% { box-shadow:0 0 0 6px rgba(232,98,42,0); } }
         
-        .hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size: clamp(48px, 6vw, 80px); font-weight:900; color: var(--fig); letter-spacing: -2px; line-height: 1.1; margin-bottom:24px; animation: fadeUp 0.8s 0.2s ease both; }
+        .hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size: clamp(48px, 6vw, 80px); font-weight:900; color: white; letter-spacing: -2px; line-height: 1.1; margin-bottom:24px; animation: fadeUp 0.8s 0.2s ease both; }
         .hero-title .accent { color: var(--terra); }
         
-        .hero-sub { font-size:16px; font-weight:600; color: var(--c-text-muted); line-height:1.6; margin-bottom: 48px; max-width:600px; margin-left:auto; margin-right:auto; animation: fadeUp 0.8s 0.3s ease both; }
+        .hero-sub { font-size:16px; font-weight:600; color: rgba(255,255,255,0.65); line-height:1.6; margin-bottom: 48px; max-width:600px; margin-left:auto; margin-right:auto; animation: fadeUp 0.8s 0.3s ease both; }
         
-        .search-wrap { display:flex; align-items:center; background: white; border-radius: 32px; padding: 12px; gap: 12px; max-width: 800px; width:100%; box-shadow: 0 24px 60px rgba(45,27,78,0.08); margin: 0 auto; animation: fadeUp 0.8s 0.4s ease both; transition: box-shadow 0.3s; border: 1px solid var(--c-border); }
-        .search-wrap:focus-within { box-shadow: 0 24px 60px rgba(45,27,78,0.12), 0 0 0 3px rgba(232,98,42,0.2); }
+        .search-wrap { display:flex; align-items:center; background: white; border-radius: 32px; padding: 12px; gap: 12px; max-width: 800px; width:100%; box-shadow: 0 24px 60px rgba(0,0,0,0.3); margin: 0 auto; animation: fadeUp 0.8s 0.4s ease both; transition: box-shadow 0.3s; border: none; }
+        .search-wrap:focus-within { box-shadow: 0 24px 60px rgba(0,0,0,0.4), 0 0 0 4px rgba(232,98,42,0.3); }
         
         .search-field { flex:1.5; display:flex; align-items:center; gap:12px; padding: 0 16px; border-right: 1px solid var(--c-border); }
         .search-icon { color: var(--terra); font-size:22px; flex-shrink:0; }
         .search-field input { border:none; outline:none; width:100%; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; color:var(--c-text-main); background:transparent; }
-        .search-field input::placeholder { color:var(--c-text-light); font-weight:600; }
+        .search-field input::placeholder { color:var(--c-text-muted); font-weight:600; }
         
         .search-location { display:flex; align-items:center; gap:12px; flex:1; padding: 0 16px; }
         .search-location select { border:none; outline:none; width:100%; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; color:var(--c-text-main); background:transparent; cursor:pointer; }
@@ -839,18 +824,19 @@ export default function Home() {
         .search-btn:hover { background:#d4561f; transform:translateY(-2px); box-shadow: 0 12px 25px rgba(232,98,42,0.3); }
         
         .hero-popular { display:flex; align-items:center; gap:10px; margin-top:30px; flex-wrap:wrap; justify-content:center; animation: fadeUp 0.8s 0.5s ease both; }
-        .hero-popular span { font-size:12px; color:var(--c-text-muted); font-weight:700; letter-spacing:0.5px; }
-        .pop-tag { font-size:12px; font-weight:700; padding:8px 16px; border-radius:50px; background:white; border:1px solid var(--c-border); color:var(--c-text-main); transition:all 0.2s; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
-        .pop-tag:hover { border-color:var(--terra); color:var(--terra); }
+        .hero-popular span { font-size:12px; color:rgba(255,255,255,0.5); font-weight:700; letter-spacing:0.5px; }
+        .pop-tag { font-size:12px; font-weight:700; padding:8px 16px; border-radius:50px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.8); transition:all 0.2s; cursor:pointer; }
+        .pop-tag:hover { background:var(--terra); border-color:var(--terra); color:white; }
         
-        .hero-stats { display:flex; gap:0; margin-top: 60px; margin-bottom: 20px; border-top:1px solid var(--c-border); padding-top:40px; width:100%; max-width:800px; animation: fadeUp 0.8s 0.6s ease both; position: relative; z-index: 10; }
-        .stat { flex:1; text-align:center; border-right:1px solid var(--c-border); }
+        .hero-stats { display:flex; gap:0; margin-top: 60px; margin-bottom: 20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:40px; width:100%; max-width:800px; animation: fadeUp 0.8s 0.6s ease both; position: relative; z-index: 10; }
+        .stat { flex:1; text-align:center; border-right:1px solid rgba(255,255,255,0.1); }
         .stat:last-child { border-right:none; }
-        .stat-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:36px; font-weight:900; color:var(--fig); letter-spacing:-1px; line-height:1; }
+        .stat-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:36px; font-weight:900; color:white; letter-spacing:-1px; line-height:1; }
         .stat-num span { color:var(--terra); }
-        .stat-label { font-size:11px; font-weight:700; color:var(--c-text-muted); text-transform:uppercase; letter-spacing:1px; margin-top:8px; }
+        .stat-label { font-size:11px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:1px; margin-top:8px; }
         
-        .section-categories { padding: 80px 48px 60px; background: var(--c-bg-card); }
+        /* --- DİĞER BÖLÜMLER (BEYAZ TEMA) --- */
+        .section-categories { padding: 80px 48px 60px; background: var(--c-bg-card); position:relative; z-index:2; }
         .section-header { display:flex; align-items:flex-end; justify-content:space-between; max-width:1200px; margin:0 auto 48px; }
         .section-label-sm { font-size:11px; font-weight:800; letter-spacing:4px; text-transform:uppercase; color:var(--terra); margin-bottom:8px; }
         .section-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:36px; font-weight:900; color:var(--fig); letter-spacing:-1px; line-height:1.1; }
@@ -929,7 +915,7 @@ export default function Home() {
           .cta-actions { flex-direction:column; width:100%; }
           .footer-top { grid-template-columns:1fr 1fr; }
           .hero-stats { flex-direction:column; gap:24px; }
-          .stat { border-right:none; border-bottom:1px solid var(--c-border); padding-bottom:24px; }
+          .stat { border-right:none; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:24px; }
           .nav-right .btn-outline { display:none; }
           .nav-right .btn-primary span { display:none; }
         }
@@ -1245,6 +1231,11 @@ export default function Home() {
                           </div>
                       );
                   })()}
+                  
+                  {/* Beyaz Dalga (Alt kısımla kusursuz birleşmesi için) */}
+                  <svg className="absolute bottom-[-1px] left-0 w-full h-auto z-10 pointer-events-none" viewBox="0 0 1440 80" preserveAspectRatio="none" fill="var(--c-bg-card)">
+                    <path d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z"/>
+                  </svg>
                 </section>
 
                 <section className="section-categories">
