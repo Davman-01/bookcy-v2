@@ -9,9 +9,105 @@ import {
   ShieldCheck, Moon, Sun, Instagram
 } from 'lucide-react';
 
-import { supabase } from '@/lib/supabase';
-// Mail şablonunu import ediyoruz
-import { getRegistrationTemplate } from '@/lib/emailTemplates';
+// ... (Diğer importların yanına ekle)
+import { 
+  getRegistrationTemplate, 
+  getNewBookingShopTemplate, 
+  getBookingConfirmationTemplate 
+} from '@/lib/emailTemplates';
+
+// --- (Home fonksiyonu içindeki handleRegisterSubmit kısmını bununla güncelle) ---
+async function handleRegisterSubmit(e) {
+  e.preventDefault();
+  if (emailValid === false || phoneValid === false || adminEmailValid === false) { return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz."); }
+  setIsUploading(true); 
+  let uploadedLogoUrl = null;
+  if (newShop.logoFile) {
+    const fileName = `${Math.random()}.${newShop.logoFile.name.split('.').pop()}`;
+    const { error: uploadError } = await supabase.storage.from('logos').upload(fileName, newShop.logoFile);
+    if (!uploadError) { uploadedLogoUrl = supabase.storage.from('logos').getPublicUrl(fileName).data.publicUrl; }
+  }
+  const fullPhone = newShop.phoneCode + " " + newShop.contactPhone;
+  
+  const { error } = await supabase.from('shops').insert([{ name: newShop.name, category: newShop.category, location: newShop.location, address: newShop.address, maps_link: newShop.maps_link, admin_email: newShop.email, admin_username: newShop.username, admin_password: newShop.password, description: newShop.description, logo_url: uploadedLogoUrl, package: newShop.package, status: 'pending', contact_phone: fullPhone, contact_insta: newShop.contactInsta, contact_email: newShop.contactEmail, services: [], staff: [], gallery: [], closed_dates: [], events: [] }]);
+  
+  if (!error) {
+    // 1. KAYIT MAİLİ (İşletmeye)
+    await fetch('/api/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: newShop.email,
+        subject: 'Bookcy Kayıt Talebiniz Alındı',
+        html: getRegistrationTemplate({
+          shopName: newShop.name,
+          date: new Date().toLocaleDateString('tr-TR'),
+          packageName: newShop.package.toUpperCase(),
+          price: newShop.package === 'Premium Paket' ? '100 STG' : '60 STG'
+        })
+      }),
+    });
+    setRegisterSuccess(true); 
+  } else { alert("Hata oluştu. Lütfen tekrar deneyiniz."); }
+  setIsUploading(false);
+}
+
+// --- (Home fonksiyonu içindeki handleBooking kısmını bununla güncelle) ---
+async function handleBooking(e) {
+  e.preventDefault();
+  if (bookingEmailValid === false || bookingPhoneValid === false) { return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz."); }
+  
+  // ... (Mevcut slot hesaplama kodların aynen kalsın) ...
+  const fullPhone = formData.phoneCode + " " + formData.phone;
+  const finalDate = isClub ? bookingData.selectedEvent.date : bookingData.date;
+  const finalTime = isClub ? bookingData.selectedEvent.time : bookingData.time;
+
+  const { error } = await supabase.from('appointments').insert([{ shop_id: selectedShop.id, customer_name: formData.name, customer_surname: formData.surname, customer_phone: fullPhone, customer_email: formData.email, appointment_date: finalDate, appointment_time: finalTime, service_name: bookingData.selectedShopService.name, staff_name: assignedStaffName, occupied_slots: occupied_slots, status: 'Bekliyor' }]);
+  
+  if (!error) {
+    // 2. YENİ RANDEVU MAİLİ (İşletmeye)
+    await fetch('/api/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: selectedShop.admin_email,
+        subject: 'Yeni Randevu Bildirimi - Bookcy',
+        html: getNewBookingShopTemplate({
+          shopName: selectedShop.name,
+          date: finalDate,
+          time: finalTime,
+          service: bookingData.selectedShopService.name,
+          staff: assignedStaffName,
+          customerName: formData.name + " " + formData.surname,
+          customerPhone: fullPhone,
+          customerEmail: formData.email
+        })
+      }),
+    });
+
+    // 3. RANDEVU ONAY MAİLİ (Müşteriye)
+    await fetch('/api/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: formData.email,
+        subject: 'Randevunuz Alındı - Bookcy',
+        html: getBookingConfirmationTemplate({
+          customerName: formData.name,
+          shopName: selectedShop.name,
+          date: finalDate,
+          time: finalTime,
+          service: bookingData.selectedShopService.name,
+          staff: assignedStaffName,
+          address: selectedShop.address || selectedShop.location
+        })
+      }),
+    });
+
+    setStep('success'); 
+    window.scrollTo(0,0);
+  } else { alert("Rezervasyon alınırken bir hata oluştu!"); }
+}
 
 const InstagramIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>

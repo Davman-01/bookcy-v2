@@ -9,7 +9,24 @@ import {
   CreditCard, Send, Eye, EyeOff
 } from 'lucide-react';
 
-import { supabase } from '@/lib/supabase';
+// Admin sayfasındaki Onayla butonunun içine ekle
+import { getActivationTemplate } from '@/lib/emailTemplates';
+
+// ... onay fonksiyonu içinde ...
+await fetch('/api/email', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    to: shop.admin_email,
+    subject: 'Hesabınız Aktif Edildi - Bookcy',
+    html: getActivationTemplate({
+      shopName: shop.name,
+      packageName: shop.package,
+      username: shop.admin_username,
+      password: shop.admin_password // Güvenlik için daha sonra değiştirilmesini önerebiliriz
+    })
+  }),
+});
 
 const InstagramIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
