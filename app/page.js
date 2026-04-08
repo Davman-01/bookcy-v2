@@ -1,29 +1,16 @@
 "use client";
-
 import React, { useState, useEffect } from 'react';
-
 import { useRouter } from 'next/navigation';
 
-
-
 // Instagram ve bazi ikonlar Vercel'de hata verdigi icin onlari cikardik.
-
 import { 
-
   MapPin, Star, ArrowRight, CheckCircle2, XCircle, ChevronLeft, ChevronRight, ChevronDown, 
-
   Phone, Calendar, Clock, Lock, Upload, FileText, Briefcase, 
-
   MessageSquare, Mail, Settings, Edit3, Target, TrendingUp, Users, Crown, 
-
   Search, Sliders, MessageCircle, Scissors, Tag, User, UserCircle, 
-
   Smartphone, Bell, Grid, X, Gem, Zap, Check, Award, LayoutDashboard, PieChart, Store, 
-
-  CalendarOff, Music, Ticket
-
+  CalendarOff, Music, Ticket, ShieldCheck, HeartHandshake
 } from 'lucide-react';
-
 
 
 // VERCEL'İ KANDIRAN SAHTE VERİTABANI BAĞLANTISI (lib/supabase.js bulunamadi hatasini engeller)
