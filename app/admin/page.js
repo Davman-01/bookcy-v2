@@ -256,7 +256,7 @@ export default function SuperAdmin() {
     <div className="min-h-screen bg-[#F8FAFC] flex text-[#2D1B4E] font-['DM_Sans']">
       <style dangerouslySetInnerHTML={{__html: `@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');`}} />
       
-      {/* SOL MENÜ - nav etiketi div olarak değiştirildi */}
+      {/* SOL MENÜ - nav etiketi DIV olarak değiştirildi, CSS çakışması önlendi */}
       <aside className="w-64 bg-[#2D1B4E] text-white h-screen sticky top-0 flex flex-col shrink-0 shadow-2xl z-40 hidden md:flex">
         <div className="p-8 border-b border-white/10 flex items-center gap-3">
           <div className="w-10 h-10 bg-[#E8622A] rounded-xl flex items-center justify-center font-black shadow-lg font-['Plus_Jakarta_Sans']">B.</div>
