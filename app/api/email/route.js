@@ -11,7 +11,7 @@ export async function POST(request) {
     // ÖNEMLİ: Kendi domainini (bookcy.co) Resend'de doğrulatana kadar 
     // 'from' kısmında sadece 'onboarding@resend.dev' kullanabilirsin.
     const { data, error } = await resend.emails.send({
-      from: 'Bookcy <onboarding@resend.dev>', 
+      from: 'Bookcy <info@bookcy.co>', 
       to: to,
       subject: subject,
       html: html,
