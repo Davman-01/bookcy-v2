@@ -1,14 +1,12 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
 import { 
   MapPin, Star, ArrowRight, CheckCircle2, XCircle, ChevronLeft, ChevronRight, ChevronDown, 
-  Phone, Calendar, Clock, Lock, Upload, FileText, Briefcase, 
-  MessageSquare, Mail, Settings, Edit3, Target, TrendingUp, Users, Crown, 
-  Search, Sliders, MessageCircle, Scissors, Tag, User, UserCircle, 
-  Smartphone, Bell, Grid, X, Gem, Zap, Check, Award, LayoutDashboard, PieChart, Store, 
-  CalendarOff, Music, Ticket, ShieldCheck, HeartHandshake, Moon, Sun
+  Phone, Calendar, Clock, Lock, Upload, Briefcase, MessageSquare, Mail, Settings, Target, 
+  TrendingUp, Users, Crown, Search, SlidersHorizontal, MessageCircle, Scissors, User, UserCircle, 
+  Smartphone, Grid, X, Gem, Check, PieChart, Store, CalendarOff, Music, Ticket, HeartHandshake,
+  ShieldCheck, Moon, Sun, Instagram
 } from 'lucide-react';
 
 const supabase = {
@@ -18,99 +16,64 @@ const supabase = {
 
 const InstagramIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
   </svg>
 );
 
-function parseDuration(durationStr) {
-  if (!durationStr || durationStr === '0') return 30;
-  const match = durationStr.match(/\d+/);
-  return match ? parseInt(match[0]) : 30;
-}
+function parseDuration(d) { const m = (d||'').match(/\d+/); return m ? parseInt(m[0]) : 30; }
+function getRequiredSlots(d) { return Math.ceil(parseDuration(d) / 30); }
 
-function getRequiredSlots(durationStr) {
-  return Math.ceil(parseDuration(durationStr) / 30);
-}
-
-const allTimeSlots = [
-  "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", 
-  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", 
-  "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", 
-  "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00", "23:30", 
-  "00:00", "00:30", "01:00", "01:30", "02:00"
-];
-
-const defaultWorkingHours = [
-  { day: 'Pazartesi', open: '09:00', close: '19:00', isClosed: false },
-  { day: 'Salı', open: '09:00', close: '19:00', isClosed: false },
-  { day: 'Çarşamba', open: '09:00', close: '19:00', isClosed: false },
-  { day: 'Perşembe', open: '09:00', close: '19:00', isClosed: false },
-  { day: 'Cuma', open: '09:00', close: '19:00', isClosed: false },
-  { day: 'Cumartesi', open: '09:00', close: '19:00', isClosed: false },
-  { day: 'Pazar', open: '09:00', close: '19:00', isClosed: true },
-];
+const allTimeSlots = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30","00:00","00:30","01:00","01:30","02:00"];
+const defaultWorkingHours = [{day:'Pazartesi',open:'09:00',close:'19:00',isClosed:false},{day:'Salı',open:'09:00',close:'19:00',isClosed:false},{day:'Çarşamba',open:'09:00',close:'19:00',isClosed:false},{day:'Perşembe',open:'09:00',close:'19:00',isClosed:false},{day:'Cuma',open:'09:00',close:'19:00',isClosed:false},{day:'Cumartesi',open:'09:00',close:'19:00',isClosed:false},{day:'Pazar',open:'09:00',close:'19:00',isClosed:true}];
+const cyprusRegions = ["Girne", "Lefkoşa", "Mağusa", "İskele", "Güzelyurt", "Lefke"];
 
 export default function Home() {
   const router = useRouter(); 
-  
   const [theme, setTheme] = useState('light');
-  const [step, setStep] = useState('services'); 
-  const [shops, setShops] = useState([]);
-  const [lang, setLang] = useState('TR');
-  const [showFeaturesMenu, setShowFeaturesMenu] = useState(false);
-  const [activeFeature, setActiveFeature] = useState(null);
-  
-  const approvedShops = shops.filter(shop => shop.status === 'approved');
-  const [selectedShop, setSelectedShop] = useState(null);
-  
-  const [bookingData, setBookingData] = useState({ 
-    date: new Date().toISOString().split('T')[0], 
-    time: '', selectedShopService: null, selectedStaff: null, selectedEvent: null
-  });
+  const [step, setStep] = useState('services'); const [shops, setShops] = useState([]); const [lang, setLang] = useState('TR');
+  const [showFeaturesMenu, setShowFeaturesMenu] = useState(false); const [activeFeature, setActiveFeature] = useState(null);
+  const [selectedShop, setSelectedShop] = useState(null); const [bookingData, setBookingData] = useState({ date: new Date().toISOString().split('T')[0], time: '', selectedShopService: null, selectedStaff: null, selectedEvent: null });
+  const [formData, setFormData] = useState({ name: '', surname: '', phoneCode: '+90', phone: '', email: '' }); const [bookingPhase, setBookingPhase] = useState(1);
+  const [bookingEmailValid, setBookingEmailValid] = useState(null); const [bookingPhoneValid, setBookingPhoneValid] = useState(null);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false); const [feedbackData, setFeedbackData] = useState({ q1: null, q2: null, q3: null, q4: null });
+  const [showRegister, setShowRegister] = useState(false); const [loggedInShop, setLoggedInShop] = useState(null);
+  const [showLogin, setShowLogin] = useState(false); const [loginType, setLoginType] = useState('owner'); const [loginUsername, setLoginUsername] = useState(''); const [loginPassword, setLoginPassword] = useState(''); const [loginStaffName, setLoginStaffName] = useState(''); const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [filterRegion, setFilterRegion] = useState('All'); const [filterService, setFilterService] = useState('All'); const [filterSort, setFilterSort] = useState('High'); const [searchQuery, setSearchQuery] = useState('');
+  const [newShop, setNewShop] = useState({ name: '', category: 'Berber', location: 'Girne', address: '', maps_link: '', phoneCode: '+90', contactPhone: '', contactInsta: '', contactEmail: '', username: '', password: '', email: '', description: '', logoFile: null, package: 'Standart Paket' });
+  const [isUploading, setIsUploading] = useState(false); const [registerSuccess, setRegisterSuccess] = useState(false);
+  const [emailValid, setEmailValid] = useState(null); const [phoneValid, setPhoneValid] = useState(null); const [adminEmailValid, setAdminEmailValid] = useState(null);
+  const [appointments, setAppointments] = useState([]); const [globalAppointments, setGlobalAppointments] = useState([]); const [closedSlots, setClosedSlots] = useState([]); const [profileTab, setProfileTab] = useState('services'); const [lightboxImg, setLightboxImg] = useState(null);
 
-  const [formData, setFormData] = useState({ name: '', surname: '', phoneCode: '+90', phone: '', email: '' });
-  const [bookingPhase, setBookingPhase] = useState(1);
-  const [bookingEmailValid, setBookingEmailValid] = useState(null);
-  const [bookingPhoneValid, setBookingPhoneValid] = useState(null);
+  const approvedShops = shops.filter(s => s.status === 'approved');
+  const isClub = selectedShop?.category === 'Bar & Club';
 
-  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
-  const [feedbackData, setFeedbackData] = useState({ q1: null, q2: null, q3: null, q4: null });
-  const [showRegister, setShowRegister] = useState(false);
-  const [loggedInShop, setLoggedInShop] = useState(null);
-  const [showLogin, setShowLogin] = useState(false);
-  const [loginType, setLoginType] = useState('owner');
-  const [loginUsername, setLoginUsername] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [loginStaffName, setLoginStaffName] = useState('');
-  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('bookcy_theme') || 'light';
+    setTheme(savedTheme);
+  }, []);
 
-  const [filterRegion, setFilterRegion] = useState('All');
-  const [filterService, setFilterService] = useState('All');
-  const [filterSort, setFilterSort] = useState('High'); 
-  const [searchQuery, setSearchQuery] = useState('');
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.body.classList.add('dark');
+      document.body.style.backgroundColor = '#0B0710';
+    } else {
+      document.body.classList.remove('dark');
+      document.body.style.backgroundColor = '#FAF7F2';
+    }
+  }, [theme]);
 
-  const [newShop, setNewShop] = useState({ 
-    name: '', category: 'Berber', location: 'Girne', address: '', maps_link: '', 
-    phoneCode: '+90', contactPhone: '', contactInsta: '', contactEmail: '', 
-    username: '', password: '', email: '', description: '', logoFile: null, package: 'Standard' 
-  });
-  
-  const [isUploading, setIsUploading] = useState(false);
-  const [registerSuccess, setRegisterSuccess] = useState(false);
-  
-  const [emailValid, setEmailValid] = useState(null);
-  const [phoneValid, setPhoneValid] = useState(null);
-  const [adminEmailValid, setAdminEmailValid] = useState(null);
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('bookcy_theme', newTheme);
+  };
 
-  const [appointments, setAppointments] = useState([]);
-  const [globalAppointments, setGlobalAppointments] = useState([]); 
-  const [closedSlots, setClosedSlots] = useState([]);
-  const [profileTab, setProfileTab] = useState('services'); 
-  const [lightboxImg, setLightboxImg] = useState(null);
-
-  const cyprusRegions = ["Girne", "Lefkoşa", "Mağusa", "İskele", "Güzelyurt", "Lefke"];
+  const handleHeroSearch = (e) => { e.preventDefault(); setStep('all_shops'); window.scrollTo(0,0); };
+  const handleBookingEmailChange = (e) => { const val = e.target.value; setFormData(prev => ({...prev, email: val})); setBookingEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
+  const handleBookingPhoneChange = (e) => { const val = e.target.value; setFormData(prev => ({...prev, phone: val})); setBookingPhoneValid(val === '' ? null : val.replace(/\s/g, '').length >= 7); };
+  const handleEmailChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, email: val})); setEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
+  const handleAdminEmailChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, contactEmail: val})); setAdminEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
+  const handlePhoneChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, contactPhone: val})); setPhoneValid(val === '' ? null : val.replace(/\s/g, '').length >= 7); };
 
   const t = {
     TR: {
@@ -119,33 +82,33 @@ export default function Home() {
       featNames: { profile: "Bookcy Profili", market: "Pazaryeri Listeleme", team: "Ekip Yönetimi", booking: "Online Randevu", app: "Müşteri Uygulaması", marketing: "Pazarlama Araçları", calendar: "Takvim & Planlama", crm: "Müşteri Yönetimi", boost: "Öne Çık", stats: "İstatistik & Raporlar" },
       featDesc: { profile: "İşletmenizin dijital vitrinini saniyeler içinde oluşturun.", market: "Bookcy kullanan binlerce aktif müşteriye doğrudan ulaşın.", team: "Personelinizin çalışma saatlerini kolayca yönetin.", booking: "Müşterilerinizin 7/24 randevu almasını sağlayın.", app: "Müşterilerinize özel mobil uygulama konforu sunun.", marketing: "Doğru zamanda doğru mesajı gönderin.", calendar: "Akıllı dijital takvim ile çakışmaları önleyin.", crm: "Müşteri geçmişini güvenle saklayın.", boost: "Aramalarda üst sıralara çıkın.", stats: "Anlık ve net raporlarla kazancınızı görün." },
       featDetails: {
-        profile: { purpose: "Bookcy Profili, işletmenizin çevrimiçi ortamdaki dijital vitrinidir.", adv1: { title: "Profesyonel İmaj", desc: "Kaliteli fotoğraflar ile ilk intibanızı güçlendirin." }, adv2: { title: "Güven İnşası", desc: "Müşteri yorumları ile güveni hızla kazanın." }, adv3: { title: "Kolay Keşfedilebilirlik", desc: "Arama motorlarında üst sıralarda bulunun." } },
-        market: { purpose: "Binlerce hazır müşteriyi sizinle buluşturur.", adv1: { title: "Yeni Müşteriler", desc: "Bölgenizde hizmet arayan aktif kullanıcılara ulaşın." }, adv2: { title: "Boşlukları Doldurun", desc: "İptal edilen randevuları sergileyin." }, adv3: { title: "Rekabet Avantajı", desc: "Rakiplerinizin önünde yer alın." } },
-        team: { purpose: "Personelinizin mesailerini zahmetsizce koordine etmenizi sağlar.", adv1: { title: "Kolay Planlama", desc: "Vardiyaları dijital olarak düzenleyin." }, adv2: { title: "Performans Takibi", desc: "Gelirleri anlık görün." }, adv3: { title: "Bireysel Takvimler", desc: "Çakışmaları tamamen ortadan kaldırın." } },
-        booking: { purpose: "Müşterilerin 7/24 randevu oluşturmasını sağlar.", adv1: { title: "Zaman Tasarrufu", desc: "Randevu telefonları yerine işinize odaklanın." }, adv2: { title: "Sıfır Hata", desc: "Not alma hatalarını sıfıra indirin." }, adv3: { title: "Kesintisiz Hizmet", desc: "İşletmeniz kapalıyken bile rezervasyon kabul edin." } },
-        app: { purpose: "İşletmenizle müşterilerinizin pürüzsüz bir bağ kurmalarını sağlar.", adv1: { title: "Kusursuz Deneyim", desc: "Kullanıcı dostu bir arayüz sunun." }, adv2: { title: "Kolay Takip", desc: "Yaklaşan randevular takip edilsin." }, adv3: { title: "Anlık İptal", desc: "İptaller saat takviminize boş yansısın." } },
-        marketing: { purpose: "İletişim asistanınızdır.", adv1: { title: "Hedefli Kampanyalar", desc: "Özel fırsatlar sunun." }, adv2: { title: "SMS ve E-posta", desc: "Otomatik kutlama mesajları gönderin." }, adv3: { title: "Ciro Artışı", desc: "Ziyaret sıklığını artırın." } },
-        calendar: { purpose: "Randevuları organize eden yapıdır.", adv1: { title: "Çakışma Koruması", desc: "Aynı saate iki randevuyu imkansız hale getirir." }, adv2: { title: "Optimizasyon", desc: "Takvimdeki boşlukları analiz eder." }, adv3: { title: "Sürükle & Bırak", desc: "Saatleri farenizle anında değiştirin." } },
-        crm: { purpose: "Müşterinizin tercihlerini saklayan arşivinizdir.", adv1: { title: "Müşteri Profili", desc: "Geçmiş işlemleri görün." }, adv2: { title: "Özel Notlar", desc: "Detayları sisteme kaydedin." }, adv3: { title: "Sadakat İnşası", desc: "Kırılmaz bir bağ oluşturun." } },
-        boost: { purpose: "Görünürlüğünüzü en üst seviyeye taşıyan pakettir.", adv1: { title: "Aramalarda Zirve", desc: "En üst sıralarda yer alın." }, adv2: { title: "Vitrinde Yer Alın", desc: "Önerilenler listesinde gösterilin." }, adv3: { title: "Prestijli İmaj", desc: "Öne çıkan rozetlerle kalitenizi vurgulayın." } },
-        stats: { purpose: "Verilerle doğru kararlar almanızı sağlayan sistemdir.", adv1: { title: "Gerçek Zamanlı Ciro", desc: "Kazançlarınızı anlık olarak takip edin." }, adv2: { title: "Hizmet Analizi", desc: "Stratejinizi belirleyin." }, adv3: { title: "Personel Raporları", desc: "Uzman performansını görün." } }
+        profile: { purpose: "Dijital vitrininiz.", adv1: { title: "İmaj", desc: "İlk intibayı güçlendirir." }, adv2: { title: "Güven", desc: "Yorumlarla güven kazanın." }, adv3: { title: "Keşfedilebilirlik", desc: "Aramalarda bulunun." } },
+        market: { purpose: "Müşteriyi buluşturur.", adv1: { title: "Yeni Müşteriler", desc: "Aktif kullanıcılara ulaşın." }, adv2: { title: "Boşlukları Doldurun", desc: "İptalleri sergileyin." }, adv3: { title: "Rekabet", desc: "Önde yer alın." } },
+        team: { purpose: "Personeli koordine edin.", adv1: { title: "Planlama", desc: "Vardiyaları düzenleyin." }, adv2: { title: "Performans", desc: "Gelirleri görün." }, adv3: { title: "Takvimler", desc: "Çakışmaları kaldırın." } },
+        booking: { purpose: "7/24 randevu.", adv1: { title: "Zaman Tasarrufu", desc: "İşinize odaklanın." }, adv2: { title: "Sıfır Hata", desc: "Hataları indirin." }, adv3: { title: "Kesintisiz Hizmet", desc: "Sürekli rezervasyon alın." } },
+        app: { purpose: "Müşteri ile bağ.", adv1: { title: "Deneyim", desc: "Kullanıcı dostu arayüz." }, adv2: { title: "Takip", desc: "Yaklaşan randevular." }, adv3: { title: "İptal", desc: "İptaller yansısın." } },
+        marketing: { purpose: "İletişim asistanı.", adv1: { title: "Kampanyalar", desc: "Özel fırsatlar." }, adv2: { title: "Mesajlar", desc: "Otomatik mesajlar." }, adv3: { title: "Ciro Artışı", desc: "Sıklığı artırın." } },
+        calendar: { purpose: "Randevu organizasyonu.", adv1: { title: "Koruması", desc: "İki randevuyu engeller." }, adv2: { title: "Optimizasyon", desc: "Boşlukları analiz eder." }, adv3: { title: "Sürükle", desc: "Anında değiştirin." } },
+        crm: { purpose: "Müşteri arşivi.", adv1: { title: "Profil", desc: "Geçmişi görün." }, adv2: { title: "Özel Notlar", desc: "Sisteme kaydedin." }, adv3: { title: "Sadakat", desc: "Bağ oluşturun." } },
+        boost: { purpose: "Görünürlük paketi.", adv1: { title: "Zirve", desc: "En üstte yer alın." }, adv2: { title: "Vitrin", desc: "Önerilenlerde gösterilin." }, adv3: { title: "İmaj", desc: "Kalitenizi vurgulayın." } },
+        stats: { purpose: "Veri sistemi.", adv1: { title: "Ciro", desc: "Anlık takip." }, adv2: { title: "Analiz", desc: "Strateji belirleyin." }, adv3: { title: "Raporlar", desc: "Performansı görün." } }
       },
       featUI: { purposeTitle: "Amacı ve Ne İşe Yarar?", benefitsTitle: "Avantajları", allFeaturesTitle: "Tüm Özellikler", allFeaturesSub: "İşletmenizi büyütmek için ihtiyacınız olan her şey." },
-      home: { eyebrow: "Kıbrıs'ın #1 Güzellik Platformu", title1: "Kendine", title2: "iyi bak,", title3: "hemen", title4: "rezerve et.", subtitle: "Yakınındaki en iyi berber, kuaför, spa ve güzellik uzmanlarını bul. Tek tıkla randevu al, zamanın senin olsun.", searchPlace: "Hizmet veya mekan ara...", searchLoc: "Nerede?", searchBtn: "Ara", popTitle: "Popüler:", stats: {s1:"Aktif İşletme", s2:"Mutlu Müşteri", s3:"Tamamlanan İşlem", s4:"Memnuniyet"} },
+      home: { eyebrow: "Kıbrıs'ın #1 Güzellik Platformu", title1: "Kendine", title2: "iyi bak,", title3: "hemen", title4: "randevu al.", subtitle: "Yakınındaki en iyi berber, kuaför, spa ve güzellik uzmanlarını bul. Tek tıkla randevu al, zamanın senin olsun.", searchPlace: "Hizmet veya mekan ara...", searchLoc: "Nerede?", searchBtn: "Ara", popTitle: "Popüler:", stats: {s1:"Aktif İşletme", s2:"Mutlu Müşteri", s3:"Tamamlanan İşlem", s4:"Memnuniyet"} },
       cats: { catTitle: "Kategoriler", catSub: "Bugün ne yaptırmak istersiniz?", seeAll: "Tümünü Gör →", tattoo: "Dövme", barber: "Berber", hair: "Kuaför", nail: "Tırnak & Güzellik", club: "Bar & Club", spa: "Spa & Masaj", makeup: "Makyaj", skincare: "Cilt Bakımı" },
       homeInfo: { recLabel: "Öne Çıkanlar", recTitle: "Kıbrıs'ta Bu Hafta 🔥", howLabel: "Nasıl Çalışır?", howTitle: "4 Basit Adımda Randevun Hazır", how1Title: "Keşfet", how1Desc: "Yakındaki mekanları incele ve filtrele.", how2Title: "Tarih Seç", how2Desc: "Sana en uygun zamanı tek tıkla seç.", how3Title: "Onayla", how3Desc: "Saniyeler içinde rezervasyonun onaylanır.", how4Title: "Keyif Çıkar", how4Desc: "Git, hizmetini al ve puan ver.", ctaLabel: "İşletme Sahibi misiniz?", ctaTitle1: "Bookcy ile İşletmeni", ctaTitle2: "Dijitalleştir.", ctaSub: "Randevu sistemini kolaylaştır, yeni müşteri kazan." },
-      filters: { title: "Arama Sonuçları", search: "Mekan Ara...", region: "Bölge", service: "Kategori", sortHigh: "En Yüksek Puan", sortLow: "En Düşük Puan", clear: "Temizle", count: "Mekan Bulundu" },
+      filters: { title: "Arama Sonuçları", search: "Mekan Ara...", region: "Bölge Seçimi", service: "Kategoriler", sortHigh: "En Yüksek Puan", sortLow: "En Düşük Puan", clear: "Temizle", count: "Mekan Bulundu" },
       reg: { title: "İŞLETME KAYIT", subtitle: "Sadece İşletme Sahipleri İçindir", shopName: "İşletme Adı", location: "Bölge Seçin", address: "Tam Adres", maps: "Google Maps Linki", desc: "Hakkımızda", email: "Admin E-Posta", contactPhone: "İşletme Telefonu", contactInsta: "Instagram Linki", contactEmail: "İletişim E-Posta", user: "Kullanıcı Adı", pass: "Şifre", pack: "Paket Seçimi", upload: "Logo Yükle", submit: "BAŞVUR", success: "BAŞVURUNUZ ALINDI!", uploading: "YÜKLENİYOR..." },
       shops: { back: "GERİ DÖN", empty: "Kriterlere uygun işletme bulunamadı." },
       profile: { tabServices: "Hizmetler", tabEvents: "Etkinlikler", tabGallery: "Galeri", about: "Hakkında", contactTitle: "İLETİŞİM", bookBtn: "SEÇ", noDesc: "İşletme henüz bir açıklama eklememiş.", noServices: "İşletme henüz liste eklememiş.", noGallery: "İşletme henüz fotoğraf eklememiş.", similarTitle: "BENZER MEKANLAR" },
       book: { change: "Geri", selectService: "Devam etmek için hizmet seçin.", selectEvent: "Etkinliği seçin.", selectLoca: "VIP türünü seçin.", selectStaff: "UZMAN SEÇİN", anyStaff: "Fark Etmez", date: "Tarih", time: "Saat", name: "Adınız", surname: "Soyadınız", phone: "Telefon", email: "E-Posta", submit: "ONAYLA", success: "RANDEVU ONAYLANDI", successSub: "Bilgileriniz işletmeye iletildi.", backHome: "ANA SAYFA", total: "Toplam", details: "Randevu Detayları", service: "Hizmet", event: "Etkinlik", staff: "Uzman", dateTime: "Zaman", contactInfo: "İletişim Bilgileri", btnBook: "Randevu Al →", shopClosed: "İŞLETME BU TARİHTE KAPALIDIR." },
-      about: { title: "Sektörün Dijital Devrimi", subtitle: "İşletmenizi Büyütün.", missionDesc: "Telefon trafiğinden kurtulun. BOOKCY, pazar lideri randevu platformudur.", bizTitle: "Karlı Çözümler", biz1: "Kesintisiz 7/24 Rezervasyon", biz1Desc: "Siz uyurken sistem randevu alır.", biz2: "Boş Koltuklara Son", biz2Desc: "İptalleri minimuma indirin.", biz3: "Sıfır Komisyon", biz3Desc: "Her randevudan komisyon kesilmez.", biz4: "Lider Olun", biz4Desc: "Rakiplerinizin önüne geçin.", usrTitle: "Müşteriler Neden Seçiyor?", usr1: "Sırada Beklemeye Son", usr1Desc: "Saatinizi seçin, beklemeyin.", usr2: "Şeffaf Fiyatlandırma", usr2Desc: "Ne kadar ödeyeceğinizi bilin.", usr3: "Güvenilir Yorumlar", usr3Desc: "Gerçek deneyimleri okuyun.", packTitle: "Paketler", packSub: "Sürpriz ücret yok.", pkg1Name: "Standard Paket", pkg1Price: "£60", pkg1Period: "/ Ay", pkg1Feat1: "Sınırsız Randevu", pkg1Feat2: "Sosyal Medya", pkg1Feat3: "İşletme Paneli", pkg1Feat4: "Personel Optimizasyonu", pkg1Feat5: "7/24 Destek", pkg2Name: "Premium Paket", pkg2Price: "£100", pkg2Period: "/ Ay", pkg2Feat1: "Standard Paketteki Her Şey", pkg2Feat2: "Önerilenler Vitrini", pkg2Feat3: "Arama Üst Sıra", pkg2Feat4: "VIP Çerçeve", pkg2Feat5: "Sponsorlu Reklam", ctaTitle: "Kazancınızı Katlayın", ctaBtn: "İŞLETMENİZİ EKLEYİN" },
+      about: { title: "Sektörün Dijital Devrimi", subtitle: "İşletmenizi Büyütün.", missionDesc: "Telefon trafiğinden kurtulun. BOOKCY, pazar lideri randevu platformudur.", bizTitle: "Karlı Çözümler", biz1: "Kesintisiz 7/24 Rezervasyon", biz1Desc: "Siz uyurken sistem randevu alır.", biz2: "Boş Koltuklara Son", biz2Desc: "İptalleri minimuma indirin.", biz3: "Sıfır Komisyon", biz3Desc: "Her randevudan komisyon kesilmez.", biz4: "Lider Olun", biz4Desc: "Rakiplerinizin önüne geçin.", usrTitle: "Müşteriler Neden Seçiyor?", usr1: "Sırada Beklemeye Son", usr1Desc: "Saatinizi seçin, beklemeyin.", usr2: "Şeffaf Fiyatlandırma", usr2Desc: "Ne kadar ödeyeceğinizi bilin.", usr3: "Güvenilir Yorumlar", usr3Desc: "Gerçek deneyimleri okuyun.", packTitle: "Paketler", packSub: "Sürpriz ücret yok.", pkg1Name: "Standart Paket", pkg1Price: "60 STG", pkg1Period: "/ Ay", pkg1Feat1: "Sınırsız Randevu", pkg1Feat2: "Sosyal Medya", pkg1Feat3: "İşletme Paneli", pkg1Feat4: "Personel Optimizasyonu", pkg1Feat5: "7/24 Destek", pkg2Name: "Premium Paket", pkg2Price: "100 STG", pkg2Period: "/ Ay", pkg2Feat1: "Standart Paketteki Her Şey", pkg2Feat2: "Önerilenler Vitrini", pkg2Feat3: "Arama Üst Sıra", pkg2Feat4: "VIP Çerçeve", pkg2Feat5: "Sponsorlu Reklam", ctaTitle: "Kazancınızı Katlayın", ctaBtn: "İŞLETMENİZİ EKLEYİN" },
       contact: { title: "BİZE ULAŞIN", sub: "Sorularınız için bize 7/24 ulaşabilirsiniz.", whatsapp: "WhatsApp Destek", wpDesc: "Anında yanıt almak için WhatsApp.", insta: "Instagram", instaDesc: "En yeni mekanları keşfedin.", email: "Kurumsal E-Posta", emailDesc: "Sponsorluk ve görüşmeler.", btnWp: "MESAJ AT", btnInsta: "TAKİP ET", btnEmail: "MAİL GÖNDER" },
-      footer: { desc: "Kuzey Kıbrıs'ın tek rezervasyon platformu.", links: "Platform", cities: "Bölgeler", legal: "Sözleşmeler", terms: "Kullanım Şartları", privacy: "Gizlilik Politikası", copy: "Tüm hakları saklıdır. Kuzey Kıbrıs'ta kurulmuştur. 🇹🇷", kvkk: "KVKK", cookies: "Çerez Politikası" },
-      legal: { privacyTitle: "Gizlilik Politikası", kvkkTitle: "KVKK", termsTitle: "Kullanım Şartları", cookiesTitle: "Çerez Politikası", lastUpdated: "Son güncellenme tarihi: 10 Nisan 2024" }
+      footer: { desc: "Kuzey Kıbrıs'ın tek rezervasyon platformu.", links: "Platform", cities: "Bölgeler", legal: "Yasal", terms: "Kullanım Şartları", privacy: "Gizlilik Politikası", copy: "Tüm hakları saklıdır. Kuzey Kıbrıs'ta kurulmuştur. 🇹🇷", kvkk: "KVKK Aydınlatma", cookies: "Çerez Politikası" },
+      legal: { privacyTitle: "Gizlilik Politikası", kvkkTitle: "KVKK Aydınlatma Metni", termsTitle: "Kullanım Şartları", cookiesTitle: "Çerez Politikası", lastUpdated: "Son güncellenme tarihi: 10 Nisan 2024" }
     },
     EN: {
-      nav: { places: "Places", features: "Features", contact: "Contact", about: "About", addShop: "Add Business", login: "Login", logout: "Logout", dashboard: "Dashboard", why: "Why Bookcy" },
+      nav: { places: "Places", features: "Features", why: "Why Bookcy", contact: "Contact", about: "About", addShop: "Add Business", login: "Login", logout: "Logout", dashboard: "Dashboard" },
       megaMenu: { col1Title: "Set up shop", col2Title: "Wow your clients", col3Title: "Run your business", col4Title: "Keep growing", btn: "Explore All Features" },
       featNames: { profile: "Bookcy Profile", market: "Marketplace", team: "Team Management", booking: "Online Booking", app: "Customer App", marketing: "Marketing Tools", calendar: "Calendar", crm: "Client Management", boost: "Boost", stats: "Stats & Reports" },
       featDesc: { profile: "Create your digital storefront.", market: "Reach active customers.", team: "Manage staff hours.", booking: "Let clients book 24/7.", app: "Mobile app for clients.", marketing: "Send SMS/Email campaigns.", calendar: "Smart digital calendar.", crm: "Store client history.", boost: "Rank higher in searches.", stats: "Track your revenue." },
@@ -172,11 +135,11 @@ export default function Home() {
       book: { change: "Back", selectService: "Select a service to continue.", selectEvent: "Select an event.", selectLoca: "Select your VIP booking type.", selectStaff: "SELECT STAFF", anyStaff: "Any Staff", date: "Date", time: "Time", name: "First Name", surname: "Last Name", phone: "Phone", email: "Email", submit: "CONFIRM", success: "APPOINTMENT CONFIRMED", successSub: "Your details have been sent.", backHome: "RETURN TO HOME", total: "Total", details: "Appointment Details", service: "Service", event: "Event", staff: "Staff", dateTime: "Date/Time", contactInfo: "Contact Info", btnBook: "Book Now →", shopClosed: "SHOP IS CLOSED ON THIS DATE." },
       about: { title: "Digital Revolution", subtitle: "Grow Your Business.", missionDesc: "Get rid of phone traffic. BOOKCY is Cyprus's market-leading booking platform.", bizTitle: "Solutions for Businesses", biz1: "24/7 Booking", biz1Desc: "Accept bookings while you sleep.", biz2: "No Empty Chairs", biz2Desc: "Minimize cancellations.", biz3: "Zero Commissions", biz3Desc: "Pay only a fixed fee.", biz4: "Be the Leader", biz4Desc: "Stand out from competitors.", usrTitle: "Why Customers Choose Bookcy?", usr1: "No More Waiting", usr1Desc: "Choose a time that fits.", usr2: "Transparent Pricing", usr2Desc: "Know what you will pay.", usr3: "Reliable Reviews", usr3Desc: "Read verified reviews.", packTitle: "Packages", packSub: "No hidden fees.", pkg1Name: "Standard Package", pkg1Price: "£60", pkg1Period: "/ Month", pkg1Feat1: "Unlimited Bookings", pkg1Feat2: "Social Media Sharing", pkg1Feat3: "Dashboard", pkg1Feat4: "Staff Optimization", pkg1Feat5: "24/7 Support", pkg2Name: "Premium Package", pkg2Price: "£100", pkg2Period: "/ Month", pkg2Feat1: "Everything in Standard", pkg2Feat2: "Homepage 'Recommended'", pkg2Feat3: "Top Ranks in Search", pkg2Feat4: "VIP Gold Border", pkg2Feat5: "Sponsored Ad Sharing", ctaTitle: "Ready to Multiply Your Income?", ctaBtn: "ADD YOUR BUSINESS" },
       contact: { title: "CONTACT US", sub: "We are here 24/7.", whatsapp: "WhatsApp", wpDesc: "Contact us via WhatsApp.", insta: "Instagram", instaDesc: "Follow us.", email: "Corporate Email", emailDesc: "Email us for inquiries.", btnWp: "MESSAGE", btnInsta: "FOLLOW", btnEmail: "EMAIL" },
-      footer: { desc: "North Cyprus's premier booking platform.", links: "Platform", cities: "Regions", legal: "Terms", terms: "Terms of Use", privacy: "Privacy Policy", copy: "All rights reserved.", kvkk: "KVKK", cookies: "Cookies" },
+      footer: { desc: "North Cyprus's premier booking platform for beauty & wellness.", links: "Platform", cities: "Regions", legal: "Legal", terms: "Terms of Use", privacy: "Privacy Policy", copy: "All rights reserved. Made in North Cyprus. 🇹🇷", kvkk: "KVKK", cookies: "Cookie Policy" },
       legal: { privacyTitle: "Privacy Policy", kvkkTitle: "KVKK", termsTitle: "Terms of Use", cookiesTitle: "Cookie Policy", lastUpdated: "Last updated: April 10, 2024" }
     },
     RU: {
-      nav: { places: "Места", features: "Функции", contact: "Контакты", about: "О нас", addShop: "Добавить", login: "Вход", logout: "Выйти", dashboard: "Панель", why: "Почему Bookcy" },
+      nav: { places: "Места", features: "Функции", why: "Почему Bookcy", contact: "Контакты", about: "О нас", addShop: "Добавить бизнес", login: "Вход", logout: "Выйти", dashboard: "Панель" },
       megaMenu: { col1Title: "Настройка", col2Title: "Клиенты", col3Title: "Бизнес", col4Title: "Развитие", btn: "Узнать все функции" },
       featNames: { profile: "Профиль Bookcy", market: "Маркетплейс", team: "Команда", booking: "Онлайн-бронирование", app: "Приложение", marketing: "Маркетинг", calendar: "Календарь", crm: "Управление клиентами", boost: "Продвижение", stats: "Статистика" },
       featDesc: { profile: "Создайте витрину за секунды.", market: "Охватите тысячи клиентов.", team: "Управляйте персоналом.", booking: "Бронирование 24/7.", app: "Мобильное приложение.", marketing: "SMS и Email кампании.", calendar: "Умный календарь.", crm: "Управление клиентами.", boost: "Выше в поиске.", stats: "Следите за доходами." },
@@ -203,8 +166,8 @@ export default function Home() {
       book: { change: "Назад", selectService: "Выберите услугу", selectEvent: "Выберите событие", selectLoca: "Выберите зону", selectStaff: "ВЫБЕРИТЕ СПЕЦИАЛИСТА", anyStaff: "Любой", date: "Дата", time: "Время", name: "Имя", surname: "Фамилия", phone: "Телефон", email: "Email", submit: "ПОДТВЕРДИТЬ", success: "БРОНЬ ПОДТВЕРЖДЕНА", successSub: "Данные отправлены.", backHome: "НА ГЛАВНУЮ", total: "Итого", details: "Детали", service: "Услуга", event: "Событие", staff: "Специалист", dateTime: "Дата / Время", contactInfo: "Контакты", btnBook: "Забронировать →", shopClosed: "ЗАКРЫТО В ЭТУ ДАТУ." },
       about: { title: "Революция", subtitle: "Развивайте бизнес.", missionDesc: "BOOKCY — платформа Кипра.", bizTitle: "Решения", biz1: "Бронь 24/7", biz1Desc: "Принимайте заказы.", biz2: "Нет отменам", biz2Desc: "Сведите к минимуму отмены.", biz3: "Без комиссий", biz3Desc: "Фиксированная плата.", biz4: "Лидерство", biz4Desc: "Выделяйтесь.", usrTitle: "Почему Bookcy?", usr1: "Без очередей", usr1Desc: "Удобное время.", usr2: "Прозрачные цены", usr2Desc: "Точная цена.", usr3: "Отзывы", usr3Desc: "Читайте реальные отзывы.", packTitle: "Пакеты", packSub: "Никаких скрытых платежей.", pkg1Name: "Стандартный Пакет", pkg1Price: "£60", pkg1Period: "/ Месяц", pkg1Feat1: "Безлимит", pkg1Feat2: "Соцсети", pkg1Feat3: "Панель", pkg1Feat4: "Персонал", pkg1Feat5: "Поддержка", pkg2Name: "Премиум Пакет", pkg2Price: "£100", pkg2Period: "/ Месяц", pkg2Feat1: "Всё включено", pkg2Feat2: "Топ на главной", pkg2Feat3: "Высший рейтинг", pkg2Feat4: "VIP Рамка", pkg2Feat5: "Реклама", ctaTitle: "Готовы расти?", ctaBtn: "ДОБАВИТЬ БИЗНЕС" },
       contact: { title: "КОНТАКТЫ", sub: "Мы здесь 24/7.", whatsapp: "WhatsApp", wpDesc: "Свяжитесь.", insta: "Instagram", instaDesc: "Подписывайтесь.", email: "Эл. почта", emailDesc: "Напишите нам.", btnWp: "НАПИСАТЬ", btnInsta: "ПОДПИСАТЬСЯ", btnEmail: "ОТПРАВИТЬ" },
-      footer: { desc: "Платформа бронирования на Северном Кипре.", links: "Платформа", cities: "Регион", legal: "Документы", terms: "Условия использования", privacy: "Политика конфиденциальности", copy: "Все права защищены.", kvkk: "KVKK", cookies: "Файлы cookie" },
-      legal: { privacyTitle: "Политика конфиденциальности", kvkkTitle: "KVKK", termsTitle: "Условия использования", cookiesTitle: "Файлы cookie", lastUpdated: "Обновлено" }
+      footer: { desc: "Платформа бронирования на Северном Кипре.", links: "Платформа", cities: "Регион", legal: "Документы", terms: "Условия использования", privacy: "Политика конфиденциальности", copy: "Все права защищены. Сделано на Северном Кипре. 🇹🇷", kvkk: "KVKK", cookies: "Файлы cookie" },
+      legal: { privacyTitle: "Политика конфиденциальности", kvkkTitle: "KVKK", termsTitle: "Условия использования", cookiesTitle: "Файлы cookie", lastUpdated: "Последнее обновление: 10 апреля 2024 г." }
     }
   };
 
@@ -338,6 +301,7 @@ export default function Home() {
       if (filterSort === 'High') {
         if ((a.package === 'Premium' || a.package === 'Premium Paket') && (b.package !== 'Premium' && b.package !== 'Premium Paket')) return -1;
         if ((a.package !== 'Premium' && a.package !== 'Premium Paket') && (b.package === 'Premium' || b.package === 'Premium Paket')) return 1;
+        return 0;
       }
       return 0;
   });
@@ -355,10 +319,6 @@ export default function Home() {
 
   const currentAvailableSlots = getCurrentAvailableSlots();
   const isShopClosedToday = currentAvailableSlots.length === 0;
-
-  const similarShops = selectedShop 
-    ? approvedShops.filter(s => s.id !== selectedShop.id && s.category === selectedShop.category).slice(0, 3)
-    : [];
 
   const renderFeedbackScale = (qKey) => (
     <div className="flex gap-1 justify-center mt-3 mb-6 w-full max-w-full overflow-x-auto custom-scrollbar pb-2">
@@ -445,7 +405,7 @@ export default function Home() {
       `}} />
 
       <nav>
-        <div className="nav-logo" onClick={() => {setStep('services'); window.scrollTo(0,0);}}>
+        <div className="nav-logo" onClick={() => {setStep('services'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}}>
           <svg className="nav-logo-icon" viewBox="0 0 36 36" fill="none" aria-hidden="true">
             <rect width="36" height="36" rx="10" fill="#2D1B4E"/>
             <circle cx="18" cy="10" r="4.5" fill="#F5C5A3"/>
@@ -570,8 +530,8 @@ export default function Home() {
                           <p className="font-bold text-sm">IBAN: <span className="text-[#E8622A]">TR99 0006 4000 0012 3456 7890 12</span></p>
                           
                           <p className="text-sm font-bold text-slate-500 mt-6 mb-4 text-center">Bizi tercih ettiğiniz için teşekkür ederiz. İşletme profilinizin onaylanıp yayına alınabilmesi için lütfen ödeme dekontunuzu WhatsApp destek hattımız üzerinden bize iletiniz.</p>
-                          <a href="https://wa.me/905555555555?text=Merhaba,%20Bookcy%20işletme%20kaydımı%20yaptım.%20Dekontumu%20iletiyorum." target="_blank" rel="noreferrer" className="w-full bg-[#25D366] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg shadow-green-500/30 flex justify-center items-center gap-2 text-decoration-none text-xs border-none cursor-pointer">
-                              <MessageCircle size={18}/> DEKONTU WHATSAPP'TAN İLET
+                          <a href="https://wa.me/905555555555?text=Merhaba,%20Bookcy%20işletme%20kaydımı%20yaptım.%20Dekontumu%20iletiyorum." target="_blank" rel="noreferrer" className="w-full bg-[#25D366] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg shadow-green-500/30 flex justify-center items-center gap-2 text-decoration-none text-xs border-none cursor-pointer mt-4">
+                              <MessageCircle size={18}/> DEKONTU İLET
                           </a>
                       </div>
                   </div>
@@ -581,88 +541,65 @@ export default function Home() {
                           <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight italic text-[#2D1B4E]">{t[lang].reg.title}</h2>
                           <p className="text-[10px] text-[#E8622A] font-bold uppercase tracking-[0.2em] mt-2 flex items-center justify-center gap-2"><Lock size={12}/> {t[lang].reg.subtitle}</p>
                       </div>
-                      <form onSubmit={handleRegisterSubmit} className="flex flex-col gap-5">
+                      <form onSubmit={handleRegisterSubmit} className="flex flex-col gap-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <input required placeholder={t[lang].reg.shopName} className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-xs font-bold focus:border-[#E8622A] outline-none text-[#2D1B4E]" value={newShop.name} onChange={e => setNewShop({...newShop, name: e.target.value})} />
-                              <select className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-xs font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] cursor-pointer" value={newShop.category} onChange={e => setNewShop({...newShop, category: e.target.value})}>
+                              <input required placeholder={t[lang].reg.shopName} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.name} onChange={e => setNewShop({...newShop, name: e.target.value})} />
+                              <select className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold text-[#2D1B4E] outline-none" value={newShop.category} onChange={e => setNewShop({...newShop, category: e.target.value})}>
                                   {categories.map(c => <option key={c.dbName} value={c.dbName}>{t[lang].cats[c.key]}</option>)}
                               </select>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <select required className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-xs font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] cursor-pointer uppercase" value={newShop.location} onChange={e => setNewShop({...newShop, location: e.target.value})}>
+                              <select required className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold text-[#2D1B4E] outline-none" value={newShop.location} onChange={e => setNewShop({...newShop, location: e.target.value})}>
                                   {cyprusRegions.map(region => <option key={region} value={region}>{region}</option>)}
                               </select>
-                              <input required placeholder={t[lang].reg.address} className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-xs font-bold focus:border-[#E8622A] outline-none uppercase text-[#2D1B4E]" value={newShop.address} onChange={e => setNewShop({...newShop, address: e.target.value})} />
+                              <input required placeholder={t[lang].reg.address} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none uppercase text-[#2D1B4E]" value={newShop.address} onChange={e => setNewShop({...newShop, address: e.target.value})} />
                           </div>
+                          <input type="url" placeholder={t[lang].reg.maps} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.maps_link} onChange={e => setNewShop({...newShop, maps_link: e.target.value})} />
                           
-                          <div className="border-t border-slate-100 pt-5">
-                              <input type="url" placeholder={t[lang].reg.maps} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-xs font-bold focus:border-[#E8622A] outline-none text-[#2D1B4E]" value={newShop.maps_link} onChange={e => setNewShop({...newShop, maps_link: e.target.value})} />
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-5">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-4">
                               <div className="flex gap-2 w-full relative">
-                                <select className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-3 outline-none focus:border-[#E8622A] font-bold text-xs text-[#2D1B4E] cursor-pointer w-20 shrink-0" value={newShop.phoneCode} onChange={e => setNewShop({...newShop, phoneCode: e.target.value})}>
+                                <select className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-2 outline-none font-bold text-xs text-[#2D1B4E] w-20" value={newShop.phoneCode} onChange={e => setNewShop({...newShop, phoneCode: e.target.value})}>
                                     <option value="+90">TR</option>
-                                    <option value="+357">CY</option>
-                                    <option value="+44">UK</option>
                                 </select>
                                 <div className="relative flex-1">
-                                  <input required type="tel" placeholder={t[lang].reg.contactPhone} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 pr-10 outline-none focus:border-[#E8622A] font-bold text-xs text-[#2D1B4E]" value={newShop.contactPhone} onChange={handlePhoneChange} />
+                                  <input required type="tel" placeholder={t[lang].reg.contactPhone} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 outline-none font-bold text-xs text-[#2D1B4E]" value={newShop.contactPhone} onChange={handlePhoneChange} />
                                   {phoneValid === true && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" size={16}/>}
                                   {phoneValid === false && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500" size={16}/>}
                                 </div>
                               </div>
-                              <input placeholder={t[lang].reg.contactInsta} className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-xs font-bold focus:border-[#E8622A] outline-none text-[#2D1B4E]" value={newShop.contactInsta} onChange={e => setNewShop({...newShop, contactInsta: e.target.value})} />
+                              <input placeholder={t[lang].reg.contactInsta} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.contactInsta} onChange={e => setNewShop({...newShop, contactInsta: e.target.value})} />
                               <div className="relative">
-                                <input type="email" placeholder={t[lang].reg.contactEmail} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 pr-10 text-xs font-bold focus:border-[#E8622A] outline-none text-[#2D1B4E]" value={newShop.contactEmail} onChange={handleAdminEmailChange} />
+                                <input type="email" placeholder={t[lang].reg.contactEmail} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.contactEmail} onChange={handleAdminEmailChange} />
                                 {adminEmailValid === true && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" size={16}/>}
                                 {adminEmailValid === false && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500" size={16}/>}
                               </div>
                           </div>
                           
-                          <div className="border-t border-slate-100 pt-5 relative">
-                              <input required type="email" placeholder={t[lang].reg.email} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 pr-10 text-xs font-bold focus:border-[#E8622A] outline-none text-[#2D1B4E]" value={newShop.email} onChange={handleEmailChange} />
-                              {emailValid === true && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" size={16}/>}
-                              {emailValid === false && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500" size={16}/>}
-                          </div>
+                          <input required type="email" placeholder={t[lang].reg.email} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E] mt-2" value={newShop.email} onChange={handleEmailChange} />
+                          {emailValid === true && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" size={16}/>}
+                          {emailValid === false && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500" size={16}/>}
                           
-                          <textarea placeholder={t[lang].reg.desc} rows="2" className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-xs font-bold focus:border-[#E8622A] outline-none resize-none text-[#2D1B4E]" value={newShop.description} onChange={e => setNewShop({...newShop, description: e.target.value})}></textarea>
+                          <textarea placeholder={t[lang].reg.desc} rows="2" className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none resize-none text-[#2D1B4E]" value={newShop.description} onChange={e => setNewShop({...newShop, description: e.target.value})}></textarea>
                           
-                          <div className="bg-slate-50 border border-slate-200 border-dashed rounded-2xl p-4 relative group hover:border-[#E8622A] transition-all">
-                              {newShop.logoFile ? (
-                                  <span className="text-[10px] font-bold text-[#00c48c] flex items-center justify-center gap-2"><CheckCircle2 size={16}/> {newShop.logoFile.name}</span>
-                              ) : (
-                                  <div className="flex flex-col items-center justify-center text-center cursor-pointer">
-                                      <Upload size={20} className="text-slate-400 mb-2 group-hover:text-[#E8622A]" />
-                                      <span className="text-[10px] font-bold text-slate-500 uppercase">{t[lang].reg.upload}</span>
-                                  </div>
-                              )}
+                          <div className="bg-slate-50 border border-slate-200 border-dashed rounded-2xl p-4 relative group">
                               <input type="file" accept=".png, .jpg, .jpeg" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={e => setNewShop({...newShop, logoFile: e.target.files[0]})} />
+                              {newShop.logoFile ? <span className="text-[10px] font-bold text-[#00c48c] flex items-center justify-center gap-2"><CheckCircle2 size={16}/> {newShop.logoFile.name}</span> : <div className="flex flex-col items-center justify-center text-center text-[10px] font-bold text-slate-500 uppercase"><Upload size={20} className="mb-2"/> Yükle</div>}
                           </div>
                           
-                          <div className="border-t border-slate-100 pt-4">
-                              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-3">{t[lang].reg.pack}</p>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  {packages.map(p => (
-                                      <div key={p.name} onClick={() => setNewShop({...newShop, package: p.name})} className={`cursor-pointer p-5 rounded-2xl border transition-all ${newShop.package === p.name ? 'bg-orange-50 border-[#E8622A]' : 'bg-white border-slate-200 hover:border-[#E8622A]'}`}>
-                                          <div className="flex justify-between items-center mb-2">
-                                            <h4 className={`text-sm font-black uppercase ${newShop.package === p.name ? 'text-[#E8622A]' : 'text-[#2D1B4E]'}`}>{p.name}</h4>
-                                            {newShop.package === p.name && <CheckCircle2 size={16} className="text-[#E8622A]"/>}
-                                          </div>
-                                          <p className="text-xs font-bold text-slate-500">{p.price}</p>
-                                      </div>
-                                  ))}
-                              </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                              {packages.map(p => (
+                                  <div key={p.name} onClick={() => setNewShop({...newShop, package: p.name})} className={`cursor-pointer p-4 rounded-xl border ${newShop.package === p.name ? 'bg-orange-50 border-[#E8622A]' : 'bg-white border-slate-200'}`}>
+                                      <h4 className={`text-sm font-black uppercase ${newShop.package === p.name ? 'text-[#E8622A]' : 'text-[#2D1B4E]'}`}>{p.name}</h4>
+                                      <p className="text-xs font-bold text-slate-500">{p.price}</p>
+                                  </div>
+                              ))}
                           </div>
                           
-                          <div className="grid grid-cols-2 gap-4 mt-2 border-t border-slate-100 pt-4">
-                              <input required placeholder={t[lang].reg.user} className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-xs font-bold focus:border-[#E8622A] outline-none text-[#2D1B4E]" value={newShop.username} onChange={e => setNewShop({...newShop, username: e.target.value})} />
-                              <input required placeholder={t[lang].reg.pass} className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-xs font-bold focus:border-[#E8622A] outline-none text-[#2D1B4E]" value={newShop.password} onChange={e => setNewShop({...newShop, password: e.target.value})} />
+                          <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+                              <input required placeholder={t[lang].reg.user} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.username} onChange={e => setNewShop({...newShop, username: e.target.value})} />
+                              <input required placeholder={t[lang].reg.pass} className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.password} onChange={e => setNewShop({...newShop, password: e.target.value})} />
                           </div>
-                          
-                          <button type="submit" disabled={isUploading || emailValid === false || phoneValid === false || adminEmailValid === false} className="w-full btn-primary justify-center py-5 rounded-2xl mt-2 uppercase text-xs tracking-[0.2em] shadow-lg border-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-                            {isUploading ? t[lang].reg.uploading : t[lang].reg.submit}
-                          </button>
+                          <button type="submit" disabled={isUploading || emailValid === false || phoneValid === false || adminEmailValid === false} className="w-full btn-primary justify-center py-4 rounded-xl mt-2 shadow-lg border-none cursor-pointer">{isUploading ? t[lang].reg.uploading : t[lang].reg.submit}</button>
                       </form>
                   </>
               )}
@@ -673,957 +610,171 @@ export default function Home() {
       {/* GİRİŞ MODALI */}
       {showLogin && (
         <div className="fixed inset-0 bg-[#2D1B4E]/80 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-[480px] rounded-[32px] p-8 md:p-12 relative animate-in zoom-in-95 duration-300 shadow-2xl border border-slate-200">
-            <button onClick={() => setShowLogin(false)} className="absolute top-6 right-6 text-slate-400 hover:text-[#E8622A] bg-transparent border-none cursor-pointer">
-              <X size={28}/>
-            </button>
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-[#E8622A]/10 text-[#E8622A] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner"><Store size={32} /></div>
-              <h1 className="text-2xl md:text-3xl font-black text-[#2D1B4E] uppercase tracking-tight mb-2">GİRİŞ YAP</h1>
-              <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">BOOKCY İŞ ORTAĞI PANELİ</p>
-            </div>
-            <div className="flex bg-slate-50 p-1 rounded-xl mb-8 border border-slate-100">
-              <button onClick={() => setLoginType('owner')} className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-lg transition-all border-none cursor-pointer flex justify-center items-center gap-2 ${loginType === 'owner' ? 'bg-white text-[#E8622A] shadow-sm' : 'bg-transparent text-slate-400 hover:text-slate-600'}`}><User size={14}/> YÖNETİCİ</button>
-              <button onClick={() => setLoginType('staff')} className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-lg transition-all border-none cursor-pointer flex justify-center items-center gap-2 ${loginType === 'staff' ? 'bg-white text-[#E8622A] shadow-sm' : 'bg-transparent text-slate-400 hover:text-slate-600'}`}><Users size={14}/> PERSONEL</button>
+          <div className="bg-white w-full max-w-[400px] rounded-[32px] p-8 relative shadow-2xl border border-slate-200">
+            <button onClick={() => setShowLogin(false)} className="absolute top-6 right-6 text-slate-400 bg-transparent border-none cursor-pointer"><X size={24}/></button>
+            <div className="text-center mb-6"><h1 className="text-2xl font-black text-[#2D1B4E] uppercase mb-2">GİRİŞ YAP</h1><p className="text-slate-400 font-bold text-xs uppercase">İŞ ORTAĞI PANELİ</p></div>
+            <div className="flex bg-slate-50 p-1 rounded-xl mb-6">
+              <button onClick={() => setLoginType('owner')} className={`flex-1 py-3 text-xs font-black uppercase rounded-lg border-none cursor-pointer flex justify-center items-center gap-2 ${loginType === 'owner' ? 'bg-white text-[#E8622A] shadow-sm' : 'bg-transparent text-slate-400'}`}>YÖNETİCİ</button>
+              <button onClick={() => setLoginType('staff')} className={`flex-1 py-3 text-xs font-black uppercase rounded-lg border-none cursor-pointer flex justify-center items-center gap-2 ${loginType === 'staff' ? 'bg-white text-[#E8622A] shadow-sm' : 'bg-transparent text-slate-400'}`}>PERSONEL</button>
             </div>
             <form onSubmit={handleLogin} className="space-y-4">
-              <div className="relative"><Store className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20}/><input type="text" required placeholder="İşletme Kullanıcı Adı" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-14 pr-6 font-bold text-sm outline-none focus:border-[#E8622A] text-[#2D1B4E] placeholder:text-slate-400" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} /></div>
-              {loginType === 'staff' && (<div className="relative animate-in fade-in zoom-in-95 duration-300"><User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20}/><input type="text" required placeholder="Personel İsim Soyisim" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-14 pr-6 font-bold text-sm outline-none focus:border-[#E8622A] text-[#2D1B4E] placeholder:text-slate-400" value={loginStaffName} onChange={(e) => setLoginStaffName(e.target.value)} /></div>)}
-              <div className="relative"><Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20}/><input type="password" required placeholder="Şifre" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-14 pr-6 font-bold text-sm outline-none focus:border-[#E8622A] text-[#2D1B4E] placeholder:text-slate-400" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} /></div>
-              <button type="submit" disabled={isLoginLoading} className="w-full btn-primary py-5 rounded-2xl font-black uppercase tracking-widest text-xs flex justify-center items-center gap-2 transition-all mt-6 disabled:opacity-70 border-none cursor-pointer">{isLoginLoading ? 'Giriş Yapılıyor...' : 'PANELE GİT'} <ArrowRight size={18}/></button>
+              <input type="text" required placeholder="Kullanıcı Adı" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm outline-none text-[#2D1B4E]" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} />
+              {loginType === 'staff' && <input type="text" required placeholder="Personel Adı" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm outline-none text-[#2D1B4E]" value={loginStaffName} onChange={(e) => setLoginStaffName(e.target.value)} />}
+              <input type="password" required placeholder="Şifre" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm outline-none text-[#2D1B4E]" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
+              <button type="submit" disabled={isLoginLoading} className="w-full btn-primary py-4 rounded-xl font-black uppercase tracking-widest text-xs flex justify-center items-center mt-4 border-none cursor-pointer">{isLoginLoading ? 'Bekleyin...' : 'PANELE GİT'}</button>
             </form>
           </div>
         </div>
       )}
 
-      <main className="flex-1 w-full relative z-10" style={{minHeight: '80vh'}}>
-        
+      <main className="flex-1 w-full relative z-10 min-h-[80vh] mt-[72px]">
         {/* === ANA SAYFA === */}
         {step === 'services' && (
-            <div className="w-full animate-in fade-in">
+            <div className="w-full">
                 <section className="hero">
-                  <div className="orb orb-1"></div><div className="orb orb-2"></div><div className="orb orb-3"></div>
                   <div className="hero-content">
-                    <div className="hero-eyebrow">
-                      <div className="hero-eyebrow-dot"></div>
-                      {t[lang].home.eyebrow}
-                    </div>
-                    <h1 className="hero-title">
-                      {t[lang].home.title1}<br/>
-                      <span className="accent">{t[lang].home.title2}</span><br/>
-                      <span className="accent-2">{t[lang].home.title3}</span> {t[lang].home.title4}
-                    </h1>
+                    <div className="hero-eyebrow"><div className="hero-eyebrow-dot"></div>{t[lang].home.eyebrow}</div>
+                    <h1 className="hero-title">{t[lang].home.title1} <span className="accent">{t[lang].home.title2}</span><br/>{t[lang].home.title3} <span className="accent">{t[lang].home.title4}</span></h1>
                     <p className="hero-sub">{t[lang].home.subtitle}</p>
-                    
                     <form className="search-wrap" onSubmit={handleHeroSearch}>
-                      <div className="search-field">
-                        <span className="search-icon"><Search size={18}/></span>
-                        <input aria-label="Hizmet veya Mekan Arama" type="text" placeholder={t[lang].home.searchPlace} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}/>
-                      </div>
-                      <div className="search-divider"></div>
-                      <div className="search-location">
-                        <MapPin size={16} className="text-slate-400"/>
-                        <select aria-label="Bölge Seçimi" value={filterRegion} onChange={(e) => setFilterRegion(e.target.value)}>
-                          <option value="All">{t[lang].home.searchLoc}</option>
-                          {cyprusRegions.map(r => <option key={r} value={r}>{r}</option>)}
-                        </select>
-                      </div>
-                      <button type="submit" className="search-btn"><Search size={16}/>{t[lang].home.searchBtn}</button>
+                      <div className="search-field"><Search className="search-icon" size={20}/><input type="text" placeholder={t[lang].home.searchPlace} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}/></div>
+                      <div className="search-location"><MapPin size={20} className="text-slate-400"/><select value={filterRegion} onChange={(e) => setFilterRegion(e.target.value)}><option value="All">{t[lang].home.searchLoc}</option>{cyprusRegions.map(r => <option key={r} value={r}>{r}</option>)}</select></div>
+                      <button type="submit" className="search-btn">{t[lang].home.searchBtn}</button>
                     </form>
-                    
-                    <div className="hero-popular">
-                      <span>{t[lang].home.popTitle}</span>
-                      <button className="pop-tag" onClick={()=>{setFilterService('Berber'); setStep('all_shops');}}>💈 {t[lang].cats.barber}</button>
-                      <button className="pop-tag" onClick={()=>{setFilterService('Tırnak & Güzellik'); setStep('all_shops');}}>💅 {t[lang].cats.nail}</button>
-                      <button className="pop-tag" onClick={()=>{setFilterService('Spa & Masaj'); setStep('all_shops');}}>💆 {t[lang].cats.spa}</button>
-                      <button className="pop-tag" onClick={()=>{setFilterService('Bar & Club'); setStep('all_shops');}}>🍸 {t[lang].cats.club}</button>
-                    </div>
+                    <div className="hero-popular"><span>{t[lang].home.popTitle}</span>{categories.slice(0,4).map(c=><button key={c.key} className="pop-tag" onClick={()=>{setFilterService(c.dbName); setStep('all_shops');}}>{c.emoji} {c.dbName}</button>)}</div>
                   </div>
-
-                  {(() => {
-                      const liveShopsCount = approvedShops.length > 0 ? approvedShops.length : 142;
-                      const liveCustomersCount = (new Set(globalAppointments.filter(a => a.customer_phone).map(a => a.customer_phone)).size) || 3850;
-                      const liveApptsCount = globalAppointments.length > 0 ? globalAppointments.length : 12400;
-                      return (
-                          <div className="hero-stats">
-                              <div className="stat">
-                                <div className="stat-num">{liveShopsCount.toLocaleString('tr-TR')}</div>
-                                <div className="stat-label">{t[lang].home.stats.s1}</div>
-                              </div>
-                              <div className="stat">
-                                <div className="stat-num">{liveCustomersCount.toLocaleString('tr-TR')}</div>
-                                <div className="stat-label">{t[lang].home.stats.s2}</div>
-                              </div>
-                              <div className="stat">
-                                <div className="stat-num">{liveApptsCount.toLocaleString('tr-TR')}</div>
-                                <div className="stat-label">{t[lang].home.stats.s3}</div>
-                              </div>
-                              <div className="stat">
-                                <div className="stat-num">%98</div>
-                                <div className="stat-label">{t[lang].home.stats.s4}</div>
-                              </div>
-                          </div>
-                      );
-                  })()}
-                  <svg className="wave" viewBox="0 0 1440 80" preserveAspectRatio="none" fill="var(--c-bg-main)">
-                    <path d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z"/>
-                  </svg>
-                </section>
-
-                <section className="section-categories">
-                  <div className="section-header reveal">
-                    <div>
-                      <div className="section-label-sm">{t[lang].cats.catTitle}</div>
-                      <div className="section-title">{t[lang].cats.catSub}</div>
-                    </div>
-                    <button className="see-all" onClick={()=>{setFilterService('All'); setStep('all_shops'); window.scrollTo(0,0);}}>{t[lang].cats.seeAll}</button>
-                  </div>
-                  <div className="categories-grid">
-                    {categories.map((c, i) => (
-                        <div key={c.key} onClick={() => { setFilterService(c.dbName); setStep('all_shops'); window.scrollTo(0,0); }} className={`cat-card reveal reveal-delay-${(i%4)+1}`}>
-                          <div className="cat-img-wrap"><div className="cat-emoji-bg" style={{background: c.bg}}>{c.emoji}</div></div>
-                          <div className="cat-name">{t[lang].cats[c.key]}</div>
-                        </div>
-                    ))}
+                  <div className="hero-stats">
+                      <div className="stat"><div className="stat-num">{approvedShops.length}</div><div className="stat-label">{t[lang].home.stats.s1}</div></div>
+                      <div className="stat"><div className="stat-num">{new Set(globalAppointments.map(a => a.customer_phone)).size}</div><div className="stat-label">{t[lang].home.stats.s2}</div></div>
+                      <div className="stat"><div className="stat-num">{globalAppointments.length}</div><div className="stat-label">{t[lang].home.stats.s3}</div></div>
+                      <div className="stat"><div className="stat-num">%98</div><div className="stat-label">{t[lang].home.stats.s4}</div></div>
                   </div>
                 </section>
-
+                <section className="bg-white py-20 px-8 border-b border-slate-200">
+                  <div className="max-w-6xl mx-auto flex justify-between items-end mb-10">
+                    <div><div className="text-[11px] font-black text-[#E8622A] uppercase tracking-[0.3em] mb-2">{t[lang].cats.catTitle}</div><div className="text-3xl font-black text-[#2D1B4E]">{t[lang].cats.catSub}</div></div>
+                    <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer" onClick={()=>{setFilterService('All'); setStep('all_shops'); window.scrollTo(0,0);}}>{t[lang].cats.seeAll}</button>
+                  </div>
+                  <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                    {categories.map((c) => (<button key={c.key} onClick={() => { setFilterService(c.dbName); setStep('all_shops'); window.scrollTo(0,0); }} className="cat-card"><div className="cat-img-wrap"><div className="cat-emoji-bg" style={{background: c.bg}}>{c.emoji}</div></div><div className="cat-name">{t[lang].cats[c.key]}</div></button>))}
+                  </div>
+                </section>
                {recommendedShops.length > 0 && (
-                  <section className="section-featured">
-                    <div className="section-header">
-                      <div>
-                        <div className="section-label-sm">{t[lang].homeInfo.recLabel}</div>
-                        <div className="section-title">{t[lang].homeInfo.recTitle}</div>
-                      </div>
-                      <button className="see-all" onClick={()=>{setFilterSort('High'); setStep('all_shops'); window.scrollTo(0,0);}}>{t[lang].cats.seeAll}</button>
+                  <section className="bg-slate-50 py-20 px-8 border-t border-slate-200">
+                    <div className="max-w-6xl mx-auto flex justify-between items-end mb-10">
+                      <div><div className="text-[11px] font-black text-[#E8622A] uppercase tracking-[0.3em] mb-2">{t[lang].homeInfo.recLabel}</div><div className="text-3xl font-black text-[#2D1B4E]">{t[lang].homeInfo.recTitle}</div></div>
+                      <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer" onClick={()=>{setFilterSort('High'); setStep('all_shops'); window.scrollTo(0,0);}}>{t[lang].cats.seeAll}</button>
                     </div>
-                    <div className="featured-grid">
-                      {recommendedShops.map((shop, idx) => (
-                          <div key={shop.id} onClick={() => { setSelectedShop(shop); setStep('shop_profile'); setProfileTab(shop.category === 'Bar & Club' ? 'events' : 'services'); setBookingPhase(1); window.scrollTo(0,0); }} className={`venue-card ${idx === 0 ? 'featured' : ''}`}>
-                            <div className="venue-img" style={{background: 'var(--c-bg-sub)'}}>
-                              {shop.cover_url || shop.logo_url ? <img alt={`${shop.name} Fotoğrafı`} loading="lazy" decoding="async" src={shop.cover_url || shop.logo_url} /> : categories.find(c=>c.dbName===shop.category)?.emoji}
-                              {idx === 0 && <div className="venue-badge hot">🔥 Çok Popüler</div>}
-                              {idx === 1 && <div className="venue-badge new">✨ Yeni</div>}
-                              <div className="venue-fav"><HeartHandshake size={14}/></div>
-                            </div>
-                            <div className="venue-info">
-                              <div className="venue-cat">{t[lang].cats[categories.find(c => c.dbName === shop.category)?.key || 'barber']}</div>
-                              <div className="venue-name">{shop.name}</div>
-                              <div className="venue-meta"><span>📍 {shop.location}</span></div>
-                              <button className="venue-book-btn">{t[lang].book.btnBook}</button>
-                            </div>
-                          </div>
-                      ))}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                      {recommendedShops.map((shop, idx) => (<div key={shop.id} onClick={() => { setSelectedShop(shop); setStep('shop_profile'); setProfileTab(shop.category === 'Bar & Club' ? 'events' : 'services'); setBookingPhase(1); window.scrollTo(0,0); }} className={`venue-card flex flex-col bg-white rounded-[32px] overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer ${idx === 0 ? 'md:row-span-2' : ''}`}><div className={`w-full bg-slate-100 flex items-center justify-center text-6xl relative ${idx === 0 ? 'h-[300px]' : 'h-[200px]'}`}>{shop.cover_url || shop.logo_url ? <img loading="lazy" decoding="async" src={shop.cover_url || shop.logo_url} className="w-full h-full object-cover"/> : categories.find(c=>c.dbName===shop.category)?.emoji}{idx === 0 && <div className="absolute top-4 left-4 bg-gradient-to-r from-[#E8622A] to-orange-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full">🔥 VIP</div>}</div><div className="p-6 flex flex-col flex-1"><div className="text-[10px] font-black text-[#E8622A] tracking-widest uppercase mb-2">{t[lang].cats[categories.find(c => c.dbName === shop.category)?.key || 'barber']}</div><div className="text-xl font-black text-[#2D1B4E] mb-3">{shop.name}</div><div className="text-sm font-bold text-slate-500 mb-6">📍 {shop.location}</div><button className="mt-auto w-full bg-[#2D1B4E] text-white font-black py-3 rounded-xl uppercase text-xs hover:bg-[#E8622A] transition-colors border-none cursor-pointer">{t[lang].book.btnBook}</button></div></div>))}
                     </div>
                   </section>
                )}
-
-              <section className="section-how">
-                <div className="how-inner">
-                  <div className="how-header">
-                    <div className="section-label-sm" style={{color:'var(--terra)', marginBottom:'8px', fontWeight:'800', letterSpacing:'4px'}}>{t[lang].homeInfo.howLabel}</div>
-                    <div className="section-title" style={{color:'white'}}>{t[lang].homeInfo.howTitle}</div>
-                  </div>
-                  <div className="steps-grid">
-                    <div className="step">
-                      <div className="step-icon" style={{background:'rgba(255,255,255,0.05)'}}>🔍<div className="step-num">1</div></div>
-                      <div className="step-title">{t[lang].homeInfo.how1Title}</div>
-                      <div className="step-desc">{t[lang].homeInfo.how1Desc}</div>
-                    </div>
-                    <div className="step">
-                      <div className="step-icon" style={{background:'rgba(255,255,255,0.05)'}}>📅<div className="step-num">2</div></div>
-                      <div className="step-title">{t[lang].homeInfo.how2Title}</div>
-                      <div className="step-desc">{t[lang].homeInfo.how2Desc}</div>
-                    </div>
-                    <div className="step">
-                      <div className="step-icon" style={{background:'rgba(255,255,255,0.05)'}}>✅<div className="step-num">3</div></div>
-                      <div className="step-title">{t[lang].homeInfo.how3Title}</div>
-                      <div className="step-desc">{t[lang].homeInfo.how3Desc}</div>
-                    </div>
-                    <div className="step">
-                      <div className="step-icon" style={{background:'rgba(255,255,255,0.05)'}}>✨<div className="step-num">4</div></div>
-                      <div className="step-title">{t[lang].homeInfo.how4Title}</div>
-                      <div className="step-desc">{t[lang].homeInfo.how4Desc}</div>
-                    </div>
-                  </div>
+              <section className="bg-white py-24 px-8 border-t border-slate-200">
+                <div className="max-w-6xl mx-auto text-center">
+                  <div className="text-[#E8622A] font-black text-sm tracking-widest uppercase mb-4">{t[lang].homeInfo.howLabel}</div>
+                  <div className="text-4xl md:text-5xl font-black text-[#2D1B4E] mb-16">{t[lang].homeInfo.howTitle}</div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative"><div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-[2px] bg-slate-100 z-0"></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">🔍<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">1</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{t[lang].homeInfo.how1Title}</div><div className="text-sm text-slate-500 font-medium">{t[lang].homeInfo.how1Desc}</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">📅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">2</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{t[lang].homeInfo.how2Title}</div><div className="text-sm text-slate-500 font-medium">{t[lang].homeInfo.how2Desc}</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">✅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">3</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{t[lang].homeInfo.how3Title}</div><div className="text-sm text-slate-500 font-medium">{t[lang].homeInfo.how3Desc}</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">✨<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">4</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{t[lang].homeInfo.how4Title}</div><div className="text-sm text-slate-500 font-medium">{t[lang].homeInfo.how4Desc}</div></div></div>
                 </div>
               </section>
+            </div>
+        )}
 
-              <section className="section-cta">
-                <div className="cta-inner">
-                  <div className="cta-text">
-                    <div className="section-label-sm">{t[lang].homeInfo.ctaLabel}</div>
-                    <div className="cta-title">{t[lang].homeInfo.ctaTitle1}<br/><span>{t[lang].homeInfo.ctaTitle2}</span></div>
-                    <div className="cta-sub">{t[lang].homeInfo.ctaSub}</div>
-                  </div>
-                  <div className="cta-actions">
-                    <button onClick={()=>{setShowRegister(true); window.scrollTo(0,0);}} className="app-badge">
-                        <div className="app-badge-icon">💼</div>
-                        <div className="app-badge-text">
-                            <div className="small">Hemen Katıl</div>
-                            <div className="big">İşletme Ekle</div>
-                        </div>
-                    </button>
-
-                    <button onClick={()=>{setStep('about'); window.scrollTo(0,0);}} className="app-badge">
-                        <div className="app-badge-text">
-                            <div className="small">İncele</div>
-                            <div className="big">Özellikler & Paketler</div>
-                        </div>
-                    </button>
-                  </div>
+        {/* === NEDEN BOOKCY === */}
+        {step === 'why_bookcy' && (
+            <div className="w-full bg-[#FAF7F2] animate-in fade-in overflow-hidden pb-24">
+                <div className="bg-[#2D1B4E] pt-32 pb-24 px-4 md:px-8 text-center relative overflow-hidden border-b border-slate-800">
+                    <span className="bg-white/10 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 inline-block border border-white/20 relative z-10">Farkı Keşfedin</span>
+                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-6 relative z-10">Neden <span className="text-[#E8622A]">Bookcy</span> Kullanıyorlar?</h1>
+                    <p className="text-lg text-slate-300 max-w-2xl mx-auto">Kişisel bakım yolculuğunuzun en güvenilir ortağıyız.</p>
                 </div>
-              </section>
+                <div className="max-w-[1200px] mx-auto px-4 md:px-8 -mt-10 relative z-20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200"><div className="w-16 h-16 bg-orange-50 text-[#E8622A] rounded-2xl flex items-center justify-center mb-6"><Crown size={32}/></div><h3 className="font-black text-xl text-[#2D1B4E] mb-3">Öncü Platform</h3><p className="text-slate-500 font-medium">Kıbrıs’ta ilk ve öncü randevu platformlarından biri olarak, sektöre yön veriyoruz.</p></div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200"><div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6"><Grid size={32}/></div><h3 className="font-black text-xl text-[#2D1B4E] mb-3">Entegre Sistem</h3><p className="text-slate-500 font-medium">Farklı sektörleri tek çatı altında toplayarak kapsamlı deneyim sunuyoruz.</p></div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200"><div className="w-16 h-16 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center mb-6"><Users size={32}/></div><h3 className="font-black text-xl text-[#2D1B4E] mb-3">Gerçek Müşteri</h3><p className="text-slate-500 font-medium">İşletmelere gerçek müşteri kazandıran aktif bir trafik sağlıyoruz.</p></div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200"><div className="w-16 h-16 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center mb-6"><Smartphone size={32}/></div><h3 className="font-black text-xl text-[#2D1B4E] mb-3">Üst Düzey Arayüz</h3><p className="text-slate-500 font-medium">Sade, hızlı ve kullanıcı dostu modern bir arayüz sunuyoruz.</p></div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200"><div className="w-16 h-16 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center mb-6"><TrendingUp size={32}/></div><h3 className="font-black text-xl text-[#2D1B4E] mb-3">Maksimum Kazanç</h3><p className="text-slate-500 font-medium">İşletmeler için adil, şeffaf ve komisyonsuz modelimiz ile gelirinizi katlamanızı sağlıyoruz.</p></div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200"><div className="w-16 h-16 bg-teal-50 text-teal-500 rounded-2xl flex items-center justify-center mb-6"><MessageSquare size={32}/></div><h3 className="font-black text-xl text-[#2D1B4E] mb-3">Gelişmiş Otomasyon</h3><p className="text-slate-500 font-medium">Yüksek performanslı altyapımızla yakında eklenecek SMS ve gelişmiş bildirim sistemleri.</p></div>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* === HAKKIMIZDA === */}
+        {step === 'about' && (
+            <div className="w-full bg-[#FAF7F2] animate-in fade-in overflow-hidden pb-24">
+                <div className="bg-[#2D1B4E] pt-32 pb-24 px-4 md:px-8 text-center relative overflow-hidden border-b border-slate-800">
+                    <span className="bg-white/10 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 inline-block border border-white/20">Kıbrıs'ın #1 Randevu Platformu</span>
+                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-6">İşletmeni Dijitale Taşı,<br/><span className="text-[#E8622A]">Müşterilerini Katla</span></h1>
+                </div>
+                <div className="max-w-[1000px] mx-auto px-4 md:px-8 py-20 text-center">
+                    <h2 className="text-sm font-black text-[#E8622A] uppercase tracking-[0.3em] mb-4">Biz Kimiz?</h2>
+                    <p className="text-xl md:text-3xl text-[#2D1B4E] font-black leading-tight mb-8">Bookcy, Kıbrıs’ta kurulan ilk ve tek kapsamlı online randevu platformlarından biri olarak, işletmelerin dijital dönüşümünü hızlandırmak için geliştirilmiştir.</p>
+                </div>
+                <div className="bg-slate-50 py-24 border-y border-slate-200">
+                    <div className="max-w-[1000px] mx-auto px-4 md:px-8">
+                        <div className="text-center mb-16"><h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[#2D1B4E] mb-4">Paketlerimiz</h2><p className="text-slate-500 font-medium">Sürpriz kesintiler yok, gizli ücretler yok.</p></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div className="bg-white border border-slate-200 rounded-[32px] p-8 md:p-10 shadow-lg">
+                                <h3 className="text-2xl font-black text-[#2D1B4E] mb-2">Standart Paket</h3>
+                                <div className="flex items-baseline gap-2 mb-8 border-b border-slate-100 pb-8"><span className="text-4xl font-black text-[#2D1B4E]">60 STG</span><span className="text-slate-500 font-bold">/ Aylık</span></div>
+                                <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="w-full bg-slate-100 text-[#2D1B4E] hover:bg-slate-200 hover:text-[#E8622A] py-4 rounded-xl font-black uppercase tracking-widest text-xs transition-colors cursor-pointer border-none">Hemen Başla</button>
+                            </div>
+                            <div className="bg-[#2D1B4E] border-2 border-[#E8622A] rounded-[32px] p-8 md:p-10 shadow-lg">
+                                <h3 className="text-2xl font-black text-white mb-2 mt-4">Premium Paket</h3>
+                                <div className="flex items-baseline gap-2 mb-8 border-b border-white/10 pb-8"><span className="text-5xl font-black text-[#E8622A]">100 STG</span><span className="text-slate-400 font-bold">/ Aylık</span></div>
+                                <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="w-full bg-[#E8622A] hover:bg-[#d4561f] text-white py-5 rounded-xl font-black uppercase tracking-widest text-xs transition-all cursor-pointer border-none">Premium'a Geç</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* === İLETİŞİM === */}
+        {step === 'contact' && (
+            <div className="w-full bg-[#FAF7F2] animate-in fade-in overflow-hidden pb-24">
+                <div className="bg-white pt-24 pb-32 px-4 md:px-8 text-center relative overflow-hidden border-b border-slate-200"><span className="bg-orange-50 text-[#E8622A] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 inline-block border border-orange-100">7/24 Destek</span><h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-[#2D1B4E] mb-6 relative z-10">{t[lang].contact.title}</h1><p className="text-lg md:text-2xl font-medium text-slate-500 max-w-3xl mx-auto leading-relaxed relative z-10">{t[lang].contact.sub}</p></div>
+                <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-16 md:py-24 -mt-10 md:-mt-20 relative z-20"><div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"><div className="bg-white p-8 md:p-10 rounded-[32px] shadow-xl border border-slate-200 flex flex-col items-center text-center group hover:-translate-y-2 transition-transform"><div className="w-16 h-16 md:w-20 md:h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"><MessageCircle size={32}/></div><h3 className="text-xl md:text-2xl font-black text-[#2D1B4E] mb-3">{t[lang].contact.whatsapp}</h3><p className="text-sm md:text-base text-slate-500 font-medium mb-8 leading-relaxed flex-1">{t[lang].contact.wpDesc}</p><a href="https://wa.me/905555555555" target="_blank" rel="noopener noreferrer" className="w-full bg-[#25D366] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg shadow-green-500/30 flex justify-center items-center gap-2 text-decoration-none text-xs md:text-sm"><MessageCircle size={18}/> {t[lang].contact.btnWp}</a></div><div className="bg-white p-8 md:p-10 rounded-[32px] shadow-xl border border-slate-200 flex flex-col items-center text-center group hover:-translate-y-2 transition-transform"><div className="w-16 h-16 md:w-20 md:h-20 bg-pink-50 text-pink-500 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"><InstagramIcon size={32}/></div><h3 className="text-xl md:text-2xl font-black text-[#2D1B4E] mb-3">{t[lang].contact.insta}</h3><p className="text-sm md:text-base text-slate-500 font-medium mb-8 leading-relaxed flex-1">{t[lang].contact.instaDesc}</p><a href="https://instagram.com/bookcy" target="_blank" rel="noopener noreferrer" className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-[#E8622A] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:opacity-90 transition-opacity shadow-lg shadow-pink-500/30 flex justify-center items-center gap-2 text-decoration-none text-xs md:text-sm"><InstagramIcon size={18}/> {t[lang].contact.btnInsta}</a></div><div className="bg-white p-8 md:p-10 rounded-[32px] shadow-xl border border-slate-200 flex flex-col items-center text-center group hover:-translate-y-2 transition-transform"><div className="w-16 h-16 md:w-20 md:h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"><Mail size={32}/></div><h3 className="text-xl md:text-2xl font-black text-[#2D1B4E] mb-3">{t[lang].contact.email}</h3><p className="text-sm md:text-base text-slate-500 font-medium mb-8 leading-relaxed flex-1">{t[lang].contact.emailDesc}</p><a href="mailto:noreplybookcy@gmail.com" className="w-full bg-[#2D1B4E] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-[#1a0f2e] transition-colors shadow-lg shadow-[#2D1B4E]/30 flex justify-center items-center gap-2 text-decoration-none text-xs md:text-sm"><Mail size={18}/> {t[lang].contact.btnEmail}</a></div></div></div>
             </div>
         )}
 
         {/* === TÜM MEKANLAR / FİLTRELEME === */}
         {step === 'all_shops' && (
-            <div className="w-full max-w-[1400px] mx-auto pt-24 px-4 md:px-8 animate-in fade-in duration-500 pb-20">
-                <button onClick={() => {setStep('services'); window.scrollTo(0,0);}} className="flex items-center text-slate-400 hover:text-[#E8622A] mb-8 text-[10px] font-black uppercase tracking-[0.2em] transition-colors bg-transparent border-none outline-none cursor-pointer">
-                  <ChevronLeft size={16} className="mr-2"/> {t[lang].shops.back}
-                </button>
-                <div className="flex justify-between items-end mb-8 border-b theme-border-sub pb-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase theme-text-main">{t[lang].filters.title}</h2>
-                    <span className="text-sm font-bold theme-text-muted">{sortedShops.length} {t[lang].filters.count}</span>
-                </div>
-
+            <div className="w-full max-w-[1400px] mx-auto pt-10 px-4 md:px-8 pb-20">
+                <button onClick={() => {setStep('services'); window.scrollTo(0,0);}} className="flex items-center text-slate-400 hover:text-[#E8622A] mb-8 text-[10px] font-black uppercase tracking-[0.2em] bg-transparent border-none cursor-pointer"><ChevronLeft size={16} className="mr-2"/> {t[lang].shops.back}</button>
+                <div className="flex justify-between items-end mb-8 border-b theme-border-sub pb-4"><h2 className="text-3xl font-black uppercase theme-text-main">{t[lang].filters.title}</h2><span className="text-sm font-bold theme-text-muted">{sortedShops.length} {t[lang].filters.count}</span></div>
                 <div className="flex flex-col lg:flex-row gap-8 items-start">
-                    <aside className="w-full lg:w-[320px] theme-bg-card theme-border rounded-[24px] p-6 lg:sticky top-28 shrink-0 shadow-sm flex flex-col gap-8">
-                        <div className="flex justify-between items-center border-b theme-border-sub pb-4">
-                            <h3 className="font-black theme-text-main uppercase tracking-widest text-xs flex items-center gap-2"><SlidersHorizontal size={16}/> Filtreler</h3>
-                            <button onClick={() => {setFilterRegion('All'); setFilterService('All'); setSearchQuery(''); setFilterSort('High');}} className="text-[10px] font-bold text-slate-400 hover:text-[#E8622A] transition-colors uppercase bg-transparent border-none outline-none cursor-pointer">{t[lang].filters.clear}</button>
-                        </div>
-                        <div>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-3">{t[lang].filters.search}</p>
-                            <div className="relative">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} aria-hidden="true"/>
-                                <input aria-label="Arama Kutusu" type="text" placeholder={t[lang].filters.search} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full theme-bg-sub theme-border-sub rounded-xl py-3 pl-10 pr-4 font-bold text-xs theme-text-main outline-none focus:border-[#E8622A] transition-colors" />
-                            </div>
-                        </div>
-                        <div>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-3">{t[lang].filters.region}</p>
-                            <div className="flex flex-col gap-2">
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${filterRegion === 'All' ? 'bg-[#E8622A] border-[#E8622A]' : 'theme-bg-card theme-border hover:border-[#E8622A]'}`}>
-                                        {filterRegion === 'All' && <Check size={14} className="text-white"/>}
-                                    </div>
-                                    <span className={`text-sm font-bold transition-colors ${filterRegion === 'All' ? 'theme-text-main' : 'theme-text-muted group-hover:text-[#E8622A]'}`}>Tüm Bölgeler</span>
-                                    <input type="radio" className="hidden" checked={filterRegion === 'All'} onChange={() => setFilterRegion('All')} />
-                                </label>
-                                {cyprusRegions.map(r => (
-                                    <label key={r} className="flex items-center gap-3 cursor-pointer group">
-                                        <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${filterRegion === r ? 'bg-[#E8622A] border-[#E8622A]' : 'theme-bg-card theme-border hover:border-[#E8622A]'}`}>
-                                            {filterRegion === r && <Check size={14} className="text-white"/>}
-                                        </div>
-                                        <span className={`text-sm font-bold transition-colors ${filterRegion === r ? 'theme-text-main' : 'theme-text-muted group-hover:text-[#E8622A]'}`}>{r}</span>
-                                        <input type="radio" className="hidden" checked={filterRegion === r} onChange={() => setFilterRegion(r)} />
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-                        <div>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-3">{t[lang].filters.service}</p>
-                            <div className="flex flex-wrap gap-2">
-                                <button onClick={() => setFilterService('All')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border outline-none cursor-pointer ${filterService === 'All' ? 'bg-[var(--fig)] text-white border-[var(--fig)]' : 'theme-bg-sub theme-text-muted theme-border hover:border-[#E8622A] hover:text-[#E8622A]'}`}>Tümü</button>
-                                {categories.map(c => (
-                                    <button key={c.dbName} onClick={() => setFilterService(c.dbName)} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border outline-none cursor-pointer ${filterService === c.dbName ? 'bg-[var(--fig)] text-white border-[var(--fig)]' : 'theme-bg-sub theme-text-muted theme-border hover:border-[#E8622A] hover:text-[#E8622A]'}`}>
-                                        {t[lang].cats[c.key]}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-3">Sıralama</p>
-                            <div className="relative theme-bg-sub rounded-xl theme-border-sub border">
-                                <select aria-label="Sıralama Seçenekleri" value={filterSort} onChange={(e) => setFilterSort(e.target.value)} className="w-full bg-transparent border-none py-3 pl-4 pr-10 font-bold text-xs theme-text-main outline-none appearance-none cursor-pointer">
-                                    <option value="High">{t[lang].filters.sortHigh}</option>
-                                    <option value="Low">{t[lang].filters.sortLow}</option>
-                                </select>
-                                <SlidersHorizontal size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
-                            </div>
-                        </div>
+                    <aside className="w-full lg:w-[320px] theme-bg-card theme-border rounded-[24px] p-6 shadow-sm flex flex-col gap-6">
+                        <input type="text" placeholder={t[lang].filters.search} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full theme-bg-sub theme-border-sub rounded-xl py-3 px-4 font-bold text-xs theme-text-main outline-none focus:border-[#E8622A]" />
+                        <select value={filterRegion} onChange={(e) => setFilterRegion(e.target.value)} className="w-full theme-bg-sub theme-border-sub rounded-xl py-3 px-4 font-bold text-xs theme-text-main outline-none focus:border-[#E8622A]"><option value="All">Tüm Bölgeler</option>{cyprusRegions.map(r => <option key={r} value={r}>{r}</option>)}</select>
+                        <select value={filterService} onChange={(e) => setFilterService(e.target.value)} className="w-full theme-bg-sub theme-border-sub rounded-xl py-3 px-4 font-bold text-xs theme-text-main outline-none focus:border-[#E8622A]"><option value="All">Tüm Kategoriler</option>{categories.map(c => <option key={c.dbName} value={c.dbName}>{c.dbName}</option>)}</select>
                     </aside>
-
                     <div className="flex-1 w-full flex flex-col gap-5">
                         {sortedShops.map((shop) => (
-                            <div key={shop.id} onClick={() => { 
-                                setSelectedShop(shop); 
-                                setStep('shop_profile'); 
-                                setProfileTab(shop.category === 'Bar & Club' ? 'events' : 'services'); 
-                                setBookingPhase(1); 
-                                window.scrollTo(0,0); 
-                              }} className="venue-card flex flex-col md:flex-row items-center justify-between p-5 md:p-6 theme-bg-card theme-border hover:border-[#E8622A] transition-colors rounded-[24px] cursor-pointer">
-                                <div className="flex items-center gap-6 w-full">
-                                    <div className="w-20 h-20 md:w-28 md:h-28 rounded-full theme-bg-sub flex items-center justify-center font-black text-[#E8622A] text-xs shadow-inner overflow-hidden theme-border-sub border shrink-0 relative">
-                                        {(shop.package === 'Premium' || shop.package === 'Premium Paket') && (
-                                            <div className="absolute inset-0 border-4 border-yellow-400 rounded-full shadow-[0_0_15px_rgba(250,204,21,0.5)]"></div>
-                                        )}
-                                        {shop.logo_url ? <img alt={`${shop.name} Logosu`} loading="lazy" decoding="async" src={shop.logo_url} className="w-full h-full object-cover" /> : "LOGO"}
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-1">
-                                            <h3 className="text-xl md:text-2xl font-black uppercase theme-text-main transition-colors">{shop.name}</h3>
-                                            {(shop.package === 'Premium' || shop.package === 'Premium Paket') && <Gem size={16} className="text-yellow-500 fill-yellow-500 drop-shadow-sm"/>}
-                                        </div>
-                                        <div className="flex flex-wrap items-center gap-3 mt-2 theme-text-muted text-[10px] md:text-xs font-bold uppercase tracking-widest">
-                                            <span className="flex items-center theme-text-main theme-bg-sub px-2 py-1 rounded-md"><Briefcase size={12} className="mr-1"/> {t[lang].cats[categories.find(c => c.dbName === shop.category)?.key || 'barber']}</span>
-                                            <span className="flex items-center"><MapPin size={12} className="mr-1"/> {shop.address || shop.location}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button className="hidden md:flex btn-primary mt-4 md:mt-0 shrink-0 border-none outline-none">{t[lang].book.btnBook}</button>
+                            <div key={shop.id} onClick={() => { setSelectedShop(shop); setStep('shop_profile'); setProfileTab(shop.category === 'Bar & Club' ? 'events' : 'services'); setBookingPhase(1); window.scrollTo(0,0); }} className="flex flex-col md:flex-row items-center p-5 theme-bg-card theme-border hover:border-[#E8622A] rounded-[24px] cursor-pointer transition-colors">
+                                <div className="w-20 h-20 rounded-full theme-bg-sub border theme-border-sub overflow-hidden shrink-0 flex items-center justify-center text-xs font-black text-[#E8622A] relative">{(shop.package === 'Premium Paket' || shop.package === 'Premium') && <div className="absolute inset-0 border-4 border-yellow-400 rounded-full"></div>}{shop.logo_url ? <img loading="lazy" decoding="async" src={shop.logo_url} className="w-full h-full object-cover" /> : "LOGO"}</div>
+                                <div className="flex-1 md:ml-6 mt-4 md:mt-0 text-center md:text-left"><div className="flex items-center justify-center md:justify-start gap-2 mb-1"><h3 className="text-xl font-black uppercase theme-text-main">{shop.name}</h3>{(shop.package === 'Premium Paket' || shop.package === 'Premium') && <Gem size={14} className="text-yellow-500 fill-yellow-500"/>}</div><div className="flex justify-center md:justify-start gap-3 mt-2 theme-text-muted text-[10px] font-bold uppercase"><span className="theme-bg-sub px-2 py-1 rounded-md">{shop.category}</span><span>📍 {shop.location}</span></div></div>
+                                <button className="mt-4 md:mt-0 btn-primary border-none cursor-pointer">SEÇ</button>
                             </div>
                         ))}
-                        {sortedShops.length === 0 && (
-                            <div className="text-center py-32 theme-bg-card rounded-[32px] theme-border border">
-                                <Search size={48} className="mx-auto text-slate-400 mb-4"/>
-                                <p className="theme-text-muted font-bold uppercase tracking-widest">{t[lang].shops.empty}</p>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
         )}
 
-        {/* === PROFİL === */}
-        {step === 'shop_profile' && selectedShop && (
-            <div className="w-full max-w-6xl mx-auto pt-24 px-4 animate-in fade-in duration-500 pb-20">
-                <button onClick={() => {setStep('all_shops'); window.scrollTo(0,0);}} className="flex items-center text-slate-400 hover:text-[#E8622A] mb-6 text-[10px] font-black uppercase tracking-[0.2em] transition-colors bg-transparent border-none outline-none cursor-pointer">
-                  <ChevronLeft size={16} className="mr-2"/> {t[lang].shops.back}
-                </button>
-                
-                <div className="w-full h-[250px] md:h-[350px] rounded-[32px] overflow-hidden relative mb-16 theme-border border theme-bg-sub shadow-sm">
-                    {selectedShop.cover_url ? <img alt={`${selectedShop.name} Kapak Görseli`} loading="lazy" decoding="async" src={selectedShop.cover_url} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-gradient-to-r from-[var(--c-border-sub)] to-[var(--c-bg-sub)]"></div>}
-                    <div className="absolute -bottom-10 left-8 flex items-end gap-6">
-                        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full theme-bg-card border-4 border-[var(--c-bg-card)] flex items-center justify-center shadow-lg overflow-hidden shrink-0 relative">
-                            {(selectedShop.package === 'Premium' || selectedShop.package === 'Premium Paket') && <div className="absolute inset-0 border-4 border-yellow-400 rounded-full z-10 pointer-events-none shadow-[0_0_20px_rgba(250,204,21,0.6)]"></div>}
-                            {selectedShop.logo_url ? <img alt={`${selectedShop.name} Logosu`} loading="lazy" decoding="async" src={selectedShop.logo_url} className="w-full h-full object-cover" /> : <span className="text-[#E8622A] font-black">LOGO</span>}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="px-2 md:px-8">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b theme-border-sub pb-8 gap-4">
-                        <div>
-                            <div className="flex items-center gap-3 mb-2">
-                                <h1 className="text-3xl md:text-5xl font-black uppercase theme-text-main tracking-tight">{selectedShop.name}</h1>
-                                {(selectedShop.package === 'Premium' || selectedShop.package === 'Premium Paket') && <Gem size={24} className="text-yellow-500 fill-yellow-500 drop-shadow-md"/>}
-                            </div>
-                            <div className="flex flex-wrap items-center gap-3 text-xs font-bold theme-text-muted uppercase tracking-widest">
-                                <span className="flex items-center text-[#E8622A]"><Briefcase size={14} className="mr-1"/> {t[lang].cats[categories.find(c => c.dbName === selectedShop.category)?.key || 'barber']}</span>
-                                <span className="flex items-center">
-                                  <MapPin size={14} className="mr-1"/> 
-                                  {selectedShop.maps_link ? (
-                                    <a href={selectedShop.maps_link.startsWith('http') ? selectedShop.maps_link : `https://${selectedShop.maps_link}`} target="_blank" rel="noopener noreferrer" className="theme-text-muted hover:text-[#E8622A] underline decoration-slate-400 underline-offset-4">{selectedShop.address || selectedShop.location}</a>
-                                  ) : (
-                                    selectedShop.address || selectedShop.location
-                                  )}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex gap-8 border-b theme-border-sub mb-8 overflow-x-auto custom-scrollbar">
-                        <button onClick={() => setProfileTab(selectedShop.category === 'Bar & Club' ? 'events' : 'services')} className={`pb-4 text-sm font-black uppercase tracking-widest whitespace-nowrap transition-colors border-b-4 bg-transparent outline-none cursor-pointer ${(profileTab === 'services' || profileTab === 'events') ? 'border-[#E8622A] text-[#E8622A]' : 'border-transparent text-slate-400 hover:theme-text-main'}`}>
-                          {selectedShop.category === 'Bar & Club' ? t[lang].profile.tabEvents : t[lang].profile.tabServices}
-                        </button>
-                        <button onClick={() => setProfileTab('gallery')} className={`pb-4 text-sm font-black uppercase tracking-widest whitespace-nowrap transition-colors border-b-4 bg-transparent outline-none cursor-pointer ${profileTab === 'gallery' ? 'border-[#E8622A] text-[#E8622A]' : 'border-transparent text-slate-400 hover:theme-text-main'}`}>{t[lang].profile.tabGallery}</button>
-                        <button onClick={() => setProfileTab('about')} className={`pb-4 text-sm font-black uppercase tracking-widest whitespace-nowrap transition-colors border-b-4 bg-transparent outline-none cursor-pointer ${profileTab === 'about' ? 'border-[#E8622A] text-[#E8622A]' : 'border-transparent text-slate-400 hover:theme-text-main'}`}>{t[lang].profile.about}</button>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                        <div className="lg:col-span-7">
-                            
-                            {/* BUKALEMUN SOL TARAF: CLUB İSE ETKİNLİKLER VE LOCALAR */}
-                            {(profileTab === 'events' || profileTab === 'services') && selectedShop.category === 'Bar & Club' && (
-                                <div className="animate-in fade-in flex flex-col gap-4">
-                                    {bookingPhase === 1 ? (
-                                        selectedShop.events && selectedShop.events.length > 0 ? (
-                                            selectedShop.events.map(ev => (
-                                                <div key={ev.id} onClick={() => { setBookingData({...bookingData, selectedEvent: ev, date: ev.date, time: ev.time}); setBookingPhase(2); }} 
-                                                     className="flex flex-col sm:flex-row gap-4 p-4 theme-bg-card rounded-[24px] border-2 theme-border-sub hover:border-[#E8622A] cursor-pointer transition-all hover:shadow-md items-center">
-                                                    <div className="w-full sm:w-32 h-40 sm:h-32 rounded-xl theme-bg-sub overflow-hidden shrink-0 border theme-border flex items-center justify-center">
-                                                        {ev.image_url ? <img alt={`${ev.name} Kapak`} loading="lazy" decoding="async" src={ev.image_url} className="w-full h-full object-cover"/> : <Music size={32} className="text-slate-400"/>}
-                                                    </div>
-                                                    <div className="flex-1 flex flex-col justify-center text-center sm:text-left w-full">
-                                                        <h4 className="font-black text-xl theme-text-main uppercase mb-2 leading-tight">{ev.name}</h4>
-                                                        <div className="flex items-center justify-center sm:justify-start gap-2 text-[#E8622A] font-bold text-sm mb-2">
-                                                            <Calendar size={16}/> {ev.date} • {ev.time}
-                                                        </div>
-                                                        {ev.description && <p className="text-xs theme-text-muted font-medium line-clamp-2">{ev.description}</p>}
-                                                    </div>
-                                                    <div className="w-full sm:w-auto mt-2 sm:mt-0">
-                                                        <button className="w-full sm:w-auto px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all border-none outline-none theme-bg-sub theme-text-muted hover:bg-[#E8622A] hover:text-white cursor-pointer pointer-events-none">SEÇ</button>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <div className="theme-bg-sub theme-border border p-10 rounded-[24px] text-center">
-                                                <Music size={40} className="mx-auto text-slate-400 mb-4"/>
-                                                <p className="theme-text-muted font-bold tracking-widest uppercase text-xs">Yaklaşan etkinlik bulunmuyor.</p>
-                                            </div>
-                                        )
-                                    ) : (
-                                        <>
-                                            <button onClick={() => {setBookingData({...bookingData, selectedEvent: null, selectedShopService: null}); setBookingPhase(1);}} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#E8622A] bg-transparent border-none outline-none cursor-pointer flex items-center gap-1 w-fit mb-2">
-                                                <ChevronLeft size={14}/> Etkinliklere Dön
-                                            </button>
-                                            
-                                            {selectedShop.services && selectedShop.services.length > 0 ? (
-                                                selectedShop.services.map(srv => {
-                                                    const currentCount = appointments.filter(a => a.appointment_date === bookingData.selectedEvent?.date && a.service_name === srv.name && a.status !== 'İptal').length;
-                                                    const maxCap = parseInt(srv.capacity || '10');
-                                                    const isSoldOut = currentCount >= maxCap;
-                                                    const priceDisplay = (!srv.price || srv.price === '0') ? 'ÜCRETSİZ' : `${srv.price} TL`;
-
-                                                    return (
-                                                        <div key={srv.id} onClick={() => { if(!isSoldOut) { setBookingData({...bookingData, selectedShopService: srv}); setBookingPhase(3); } }} 
-                                                             className={`p-6 theme-bg-card rounded-[24px] border-2 flex justify-between items-center transition-all ${isSoldOut ? 'theme-border-sub opacity-60 cursor-not-allowed' : bookingData.selectedShopService?.id === srv.id ? 'border-[#E8622A] shadow-md scale-[1.02] cursor-pointer' : 'theme-border-sub hover:border-[#E8622A] cursor-pointer'}`}>
-                                                            <div>
-                                                                <h4 className="font-black text-lg theme-text-main mb-1">{srv.name}</h4>
-                                                                <div className="flex items-center gap-1 text-slate-400">
-                                                                    <Music size={12}/>
-                                                                    <span className="text-[10px] font-bold uppercase tracking-widest">Gece Boyu</span>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center gap-6">
-                                                                <span className="font-black text-xl theme-text-main">{priceDisplay}</span>
-                                                                <button disabled={isSoldOut} className={`px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest transition-all border-none outline-none ${isSoldOut ? 'bg-red-500/20 text-red-500' : bookingData.selectedShopService?.id === srv.id ? 'bg-[#E8622A] text-white cursor-pointer' : 'theme-bg-sub theme-text-muted hover:bg-[var(--c-border)] cursor-pointer'}`}>
-                                                                    {isSoldOut ? 'TÜKENDİ' : 'SEÇ'}
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                })
-                                            ) : (
-                                                <div className="theme-bg-sub theme-border border p-10 rounded-[24px] text-center">
-                                                    <Ticket size={40} className="mx-auto text-slate-400 mb-4"/>
-                                                    <p className="theme-text-muted font-bold tracking-widest uppercase text-xs">Loca listesi bulunamadı.</p>
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* BUKALEMUN SOL TARAF: NORMAL İŞLETME İSE HİZMETLER */}
-                            {(profileTab === 'services' || profileTab === 'events') && selectedShop.category !== 'Bar & Club' && (
-                                <div className="animate-in fade-in flex flex-col gap-4">
-                                    {selectedShop.services && selectedShop.services.length > 0 ? (
-                                        selectedShop.services.map(srv => (
-                                            <div key={srv.id} onClick={() => { setBookingData({...bookingData, selectedShopService: srv, selectedStaff: null, time: ''}); setBookingPhase(2); }} 
-                                                 className={`p-6 theme-bg-card rounded-[24px] border-2 flex justify-between items-center cursor-pointer transition-all ${bookingData.selectedShopService?.id === srv.id ? 'border-[#E8622A] shadow-md scale-[1.02]' : 'theme-border-sub hover:border-[#E8622A]'}`}>
-                                                <div>
-                                                    <h4 className="font-black text-lg theme-text-main mb-1">{srv.name}</h4>
-                                                    <div className="flex items-center gap-1 text-slate-400">
-                                                        <Clock size={12}/>
-                                                        <span className="text-[10px] font-bold uppercase tracking-widest">{srv.duration} Dakika</span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-6">
-                                                    <span className="font-black text-xl theme-text-main">{!srv.price || srv.price === '0' ? 'ÜCRETSİZ' : `${srv.price} TL`}</span>
-                                                    <button className={`px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest transition-all border-none outline-none cursor-pointer ${bookingData.selectedShopService?.id === srv.id ? 'bg-[#E8622A] text-white' : 'theme-bg-sub theme-text-muted hover:bg-[var(--c-border)]'}`}>
-                                                        {t[lang].profile.bookBtn}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="theme-bg-sub theme-border border p-10 rounded-[24px] text-center">
-                                            <Scissors size={40} className="mx-auto text-slate-400 mb-4"/>
-                                            <p className="theme-text-muted font-bold tracking-widest uppercase text-xs">{t[lang].profile.noServices}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {profileTab === 'gallery' && (
-                                <div className="animate-in fade-in">
-                                    {selectedShop.gallery && selectedShop.gallery.length > 0 ? (
-                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                            {selectedShop.gallery.map((imgUrl, idx) => (
-                                                <div key={idx} onClick={() => setLightboxImg(imgUrl)} className="w-full h-40 md:h-48 rounded-2xl overflow-hidden cursor-pointer group relative theme-border border">
-                                                    <img alt={`Galeri Görseli ${idx+1}`} loading="lazy" decoding="async" src={imgUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                        <Search className="text-white opacity-0 group-hover:opacity-100 transition-opacity" size={24}/>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="theme-bg-sub theme-border border p-10 rounded-[24px] text-center">
-                                            <Grid size={40} className="mx-auto text-slate-400 mb-4"/>
-                                            <p className="theme-text-muted font-bold tracking-widest uppercase text-xs">{t[lang].profile.noGallery}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {profileTab === 'about' && (
-                                <div className="animate-in fade-in">
-                                    {(selectedShop.contact_phone || selectedShop.contact_insta || selectedShop.contact_email) && (
-                                        <div className="mb-10 theme-bg-sub theme-border border p-6 rounded-[24px]">
-                                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4">{t[lang].profile.contactTitle}</h3>
-                                            <div className="flex flex-col gap-3">
-                                                {selectedShop.contact_phone && (<a href={`tel:${selectedShop.contact_phone}`} className="flex items-center gap-3 theme-text-main font-bold hover:text-[#E8622A]"><Phone size={16} className="text-[#E8622A]"/> {selectedShop.contact_phone}</a>)}
-                                                {selectedShop.contact_insta && (<a href={selectedShop.contact_insta.startsWith('http') ? selectedShop.contact_insta : `https://instagram.com/${selectedShop.contact_insta.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 theme-text-main font-bold hover:text-pink-500"><InstagramIcon size={16} className="text-pink-500"/> {selectedShop.contact_insta}</a>)}
-                                                {selectedShop.contact_email && (<a href={`mailto:${selectedShop.contact_email}`} className="flex items-center gap-3 theme-text-main font-bold hover:text-[#E8622A]"><Mail size={16} className="text-[#E8622A]"/> {selectedShop.contact_email}</a>)}
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div className="theme-bg-card theme-border border p-8 rounded-[24px] shadow-sm">
-                                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4">{t[lang].profile.about}</h3>
-                                        <p className="theme-text-muted text-sm leading-relaxed font-medium whitespace-pre-wrap">{selectedShop.description || <span className="italic opacity-50">{t[lang].profile.noDesc}</span>}</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="lg:col-span-5 relative">
-                            <div className="sticky top-28 theme-bg-card theme-border border-2 rounded-[32px] p-6 md:p-8 shadow-[0_20px_40px_rgba(0,0,0,0.06)] flex flex-col min-h-[450px]">
-                                
-                                <div className="flex justify-between items-center mb-6 border-b theme-border-sub pb-4">
-                                    <h3 className="text-xl font-black uppercase tracking-tight theme-text-main">{t[lang].book.details}</h3>
-                                    {bookingPhase > 1 && (
-                                        <button onClick={() => {
-                                            if (selectedShop.category === 'Bar & Club' && bookingPhase === 2) {
-                                                setBookingPhase(1); setBookingData({...bookingData, selectedEvent: null});
-                                            } else {
-                                                setBookingPhase(bookingPhase - 1);
-                                            }
-                                        }} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-[#E8622A] theme-bg-sub px-3 py-1.5 rounded-lg flex items-center transition-colors border-none outline-none cursor-pointer">
-                                            <ChevronLeft size={14} className="mr-1"/> {t[lang].book.change}
-                                        </button>
-                                    )}
-                                </div>
-
-                                {bookingPhase === 1 && (
-                                    <div className="flex-1 flex flex-col items-center justify-center text-center animate-in fade-in duration-300">
-                                        {selectedShop.category === 'Bar & Club' ? (
-                                            <>
-                                                <Music size={40} className="text-slate-400 mb-4" />
-                                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed max-w-[200px]">{t[lang].book.selectEvent}</p>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Scissors size={40} className="text-slate-400 mb-4" />
-                                                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed max-w-[200px]">{t[lang].book.selectService}</p>
-                                            </>
-                                        )}
-                                    </div>
-                                )}
-                                
-                                {bookingPhase === 2 && selectedShop.category === 'Bar & Club' && (
-                                    <div className="flex-1 flex flex-col animate-in fade-in duration-300">
-                                        <div className="mb-6 theme-bg-sub p-4 rounded-2xl border theme-border-sub flex flex-col gap-2">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t[lang].book.event}</span>
-                                                <span className="font-black theme-text-main text-sm text-right">{bookingData.selectedEvent?.name}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center border-t theme-border-sub pt-2">
-                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t[lang].book.dateTime}</span>
-                                                <span className="font-bold text-[#E8622A] text-xs text-right">{bookingData.selectedEvent?.date} | {bookingData.selectedEvent?.time}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex-1 flex flex-col items-center justify-center text-center">
-                                            <Ticket size={40} className="text-slate-400 mb-4" />
-                                            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed max-w-[200px]">{t[lang].book.selectLoca}</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {bookingPhase > 1 && (selectedShop.category !== 'Bar & Club' || bookingPhase > 2) && (
-                                    <div className="mb-6 theme-bg-sub p-4 rounded-2xl border theme-border-sub flex flex-col gap-2 animate-in fade-in">
-                                        {selectedShop.category === 'Bar & Club' && (
-                                            <>
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t[lang].book.event}</span>
-                                                    <span className="font-black theme-text-main text-sm text-right">{bookingData.selectedEvent?.name}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center border-t theme-border-sub pt-2">
-                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t[lang].book.dateTime}</span>
-                                                    <span className="font-bold text-[#E8622A] text-xs text-right">{bookingData.selectedEvent?.date} | {bookingData.selectedEvent?.time}</span>
-                                                </div>
-                                            </>
-                                        )}
-
-                                        <div className={`flex justify-between items-center ${selectedShop.category === 'Bar & Club' ? 'border-t theme-border-sub pt-2' : ''}`}>
-                                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t[lang].book.service}</span>
-                                            <span className="font-black theme-text-main text-sm text-right">{bookingData.selectedShopService?.name}</span>
-                                        </div>
-                                        
-                                        {bookingPhase > 2 && bookingData.selectedStaff && selectedShop.category !== 'Bar & Club' && (
-                                            <div className="flex justify-between items-center border-t theme-border-sub pt-2">
-                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t[lang].book.staff}</span>
-                                                <span className="font-bold theme-text-main text-xs uppercase text-right">{bookingData.selectedStaff.name}</span>
-                                            </div>
-                                        )}
-                                        {bookingPhase > 3 && bookingData.time && selectedShop.category !== 'Bar & Club' && (
-                                            <div className="flex justify-between items-center border-t theme-border-sub pt-2">
-                                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t[lang].book.dateTime}</span>
-                                                <span className="font-bold text-[#E8622A] text-xs text-right">{bookingData.date} | {bookingData.time}</span>
-                                            </div>
-                                        )}
-                                        <div className="flex justify-between items-center border-t theme-border-sub pt-2 mt-1">
-                                            <span className="text-[10px] font-black theme-text-main uppercase tracking-widest">{t[lang].book.total}</span>
-                                            <span className="font-black text-[#E8622A] text-lg text-right">{(!bookingData.selectedShopService?.price || bookingData.selectedShopService?.price === '0') ? 'ÜCRETSİZ' : `${bookingData.selectedShopService?.price} TL`}</span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {bookingPhase === 2 && selectedShop.category !== 'Bar & Club' && (
-                                    <div className="animate-in slide-in-from-right-4 fade-in duration-300 flex-1">
-                                        <p className="text-[11px] font-black uppercase tracking-widest theme-text-main mb-4 flex items-center gap-2"><Users size={14} className="text-[#E8622A]"/> {t[lang].book.selectStaff}</p>
-                                        <div className="grid grid-cols-3 gap-3">
-                                            <button onClick={() => { setBookingData({...bookingData, selectedStaff: { name: t[lang].book.anyStaff }}); setBookingPhase(3); }} 
-                                                 className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-2xl border-2 border-transparent hover:border-[#E8622A] theme-bg-card shadow-sm hover:shadow-md transition-all bg-transparent">
-                                                <div className="w-12 h-12 rounded-full flex items-center justify-center theme-bg-sub text-slate-400"><Users size={20}/></div>
-                                                <span className="text-[9px] font-black text-center theme-text-muted uppercase">{t[lang].book.anyStaff}</span>
-                                            </button>
-                                            {selectedShop.staff?.map(person => (
-                                                <button key={person.id} onClick={() => { setBookingData({...bookingData, selectedStaff: person}); setBookingPhase(3); }} 
-                                                     className="flex flex-col items-center gap-2 cursor-pointer p-3 rounded-2xl border-2 border-transparent hover:border-[#E8622A] theme-bg-card shadow-sm hover:shadow-md transition-all bg-transparent">
-                                                    <div className="w-12 h-12 rounded-full flex items-center justify-center theme-bg-sub text-slate-400"><UserCircle size={24}/></div>
-                                                    <span className="text-[9px] font-black text-center theme-text-muted uppercase truncate w-full px-1">{person.name}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {bookingPhase === 3 && selectedShop.category !== 'Bar & Club' && (() => {
-                                    const currentAvailableSlots = getCurrentAvailableSlots();
-                                    const isShopClosedToday = currentAvailableSlots.length === 0;
-
-                                    return (
-                                        <div className="animate-in slide-in-from-right-4 fade-in duration-300 flex-1 flex flex-col gap-4">
-                                            <div className="flex items-center gap-2 theme-text-main font-black text-[11px] uppercase tracking-widest">
-                                                <Calendar size={14} className="text-[#E8622A]"/> {t[lang].book.date} / {t[lang].book.time}
-                                            </div>
-                                            <input aria-label="Randevu Tarihi" type="date" min={new Date().toISOString().split('T')[0]} value={bookingData.date} className="w-full theme-bg-sub theme-border rounded-xl py-4 px-4 font-bold theme-text-main outline-none focus:border-[#E8622A] text-sm cursor-pointer transition-colors shadow-inner color-[color-scheme:dark]" onChange={(e) => setBookingData({...bookingData, date: e.target.value, time: ''})} />
-                                            
-                                            {bookingData.date && (
-                                                isShopClosedToday ? (
-                                                    <div className="py-10 text-center text-red-500 font-bold uppercase tracking-widest text-xs bg-red-500/10 rounded-2xl border border-red-500/20 mt-2">
-                                                        <CalendarOff size={32} className="mx-auto mb-2 opacity-50"/>
-                                                        {t[lang].book.shopClosed}
-                                                    </div>
-                                                ) : (
-                                                    <div className="grid grid-cols-3 gap-2 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar mt-2">
-                                                        {currentAvailableSlots.map((slot, idx) => {
-                                                            const neededSlots = getRequiredSlots(bookingData.selectedShopService.duration);
-                                                            const slotsToCheck = currentAvailableSlots.slice(idx, idx + neededSlots);
-                                                            let isUnavailable = slotsToCheck.length < neededSlots; 
-                                                            
-                                                            if (!isUnavailable) {
-                                                                if (bookingData.selectedStaff?.name === t[lang].book.anyStaff || bookingData.selectedStaff?.name === 'Fark Etmez') {
-                                                                    if (selectedShop.staff && selectedShop.staff.length > 0) {
-                                                                        isUnavailable = !selectedShop.staff.some(staff => 
-                                                                            slotsToCheck.every(checkSlot => {
-                                                                                if (closedSlots.includes(checkSlot)) return false;
-                                                                                return !appointments.some(a => a.staff_name === staff.name && (a.occupied_slots ? a.occupied_slots.includes(checkSlot) : a.appointment_time === checkSlot));
-                                                                            })
-                                                                        );
-                                                                    } else {
-                                                                        isUnavailable = slotsToCheck.some(checkSlot => closedSlots.includes(checkSlot) || appointments.some(a => a.occupied_slots ? a.occupied_slots.includes(checkSlot) : a.appointment_time === checkSlot));
-                                                                    }
-                                                                } else {
-                                                                    isUnavailable = slotsToCheck.some(checkSlot => 
-                                                                        closedSlots.includes(checkSlot) || 
-                                                                        appointments.some(a => a.staff_name === bookingData.selectedStaff.name && (a.occupied_slots ? a.occupied_slots.includes(checkSlot) : a.appointment_time === checkSlot))
-                                                                    );
-                                                                }
-                                                            }
-
-                                                            return (
-                                                                <button key={slot} disabled={isUnavailable} onClick={() => { setBookingData({...bookingData, time: slot}); setBookingPhase(4); }} 
-                                                                        className={`p-3 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${isUnavailable ? 'theme-bg-sub border-transparent text-slate-400 cursor-not-allowed' : bookingData.time === slot ? 'bg-[#E8622A] text-white border-[#E8622A] shadow-md' : 'theme-bg-card theme-border theme-text-muted hover:border-[#E8622A] hover:text-[#E8622A]'}`}>
-                                                                    {slot}
-                                                                </button>
-                                                            );
-                                                        })}
-                                                    </div>
-                                                )
-                                            )}
-                                        </div>
-                                    );
-                                })()}
-
-                                {(bookingPhase === 4 || (selectedShop.category === 'Bar & Club' && bookingPhase === 3)) && (
-                                    <form onSubmit={handleBooking} className="animate-in slide-in-from-right-4 fade-in duration-300 flex flex-col gap-3 flex-1 mt-auto">
-                                        <div className="flex items-center gap-2 theme-text-main font-black text-[11px] uppercase tracking-widest mb-1 border-t theme-border-sub pt-4">
-                                            <User size={14} className="text-[#E8622A]"/> {t[lang].book.contactInfo}
-                                        </div>
-                                        <div className="flex gap-2 w-full">
-                                          <input aria-label="Adınız" required placeholder={t[lang].book.name} className="w-full theme-bg-sub theme-border rounded-[14px] py-4 px-4 outline-none focus:border-[#E8622A] font-bold text-xs theme-text-main transition-colors" onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                                          <input aria-label="Soyadınız" required placeholder={t[lang].book.surname} className="w-full theme-bg-sub theme-border rounded-[14px] py-4 px-4 outline-none focus:border-[#E8622A] font-bold text-xs theme-text-main transition-colors" onChange={(e) => setFormData({...formData, surname: e.target.value})} />
-                                        </div>
-                                        
-                                        <div className="flex gap-2 w-full relative">
-                                          <select aria-label="Telefon Kodu" className="theme-bg-sub theme-border rounded-[14px] py-4 px-3 outline-none focus:border-[#E8622A] font-bold text-xs theme-text-main cursor-pointer w-28 shrink-0" value={formData.phoneCode} onChange={e => setFormData({...formData, phoneCode: e.target.value})}>
-                                              <option value="+90">TR (+90)</option>
-                                              <option value="+357">CY (+357)</option>
-                                              <option value="+44">UK (+44)</option>
-                                          </select>
-                                          <div className="relative flex-1">
-                                              <input aria-label="Telefon Numarası" required type="tel" placeholder={t[lang].book.phone} className="w-full theme-bg-sub theme-border rounded-[14px] py-4 px-4 pr-10 outline-none focus:border-[#E8622A] font-bold text-xs theme-text-main transition-colors" onChange={handleBookingPhoneChange} />
-                                              {bookingPhoneValid === true && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" size={16}/>}
-                                              {bookingPhoneValid === false && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500" size={16}/>}
-                                          </div>
-                                        </div>
-
-                                        <div className="relative w-full">
-                                            <input aria-label="E-Posta Adresi" required type="email" placeholder={t[lang].book.email} className="w-full theme-bg-sub theme-border rounded-[14px] py-4 px-4 pr-10 outline-none focus:border-[#E8622A] font-bold text-xs theme-text-main transition-colors" onChange={handleBookingEmailChange} />
-                                            {bookingEmailValid === true && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" size={16}/>}
-                                            {bookingEmailValid === false && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500" size={16}/>}
-                                        </div>
-                                        
-                                        <button type="submit" disabled={bookingEmailValid === false || bookingPhoneValid === false} className="w-full bg-[#E8622A] text-white py-5 rounded-[14px] mt-2 uppercase font-black text-xs tracking-widest shadow-xl shadow-[#E8622A]/20 border-none cursor-pointer hover:bg-orange-500 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                            {t[lang].book.btnBook}
-                                        </button>
-                                    </form>
-                                )}
-                            </div>
-                        </div>
-
-                    </div>
-
-                    {/* BENZER MEKANLAR */}
-                    {similarShops && similarShops.length > 0 && (
-                        <div className="mt-20 pt-16 border-t theme-border-sub">
-                            <h3 className="text-2xl font-black uppercase tracking-tight theme-text-main mb-8">{t[lang].profile.similarTitle}</h3>
-                            <div className="featured-grid">
-                                {similarShops.map((shop) => (
-                                    <div key={shop.id} onClick={() => { setSelectedShop(shop); setStep('shop_profile'); setProfileTab(shop.category === 'Bar & Club' ? 'events' : 'services'); setBookingData({date: new Date().toISOString().split('T')[0], time:'', selectedShopService: null, selectedStaff: null, selectedEvent: null}); setBookingPhase(1); window.scrollTo(0,0); }} className="venue-card flex flex-col cursor-pointer theme-bg-card theme-border hover:border-[#E8622A] transition-colors">
-                                        <div className="venue-img" style={{background: 'var(--c-bg-sub)'}}>
-                                            {shop.cover_url || shop.logo_url ? <img alt={`${shop.name} Logosu`} loading="lazy" decoding="async" src={shop.cover_url || shop.logo_url} /> : categories.find(c=>c.dbName===shop.category)?.emoji}
-                                            {(shop.package === 'Premium' || shop.package === 'Premium Paket') && <div className="venue-badge hot">🔥 VIP</div>}
-                                            <div className="venue-fav"><HeartHandshake size={14}/></div>
-                                        </div>
-                                        <div className="venue-info p-5">
-                                            <div className="venue-cat">{t[lang].cats[categories.find(c => c.dbName === shop.category)?.key || 'barber']}</div>
-                                            <div className="venue-name">{shop.name}</div>
-                                            <div className="venue-meta">
-                                                <span>📍 {shop.location}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        )}
-
-        {/* BAŞARILI EKRANI */}
-        {step === 'success' && (
-          <div className="text-center py-20 px-4 animate-in zoom-in-95 min-h-[60vh] flex flex-col items-center justify-center max-w-[600px] mx-auto">
-            {!feedbackSubmitted ? (
-              <div className="theme-bg-card rounded-[32px] p-8 md:p-12 shadow-2xl theme-border w-full animate-in slide-in-from-bottom-4">
-                <div className="w-20 h-20 bg-[#00c48c] text-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/30"><CheckCircle2 size={40} /></div>
-                <h2 className="text-3xl md:text-4xl font-black theme-text-main uppercase mb-2 tracking-tight">{t[lang].book.success}</h2>
-                <p className="text-slate-400 uppercase text-[10px] font-bold tracking-[0.2em] mb-10">{t[lang].book.successSub}</p>
-                <div className="border-t theme-border-sub pt-8 mt-4">
-                  <h3 className="font-black text-xl theme-text-main mb-2 uppercase flex items-center justify-center gap-2"><Star className="text-yellow-400 fill-yellow-400" size={24}/> Bizi Değerlendirin</h3>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Puanınız bizim için çok değerli</p>
-                  <form onSubmit={submitFeedback} className="text-left space-y-6">
-                    <div><label className="text-xs font-black uppercase theme-text-main">Platformumuzu nasıl buldunuz?</label>{renderFeedbackScale('q1')}</div>
-                    <div><label className="text-xs font-black uppercase theme-text-main">Kullanımı kolay mı?</label>{renderFeedbackScale('q2')}</div>
-                    <div><label className="text-xs font-black uppercase theme-text-main">İşleminizden memnun musunuz?</label>{renderFeedbackScale('q3')}</div>
-                    <div><label className="text-xs font-black uppercase theme-text-main">Hızlı işlem yapabildiniz mi?</label>{renderFeedbackScale('q4')}</div>
-                    <button type="submit" className="w-full bg-[#2D1B4E] hover:bg-[#1a0f2e] text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg mt-4 border-none cursor-pointer transition-all">Gönder ve Tamamla</button>
-                  </form>
-                </div>
-              </div>
-            ) : (
-              <div className="theme-bg-card rounded-[32px] p-8 md:p-16 shadow-2xl theme-border w-full animate-in zoom-in-95">
-                <div className="w-24 h-24 bg-yellow-500/10 text-yellow-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner"><Star fill="currentColor" size={48}/></div>
-                <h2 className="text-3xl font-black theme-text-main uppercase mb-4 tracking-tight">Teşekkür Ederiz!</h2>
-                <p className="theme-text-muted text-sm font-medium mb-10 leading-relaxed">Değerlendirmeniz başarıyla bize ulaştı. Platformumuzu sizin için geliştirmeye devam ediyoruz.</p>
-                <button onClick={() => {setStep('services'); setBookingData({date:'', time:'', selectedShopService: null, selectedStaff: null, selectedEvent: null}); setBookingPhase(1); setFeedbackSubmitted(false); setFeedbackData({q1:null,q2:null,q3:null,q4:null}); window.scrollTo(0,0);}} className="btn-primary mx-auto px-10 py-4 text-xs tracking-widest shadow-xl border-none cursor-pointer">{t[lang].book.backHome}</button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* NEDEN BOOKCY (YENİ SAYFA) */}
-        {step === 'why_bookcy' && (
-            <div className="w-full bg-[#FAF7F2] animate-in fade-in overflow-hidden pb-24">
-                <div className="bg-[#2D1B4E] pt-32 pb-24 px-4 md:px-8 text-center relative overflow-hidden border-b border-slate-800">
-                    <div className="absolute top-0 left-0 w-64 md:w-96 h-64 md:h-96 bg-[#E8622A]/20 rounded-full blur-[100px] pointer-events-none"></div>
-                    <div className="absolute bottom-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-[#F5C5A3]/20 rounded-full blur-[100px] pointer-events-none"></div>
-                    <span className="bg-white/10 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 inline-block border border-white/20 relative z-10">Farkı Keşfedin</span>
-                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-6 relative z-10">Neden <span className="text-[#E8622A]">Binlerce Kişi</span><br/>Bookcy Kullanıyor?</h1>
-                    <p className="text-lg md:text-xl font-medium text-slate-300 max-w-2xl mx-auto leading-relaxed relative z-10">Sadece bir randevu sistemi değil, kişisel bakım yolculuğunuzun en güvenilir ortağıyız.</p>
-                </div>
-                
-                <div className="max-w-[1200px] mx-auto px-4 md:px-8 -mt-10 relative z-20">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
-                            <div className="w-16 h-16 bg-orange-50 text-[#E8622A] rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-orange-100"><Crown size={32}/></div>
-                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Öncü Platform</h3>
-                            <p className="text-slate-500 font-medium leading-relaxed">Kıbrıs’ta ilk ve öncü randevu platformlarından biri olarak, sektöre yön veriyoruz.</p>
-                        </div>
-                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
-                            <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100"><Grid size={32}/></div>
-                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Entegre Sistem</h3>
-                            <p className="text-slate-500 font-medium leading-relaxed">Farklı sektörleri tek çatı altında toplayarak kapsamlı bir arama ve randevu deneyimi sunuyoruz.</p>
-                        </div>
-                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
-                            <div className="w-16 h-16 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-green-100"><Users size={32}/></div>
-                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Gerçek Müşteri</h3>
-                            <p className="text-slate-500 font-medium leading-relaxed">İşletmelere gerçek müşteri kazandıran, dönüşüm odaklı aktif ve büyük bir trafik sağlıyoruz.</p>
-                        </div>
-                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
-                            <div className="w-16 h-16 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-purple-100"><Smartphone size={32}/></div>
-                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Üst Düzey Arayüz</h3>
-                            <p className="text-slate-500 font-medium leading-relaxed">Karmaşadan uzak; sade, son derece hızlı ve kullanıcı dostu modern bir arayüz sunuyoruz.</p>
-                        </div>
-                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
-                            <div className="w-16 h-16 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-pink-100"><TrendingUp size={32}/></div>
-                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Maksimum Kazanç</h3>
-                            <p className="text-slate-500 font-medium leading-relaxed">İşletmeler için adil, şeffaf ve komisyonsuz modelimiz ile gelirinizi katlamanızı sağlıyoruz.</p>
-                        </div>
-                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
-                            <div className="w-16 h-16 bg-teal-50 text-teal-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-teal-100"><MessageSquare size={32}/></div>
-                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Gelişmiş Otomasyon</h3>
-                            <p className="text-slate-500 font-medium leading-relaxed">Yüksek performanslı altyapımızla yakında eklenecek SMS ve gelişmiş bildirim sistemleri.</p>
-                        </div>
-                    </div>
-                    <div className="mt-16 text-center">
-                        <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="bg-[#E8622A] hover:bg-[#d4561f] text-white px-12 py-5 rounded-full font-black uppercase tracking-widest text-sm shadow-[0_0_40px_rgba(232,98,42,0.4)] border-none cursor-pointer transition-transform hover:scale-105 inline-flex items-center gap-2">Hemen Aramıza Katıl <ArrowRight size={18}/></button>
-                    </div>
-                </div>
-            </div>
-        )}
-
-        {/* HAKKIMIZDA & PAKETLER SAYFASI */}
-        {step === 'about' && (
-            <div className="w-full bg-[#FAF7F2] animate-in fade-in overflow-hidden pb-24">
-                <div className="bg-[#2D1B4E] pt-32 pb-24 px-4 md:px-8 text-center relative overflow-hidden border-b border-slate-800">
-                    <div className="absolute top-0 left-0 w-64 md:w-96 h-64 md:h-96 bg-[#E8622A]/20 rounded-full blur-[100px] pointer-events-none"></div>
-                    <div className="absolute bottom-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-[#F5C5A3]/20 rounded-full blur-[100px] pointer-events-none"></div>
-                    <span className="bg-white/10 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 inline-block border border-white/20 relative z-10">Kıbrıs'ın #1 Randevu Platformu</span>
-                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-6 relative z-10">İşletmeni Dijitale Taşı,<br/><span className="text-[#E8622A]">Müşterilerini Katla</span></h1>
-                    <p className="text-lg md:text-xl font-medium text-slate-300 max-w-2xl mx-auto leading-relaxed relative z-10 mb-10">Kıbrıs’taki en iyi işletmeler artık Bookcy’de. Sen de yerini al, müşterilerine 7/24 ulaş, randevularını otomatik yönet.</p>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
-                        <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="bg-[#E8622A] hover:bg-[#d4561f] text-white px-8 py-4 rounded-full font-black uppercase tracking-widest text-sm transition-all shadow-[0_0_30px_rgba(232,98,42,0.4)] border-none cursor-pointer w-full sm:w-auto">Hemen Başla</button>
-                        <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="bg-transparent border-2 border-white/20 hover:bg-white/10 text-white px-8 py-4 rounded-full font-black uppercase tracking-widest text-sm transition-all cursor-pointer w-full sm:w-auto">İşletmeni Ekle</button>
-                    </div>
-                </div>
-
-                <div className="max-w-[1000px] mx-auto px-4 md:px-8 py-20 text-center">
-                    <h2 className="text-sm font-black text-[#E8622A] uppercase tracking-[0.3em] mb-4">Biz Kimiz?</h2>
-                    <p className="text-xl md:text-3xl text-[#2D1B4E] font-black leading-tight mb-8">Bookcy, Kıbrıs’ta kurulan ilk ve tek kapsamlı online randevu platformlarından biri olarak, işletmelerin dijital dönüşümünü hızlandırmak için geliştirilmiştir.</p>
-                    <p className="text-base md:text-lg text-slate-500 font-medium leading-relaxed max-w-3xl mx-auto mb-8">Güzellikten bakıma, spadan yaşam tarzı hizmetlerine kadar birçok sektörü tek çatı altında buluşturarak, hem işletmelere hem müşterilere yeni nesil bir deneyim sunuyoruz.</p>
-                    <div className="bg-[#2D1B4E] text-white p-6 md:p-8 rounded-[24px] inline-block font-bold text-lg md:text-xl shadow-xl">Biz sadece bir randevu sistemi değiliz — <br/><span className="text-[#E8622A]">işletmelerin büyümesini sağlayan dijital altyapıyız.</span></div>
-                </div>
-
-                <div className="bg-slate-50 py-24 border-y border-slate-200">
-                    <div className="max-w-[1000px] mx-auto px-4 md:px-8">
-                        <div className="text-center mb-16"><h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[#2D1B4E] mb-4">Neden Biz?</h2><p className="text-slate-500 font-medium">Sadece bir randevu sistemi değil, kişisel bakım yolculuğunuzun en güvenilir ortağıyız.</p></div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            <div className="bg-white p-8 rounded-[24px] border border-slate-200 shadow-sm"><div className="w-12 h-12 bg-orange-50 text-[#E8622A] rounded-xl flex items-center justify-center mb-6"><Crown size={24}/></div><h3 className="font-black text-lg text-[#2D1B4E] mb-3">Öncü Platform</h3><p className="text-sm text-slate-500 font-medium">Kıbrıs’ta ilk ve öncü randevu platformlarından biri.</p></div>
-                            <div className="bg-white p-8 rounded-[24px] border border-slate-200 shadow-sm"><div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center mb-6"><Grid size={24}/></div><h3 className="font-black text-lg text-[#2D1B4E] mb-3">Entegre Sistem</h3><p className="text-sm text-slate-500 font-medium">Farklı sektörleri kapsayan tek entegre sistem.</p></div>
-                            <div className="bg-white p-8 rounded-[24px] border border-slate-200 shadow-sm"><div className="w-12 h-12 bg-green-50 text-green-500 rounded-xl flex items-center justify-center mb-6"><Users size={24}/></div><h3 className="font-black text-lg text-[#2D1B4E] mb-3">Gerçek Müşteri</h3><p className="text-sm text-slate-500 font-medium">İşletmelere gerçek müşteri kazandıran aktif trafik.</p></div>
-                            <div className="bg-white p-8 rounded-[24px] border border-slate-200 shadow-sm"><div className="w-12 h-12 bg-purple-50 text-purple-500 rounded-xl flex items-center justify-center mb-6"><Smartphone size={24}/></div><h3 className="font-black text-lg text-[#2D1B4E] mb-3">Üst Düzey Arayüz</h3><p className="text-sm text-slate-500 font-medium">Sade, hızlı ve kullanıcı dostu modern tasarım.</p></div>
-                            <div className="bg-white p-8 rounded-[24px] border border-slate-200 shadow-sm"><div className="w-12 h-12 bg-pink-50 text-pink-500 rounded-xl flex items-center justify-center mb-6"><TrendingUp size={24}/></div><h3 className="font-black text-lg text-[#2D1B4E] mb-3">Maksimum Kazanç</h3><p className="text-sm text-slate-500 font-medium">Komisyonsuz model ile gelirinizi katlayın.</p></div>
-                            <div className="bg-white p-8 rounded-[24px] border border-slate-200 shadow-sm"><div className="w-12 h-12 bg-teal-50 text-teal-500 rounded-xl flex items-center justify-center mb-6"><MessageSquare size={24}/></div><h3 className="font-black text-lg text-[#2D1B4E] mb-3">Gelişmiş Otomasyon</h3><p className="text-sm text-slate-500 font-medium">Yakında eklenecek SMS ve gelişmiş bildirim sistemleri.</p></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-20">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                        <div>
-                            <div className="flex items-center gap-3 mb-8"><div className="w-12 h-12 bg-[#2D1B4E] text-white rounded-xl flex items-center justify-center"><Store size={24}/></div><h2 className="text-3xl font-black uppercase text-[#2D1B4E] tracking-tight">İşletmeler İçin</h2></div>
-                            <div className="space-y-6">
-                                <div className="flex gap-4"><div className="mt-1"><CheckCircle2 className="text-[#E8622A]" size={24}/></div><div><h4 className="font-black text-lg text-[#2D1B4E] mb-1">Daha Fazla Müşteri, Daha Fazla Kazanç</h4><p className="text-sm text-slate-500 font-medium">Platformumuz sayesinde binlerce potansiyel müşteriye anında ulaşın.</p></div></div>
-                                <div className="flex gap-4"><div className="mt-1"><CheckCircle2 className="text-[#E8622A]" size={24}/></div><div><h4 className="font-black text-lg text-[#2D1B4E] mb-1">Tüm Yönetim Tek Panelde</h4><p className="text-sm text-slate-500 font-medium">Randevularınızı, personelinizi ve hizmetlerinizi kolayca yönetin.</p></div></div>
-                                <div className="flex gap-4"><div className="mt-1"><CheckCircle2 className="text-[#E8622A]" size={24}/></div><div><h4 className="font-black text-lg text-[#2D1B4E] mb-1">Akıllı Hatırlatmalar</h4><p className="text-sm text-slate-500 font-medium">E-posta bildirimleri ile randevu kaçırma oranını minimuma indirin.</p></div></div>
-                                <div className="flex gap-4"><div className="mt-1"><CheckCircle2 className="text-[#E8622A]" size={24}/></div><div><h4 className="font-black text-lg text-[#2D1B4E] mb-1">Güçlü Dijital Kimlik</h4><p className="text-sm text-slate-500 font-medium">Modern profil sayfanız ile profesyonel ve güvenilir bir imaj oluşturun.</p></div></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div className="flex items-center gap-3 mb-8"><div className="w-12 h-12 bg-slate-100 text-[#E8622A] rounded-xl flex items-center justify-center border border-slate-200"><User size={24}/></div><h2 className="text-3xl font-black uppercase text-[#2D1B4E] tracking-tight">Müşteriler İçin</h2></div>
-                            <div className="space-y-6">
-                                <div className="flex gap-4"><div className="mt-1"><Star className="text-yellow-500 fill-yellow-500" size={24}/></div><div><h4 className="font-black text-lg text-[#2D1B4E] mb-1">En İyileri Keşfet</h4><p className="text-sm text-slate-500 font-medium">Konumuna en yakın ve en yüksek puanlı işletmeleri saniyeler içinde bul.</p></div></div>
-                                <div className="flex gap-4"><div className="mt-1"><Clock className="text-[#E8622A]" size={24}/></div><div><h4 className="font-black text-lg text-[#2D1B4E] mb-1">7/24 Randevu Özgürlüğü</h4><p className="text-sm text-slate-500 font-medium">İstediğin zaman, istediğin yerden randevunu oluştur.</p></div></div>
-                                <div className="flex gap-4"><div className="mt-1"><MessageCircle className="text-[#E8622A]" size={24}/></div><div><h4 className="font-black text-lg text-[#2D1B4E] mb-1">Gerçek Yorumlar</h4><p className="text-sm text-slate-500 font-medium">Sadece hizmet almış kullanıcıların yorumlarını incele, güvenle seçim yap.</p></div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-slate-50 py-24 border-y border-slate-200">
-                    <div className="max-w-[1000px] mx-auto px-4 md:px-8">
-                        <div className="text-center mb-16"><h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[#2D1B4E] mb-4">Paketlerimiz</h2><p className="text-slate-500 font-medium">Sürpriz kesintiler yok, gizli ücretler yok.</p></div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                            <div className="bg-white border border-slate-200 rounded-[32px] p-8 md:p-10 shadow-lg flex flex-col hover:border-[#E8622A] transition-colors">
-                                <h3 className="text-2xl font-black text-[#2D1B4E] mb-2">Standart Paket</h3>
-                                <div className="flex items-baseline gap-2 mb-8 border-b border-slate-100 pb-8"><span className="text-4xl font-black text-[#2D1B4E]">60 STG</span><span className="text-slate-500 font-bold">/ Aylık</span></div>
-                                <ul className="flex flex-col gap-5 mb-10 flex-1">
-                                    <li className="flex items-center gap-3 font-bold text-slate-600 text-sm"><Check className="text-[#E8622A]" size={20}/> Online randevu sistemi</li>
-                                    <li className="flex items-center gap-3 font-bold text-slate-600 text-sm"><Check className="text-[#E8622A]" size={20}/> Sınırsız randevu</li>
-                                    <li className="flex items-center gap-3 font-bold text-slate-600 text-sm"><Check className="text-[#E8622A]" size={20}/> İşletme profil sayfası</li>
-                                    <li className="flex items-center gap-3 font-bold text-slate-600 text-sm"><Check className="text-[#E8622A]" size={20}/> E-posta hatırlatma sistemi</li>
-                                    <li className="flex items-center gap-3 font-bold text-slate-600 text-sm"><Check className="text-[#E8622A]" size={20}/> Müşteri yönetimi</li>
-                                    <li className="flex items-center gap-3 font-bold text-slate-600 text-sm"><Check className="text-[#E8622A]" size={20}/> Temel raporlama</li>
-                                </ul>
-                                <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="w-full bg-slate-100 text-[#2D1B4E] hover:bg-slate-200 hover:text-[#E8622A] py-4 rounded-xl font-black uppercase tracking-widest text-xs transition-colors cursor-pointer border-none">Hemen Başla</button>
-                            </div>
-                            <div className="bg-[#2D1B4E] border-2 border-[#E8622A] rounded-[32px] p-8 md:p-10 shadow-[0_20px_50px_rgba(232,98,42,0.2)] flex flex-col relative transform md:scale-105 z-10">
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#E8622A] text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg"><Star className="fill-white" size={14}/> En Popüler</div>
-                                <h3 className="text-2xl font-black text-white mb-2 mt-4">Premium Paket</h3>
-                                <div className="flex items-baseline gap-2 mb-8 border-b border-white/10 pb-8"><span className="text-5xl font-black text-[#E8622A]">100 STG</span><span className="text-slate-400 font-bold">/ Aylık</span></div>
-                                <ul className="flex flex-col gap-5 mb-10 flex-1">
-                                    <li className="flex items-center gap-3 font-bold text-white text-sm"><CheckCircle2 className="text-[#E8622A]" size={20}/> Tüm Standart özellikler</li>
-                                    <li className="flex items-center gap-3 font-bold text-white text-sm"><CheckCircle2 className="text-[#E8622A]" size={20}/> Öncelikli listeleme (Görünürlük)</li>
-                                    <li className="flex items-center gap-3 font-bold text-white text-sm"><CheckCircle2 className="text-[#E8622A]" size={20}/> Gelişmiş raporlama ve analiz</li>
-                                    <li className="flex items-center gap-3 font-bold text-white text-sm"><CheckCircle2 className="text-[#E8622A]" size={20}/> Öne çıkan işletme rozeti</li>
-                                    <li className="flex items-center gap-3 font-bold text-white text-sm"><CheckCircle2 className="text-[#E8622A]" size={20}/> Öncelikli destek</li>
-                                    <li className="flex items-center gap-3 font-bold text-white text-sm"><CheckCircle2 className="text-[#E8622A]" size={20}/> Yeni özelliklere erken erişim</li>
-                                </ul>
-                                <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="w-full bg-[#E8622A] hover:bg-[#d4561f] text-white py-5 rounded-xl font-black uppercase tracking-widest text-xs transition-all shadow-lg cursor-pointer border-none flex items-center justify-center gap-2">Premium'a Geç <ArrowRight size={16}/></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )}
-
-        {/* DİNAMİK ÖZELLİK, TÜM ÖZELLİKLER */}
-        {step === 'feature_detail' && activeFeature && (
-            <div className="w-full bg-[#FAF7F2] animate-in fade-in">
-                <div className="bg-white pt-32 pb-40 px-8 text-center relative overflow-hidden border-b border-slate-200"><div className="flex justify-center mb-8 relative z-10">{featureIcons[activeFeature]}</div><h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-[#2D1B4E] mb-6 relative z-10">{t[lang].featNames[activeFeature]}</h1></div>
-                <div className="max-w-[1200px] mx-auto px-8 py-24 -mt-20 relative z-20">
-                    <div className="bg-white p-10 md:p-16 rounded-[40px] shadow-xl border border-slate-200">
-                        <div className="text-center max-w-3xl mx-auto mb-16 border-b border-slate-100 pb-12"><h2 className="text-xl font-black text-[#E8622A] uppercase tracking-widest mb-4">{t[lang].featUI.purposeTitle}</h2><p className="text-xl md:text-2xl text-[#2D1B4E] font-medium leading-relaxed">{t[lang].featDetails[activeFeature].purpose}</p></div>
-                        <h2 className="text-2xl md:text-3xl font-black text-[#2D1B4E] mb-12 text-center">{t[lang].featUI.benefitsTitle}</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div className="bg-slate-50 p-8 rounded-[24px] border border-slate-200 hover:border-[#E8622A] transition-colors group"><div className="w-12 h-12 bg-white text-[#E8622A] border border-slate-200 rounded-full flex items-center justify-center mb-6 shadow-sm group-hover:bg-[#E8622A] group-hover:text-white transition-colors"><ShieldCheck size={20}/></div><h3 className="font-black text-lg text-[#2D1B4E] mb-3 leading-tight">{t[lang].featDetails[activeFeature].adv1.title}</h3><p className="text-sm text-slate-500 font-medium leading-relaxed">{t[lang].featDetails[activeFeature].adv1.desc}</p></div>
-                            <div className="bg-slate-50 p-8 rounded-[24px] border border-slate-200 hover:border-[#E8622A] transition-colors group"><div className="w-12 h-12 bg-white text-[#E8622A] border border-slate-200 rounded-full flex items-center justify-center mb-6 shadow-sm group-hover:bg-[#E8622A] group-hover:text-white transition-colors"><Target size={20}/></div><h3 className="font-black text-lg text-[#2D1B4E] mb-3 leading-tight">{t[lang].featDetails[activeFeature].adv2.title}</h3><p className="text-sm text-slate-500 font-medium leading-relaxed">{t[lang].featDetails[activeFeature].adv2.desc}</p></div>
-                            <div className="bg-slate-50 p-8 rounded-[24px] border border-slate-200 hover:border-[#E8622A] transition-colors group"><div className="w-12 h-12 bg-white text-[#E8622A] border border-slate-200 rounded-full flex items-center justify-center mb-6 shadow-sm group-hover:bg-[#E8622A] group-hover:text-white transition-colors"><TrendingUp size={20}/></div><h3 className="font-black text-lg text-[#2D1B4E] mb-3 leading-tight">{t[lang].featDetails[activeFeature].adv3.title}</h3><p className="text-sm text-slate-500 font-medium leading-relaxed">{t[lang].featDetails[activeFeature].adv3.desc}</p></div>
-                        </div>
-                    </div>
-                </div>
-                <div className="bg-[#FAF7F2] py-24 text-center border-t border-slate-200"><h2 className="text-3xl md:text-5xl font-black uppercase text-[#2D1B4E] mb-8 tracking-tight">{t[lang].about.ctaTitle}</h2><button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="btn-primary mx-auto px-12 py-5 uppercase tracking-widest text-sm shadow-[0_0_40px_rgba(232,98,42,0.3)] border-none cursor-pointer">{t[lang].about.ctaBtn}</button></div>
-            </div>
-        )}
+        {/* === ÖZELLİKLER (FEATURES) === */}
         {step === 'all_features' && (
-            <div className="w-full bg-[#FAF7F2] animate-in fade-in">
-                <div className="bg-white pt-32 pb-24 px-8 text-center relative overflow-hidden border-b border-slate-200"><h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-[#2D1B4E] mb-6 relative z-10">{t[lang].featUI.allFeaturesTitle}</h1><p className="text-lg md:text-xl font-medium text-slate-500 max-w-3xl mx-auto leading-relaxed relative z-10">{t[lang].featUI.allFeaturesSub}</p></div>
-                <div className="max-w-[1400px] mx-auto px-8 py-24"><div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{Object.keys(t[lang].featNames).map((key) => (<div key={key} onClick={() => goToFeature(key)} className="bg-white p-8 rounded-[32px] border border-slate-200 hover:border-[#E8622A] hover:shadow-xl transition-all cursor-pointer group flex flex-col items-start"><div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-slate-100 group-hover:scale-110 transition-transform">{featureIconsSmall[key]}</div><h3 className="text-2xl font-black text-[#2D1B4E] mb-3 group-hover:text-[#E8622A] transition-colors">{t[lang].featNames[key]}</h3><p className="text-slate-500 font-medium leading-relaxed">{t[lang].featDesc[key]}</p></div>))}</div></div>
+            <div className="w-full bg-[#FAF7F2] animate-in fade-in pb-24">
+                <div className="bg-white pt-32 pb-24 px-8 text-center border-b border-slate-200"><h1 className="text-4xl md:text-6xl font-black uppercase text-[#2D1B4E] mb-6">{t[lang].featUI.allFeaturesTitle}</h1><p className="text-lg text-slate-500">{t[lang].featUI.allFeaturesSub}</p></div>
+                <div className="max-w-[1400px] mx-auto px-8 py-24"><div className="grid grid-cols-1 md:grid-cols-3 gap-8">{Object.keys(t[lang].featNames).map((key) => (<button key={key} onClick={() => goToFeature(key)} className="bg-white p-8 rounded-[32px] border border-slate-200 hover:border-[#E8622A] text-left cursor-pointer transition-transform hover:-translate-y-2 w-full"><div className="text-[#E8622A] mb-4">{featureIconsSmall[key]}</div><h3 className="text-2xl font-black text-[#2D1B4E] mb-3">{t[lang].featNames[key]}</h3><p className="text-slate-500">{t[lang].featDesc[key]}</p></button>))}</div></div>
             </div>
         )}
-
-        {/* İLETİŞİM SAYFASI */}
-        {step === 'contact' && (
-            <div className="w-full bg-[#FAF7F2] animate-in fade-in overflow-hidden">
-                <div className="bg-white pt-24 pb-32 px-4 md:px-8 text-center relative overflow-hidden border-b border-slate-200"><span className="bg-orange-50 text-[#E8622A] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 inline-block border border-orange-100">7/24 Destek</span><h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-[#2D1B4E] mb-6 relative z-10">{t[lang].contact.title}</h1><p className="text-lg md:text-2xl font-medium text-slate-500 max-w-3xl mx-auto leading-relaxed relative z-10">{t[lang].contact.sub}</p></div>
-                <div className="max-w-[1200px] mx-auto px-4 md:px-8 py-16 md:py-24 -mt-10 md:-mt-20 relative z-20"><div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"><div className="bg-white p-8 md:p-10 rounded-[32px] shadow-xl border border-slate-200 flex flex-col items-center text-center group hover:-translate-y-2 transition-transform"><div className="w-16 h-16 md:w-20 md:h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"><MessageCircle size={32}/></div><h3 className="text-xl md:text-2xl font-black text-[#2D1B4E] mb-3">{t[lang].contact.whatsapp}</h3><p className="text-sm md:text-base text-slate-500 font-medium mb-8 leading-relaxed flex-1">{t[lang].contact.wpDesc}</p><a href="https://wa.me/905555555555" target="_blank" rel="noopener noreferrer" className="w-full bg-[#25D366] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg shadow-green-500/30 flex justify-center items-center gap-2 text-decoration-none text-xs md:text-sm"><MessageCircle size={18}/> {t[lang].contact.btnWp}</a></div><div className="bg-white p-8 md:p-10 rounded-[32px] shadow-xl border border-slate-200 flex flex-col items-center text-center group hover:-translate-y-2 transition-transform"><div className="w-16 h-16 md:w-20 md:h-20 bg-pink-50 text-pink-500 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"><InstagramIcon size={32}/></div><h3 className="text-xl md:text-2xl font-black text-[#2D1B4E] mb-3">{t[lang].contact.insta}</h3><p className="text-sm md:text-base text-slate-500 font-medium mb-8 leading-relaxed flex-1">{t[lang].contact.instaDesc}</p><a href="https://instagram.com/bookcy" target="_blank" rel="noopener noreferrer" className="w-full bg-gradient-to-r from-purple-500 via-pink-500 to-[#E8622A] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:opacity-90 transition-opacity shadow-lg shadow-pink-500/30 flex justify-center items-center gap-2 text-decoration-none text-xs md:text-sm"><InstagramIcon size={18}/> {t[lang].contact.btnInsta}</a></div><div className="bg-white p-8 md:p-10 rounded-[32px] shadow-xl border border-slate-200 flex flex-col items-center text-center group hover:-translate-y-2 transition-transform"><div className="w-16 h-16 md:w-20 md:h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"><Mail size={32}/></div><h3 className="text-xl md:text-2xl font-black text-[#2D1B4E] mb-3">{t[lang].contact.email}</h3><p className="text-sm md:text-base text-slate-500 font-medium mb-8 leading-relaxed flex-1">{t[lang].contact.emailDesc}</p><a href="mailto:info@bookcy.co" className="w-full bg-[#2D1B4E] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-[#1a0f2e] transition-colors shadow-lg shadow-[#2D1B4E]/30 flex justify-center items-center gap-2 text-decoration-none text-xs md:text-sm"><Mail size={18}/> {t[lang].contact.btnEmail}</a></div></div></div>
+        {step === 'feature_detail' && activeFeature && (
+            <div className="w-full bg-[#FAF7F2] animate-in fade-in pb-24">
+                <div className="bg-[#2D1B4E] pt-32 pb-40 px-8 text-center border-b border-slate-800"><div className="flex justify-center mb-8 text-[#E8622A]">{featureIcons[activeFeature]}</div><h1 className="text-4xl md:text-6xl font-black uppercase text-white mb-6">{t[lang].featNames[activeFeature]}</h1></div>
+                <div className="max-w-[1200px] mx-auto px-8 -mt-20"><div className="bg-white p-16 rounded-[40px] shadow-xl border border-slate-200"><div className="text-center mb-16"><h2 className="text-xl font-black text-[#E8622A] mb-4">{t[lang].featUI.purposeTitle}</h2><p className="text-2xl text-[#2D1B4E] font-medium">{t[lang].featDetails[activeFeature].purpose}</p></div></div></div>
             </div>
         )}
 
@@ -1632,10 +783,10 @@ export default function Home() {
             <div className="w-full bg-[#FAF7F2] animate-in fade-in pb-24">
                 <div className="bg-white pt-32 pb-20 px-4 text-center border-b border-slate-200"><div className="max-w-3xl mx-auto"><span className="bg-slate-100 text-[#E8622A] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 inline-block">Yasal Bildirim</span><h1 className="text-3xl md:text-5xl font-black text-[#2D1B4E] uppercase tracking-tighter mb-4">{t[lang].legal[`${step}Title`]}</h1><p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{t[lang].legal.lastUpdated}</p></div></div>
                 <div className="max-w-3xl mx-auto px-4 md:px-8 mt-12 bg-white p-8 md:p-12 rounded-[32px] border border-slate-200 shadow-sm font-medium text-slate-600 leading-relaxed text-[15px]">
-                    {step === 'privacy' && (<div className="space-y-8"><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Giriş</h3><p>Bu Gizlilik Politikası, bookcy.co platformunu kullanan kullanıcıların kişisel verilerinin nasıl toplandığını, kullanıldığını ve korunduğunu açıklamaktadır.</p></section><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Toplanan Veriler</h3><ul className="list-disc pl-5 space-y-2"><li>Ad, soyad, E-posta adresi ve Telefon numarası</li><li>Randevu bilgileri (tarih, saat, hizmet türü)</li><li>IP adresi ve cihaz bilgileri</li></ul></section><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Kullanıcı Hakları & İletişim</h3><p className="mb-2">Verilere erişim, düzeltme ve silme hakkına sahipsiniz. Verileriniz güvenle korunmaktadır.</p><p className="mt-4 font-bold text-[#2D1B4E]">İletişim: info@bookcy.co</p></section></div>)}
-                    {step === 'kvkk' && (<div className="space-y-8"><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Veri Sorumlusu</h3><p>Bu metin kapsamında veri sorumlusu bookcy.co platformudur.</p></section><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Haklar (KVKK Madde 11)</h3><p className="mb-2">Kullanıcılar; Veri işlenip işlenmediğini öğrenme, Bilgi talep etme, Düzeltme veya Silme isteme haklarına sahiptir.</p><p className="mt-4 font-bold text-[#2D1B4E]">Başvurular info@bookcy.co üzerinden yapılabilir.</p></section></div>)}
-                    {step === 'terms' && (<div className="space-y-8"><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Hizmet Tanımı</h3><p>bookcy.co, kullanıcıların çeşitli hizmet sağlayıcılardan online randevu almasını sağlayan bir platformdur.</p></section><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Sorumluluk Reddi</h3><p>Platform, yalnızca aracıdır. Sunulan hizmetlerin kalitesi doğrudan işletmelere aittir.</p></section></div>)}
-                    {step === 'cookies' && (<div className="space-y-8"><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Çerez Nedir?</h3><p>Çerezler, kullanıcı deneyimini geliştirmek için kullanılan küçük veri dosyalarıdır.</p></section><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Kullanım Amacı</h3><p>Çerezler, site performansını artırmak, kullanıcı deneyimini iyileştirmek ve analiz yapmak amacıyla kullanılmaktadır.</p></section></div>)}
+                    {step === 'privacy' && (<div className="space-y-8"><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Giriş</h3><p>Bu Gizlilik Politikası, bookcy.co platformunu kullanan kullanıcıların kişisel verilerinin nasıl toplandığını, kullanıldığını ve korunduğunu açıklamaktadır.</p></section><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Kullanıcı Hakları & İletişim</h3><p>Verilere erişim, düzeltme ve silme hakkına sahipsiniz. İletişim: info@bookcy.co</p></section></div>)}
+                    {step === 'kvkk' && (<div className="space-y-8"><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Veri Sorumlusu</h3><p>Bu metin kapsamında veri sorumlusu bookcy.co platformudur.</p></section></div>)}
+                    {step === 'terms' && (<div className="space-y-8"><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Hizmet Tanımı</h3><p>bookcy.co, kullanıcıların çeşitli hizmet sağlayıcılardan online randevu almasını sağlayan bir platformdur.</p></section></div>)}
+                    {step === 'cookies' && (<div className="space-y-8"><section><h3 className="text-xl font-black text-[#2D1B4E] mb-3 uppercase">Çerez Nedir?</h3><p>Çerezler, kullanıcı deneyimini geliştirmek için kullanılan küçük veri dosyalarıdır.</p></section></div>)}
                 </div>
             </div>
         )}
