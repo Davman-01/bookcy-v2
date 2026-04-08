@@ -256,7 +256,7 @@ export default function SuperAdmin() {
     <div className="min-h-screen bg-[#F8FAFC] flex text-[#2D1B4E] font-['DM_Sans']">
       <style dangerouslySetInnerHTML={{__html: `@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');`}} />
       
-      {/* SOL MENÜ */}
+      {/* SOL MENÜ - nav etiketi div olarak değiştirildi */}
       <aside className="w-64 bg-[#2D1B4E] text-white h-screen sticky top-0 flex flex-col shrink-0 shadow-2xl z-40 hidden md:flex">
         <div className="p-8 border-b border-white/10 flex items-center gap-3">
           <div className="w-10 h-10 bg-[#E8622A] rounded-xl flex items-center justify-center font-black shadow-lg font-['Plus_Jakarta_Sans']">B.</div>
@@ -265,7 +265,7 @@ export default function SuperAdmin() {
             <span className="text-[9px] font-bold text-[#F5C5A3] uppercase tracking-[0.2em]">Komuta Merkezi</span>
           </div>
         </div>
-        <nav className="flex-1 p-4 space-y-2 mt-4 overflow-y-auto custom-scrollbar">
+        <div className="flex-1 flex flex-col p-4 space-y-2 mt-4 overflow-y-auto custom-scrollbar">
           <button onClick={() => setActiveTab('overview')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm transition-all border-none cursor-pointer text-left ${activeTab === 'overview' ? 'bg-[#E8622A] text-white shadow-md' : 'bg-transparent text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <LayoutDashboard size={18}/> Özet Panel
           </button>
@@ -288,10 +288,10 @@ export default function SuperAdmin() {
           <button onClick={() => setActiveTab('feedbacks')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm transition-all border-none cursor-pointer text-left ${activeTab === 'feedbacks' ? 'bg-[#E8622A] text-white shadow-md' : 'bg-transparent text-slate-400 hover:text-white hover:bg-white/5'}`}>
             <Star size={18}/> Değerlendirmeler
           </button>
-        </nav>
+        </div>
         <div className="p-4 border-t border-white/10">
           <button onClick={handleLogout} className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-xl font-bold text-xs text-white uppercase tracking-widest bg-red-500/10 hover:bg-red-500 transition-all border-none cursor-pointer">
-            <LogOut size={16}/> Güvenli Çıkış
+            <LogOut size={16}/> Çıkış Yap
           </button>
         </div>
       </aside>
@@ -535,7 +535,7 @@ export default function SuperAdmin() {
                                 </td>
                                 <td className="px-8 py-6 min-w-[150px]">
                                   <div className="font-black text-sm text-[#2D1B4E] mb-2 flex items-center gap-2 whitespace-nowrap">
-                                    <Crown size={16} className={shop.package === 'Premium' || shop.package === 'Premium Paket' ? 'text-yellow-500' : 'text-slate-400'}/> {shop.package}
+                                    <Crown size={16} className={shop.package === 'Premium' ? 'text-yellow-500' : 'text-slate-400'}/> {shop.package} Paket
                                   </div>
                                   <div className="text-xs font-bold text-slate-500 mb-1 flex items-center gap-2"><Mail size={12}/> {shop.admin_email}</div>
                                   <div className="text-xs font-bold text-slate-500 flex items-center gap-2"><Phone size={12}/> {shop.contact_phone}</div>
