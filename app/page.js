@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 
 import { supabase } from '@/lib/supabase';
+// Mail şablonunu import ediyoruz
+import { getRegistrationTemplate } from '@/lib/emailTemplates';
 
 const InstagramIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -248,6 +250,7 @@ export default function Home() {
   const handleLogout = () => { localStorage.removeItem('bookcy_biz_session'); setLoggedInShop(null); };
   const goToFeature = (featureKey) => { setActiveFeature(featureKey); setStep('feature_detail'); setShowFeaturesMenu(false); window.scrollTo(0,0); };
 
+  // GÜNCEL handleRegisterSubmit Fonksiyonu (Mail Tetikleyicili)
   async function handleRegisterSubmit(e) {
     e.preventDefault();
     if (emailValid === false || phoneValid === false || adminEmailValid === false) { return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz."); }
@@ -258,9 +261,35 @@ export default function Home() {
       if (!uploadError) { uploadedLogoUrl = supabase.storage.from('logos').getPublicUrl(fileName).data.publicUrl; }
     }
     const fullPhone = newShop.phoneCode + " " + newShop.contactPhone;
+    
+    // Veritabanına Ekleme
     const { error } = await supabase.from('shops').insert([{ name: newShop.name, category: newShop.category, location: newShop.location, address: newShop.address, maps_link: newShop.maps_link, admin_email: newShop.email, admin_username: newShop.username, admin_password: newShop.password, description: newShop.description, logo_url: uploadedLogoUrl, package: newShop.package, status: 'pending', contact_phone: fullPhone, contact_insta: newShop.contactInsta, contact_email: newShop.contactEmail, services: [], staff: [], gallery: [], closed_dates: [], events: [] }]);
+    
+    if (!error) {
+      // Başarılı kayıttan sonra Mail Gönderimini tetikle
+      try {
+        await fetch('/api/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: newShop.email, 
+            subject: 'Bookcy Kayıt Talebiniz Alındı',
+            html: getRegistrationTemplate({
+              shopName: newShop.name,
+              date: new Date().toLocaleDateString('tr-TR'),
+              packageName: newShop.package.toUpperCase(),
+              price: newShop.package === 'Premium Paket' ? '100 STG' : '60 STG'
+            })
+          }),
+        });
+      } catch (mailErr) {
+        console.error("Mail gönderilemedi:", mailErr);
+      }
+      setRegisterSuccess(true); 
+    } else { 
+      alert("Hata oluştu. Lütfen tekrar deneyiniz."); 
+    }
     setIsUploading(false);
-    if (!error) { setRegisterSuccess(true); } else { alert("Hata oluştu. Lütfen tekrar deneyiniz."); }
   }
 
   async function handleBooking(e) {
@@ -794,11 +823,6 @@ export default function Home() {
         {/* HAKKIMIZDA & PAKETLER SAYFASI */}
         {step === 'about' && (
             <div className="w-full bg-[#FAF7F2] pb-24"><div className="bg-[#2D1B4E] pt-24 pb-32 px-4 text-center"><span className="bg-white/10 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase mb-6 inline-block">Bookcy Hakkında</span><h1 className="text-4xl md:text-6xl font-black text-white mb-6">İşletmeni Dijitale Taşı,<br/><span className="text-[#E8622A]">Müşterilerini Katla</span></h1><p className="text-lg text-slate-300 max-w-2xl mx-auto">Kıbrıs’taki en iyi işletmeler artık Bookcy’de.</p></div><div className="max-w-[1200px] mx-auto px-4 -mt-10"><div className="bg-white p-10 rounded-[32px] shadow-xl border border-slate-200 mb-16 text-center"><h2 className="text-sm font-black text-[#E8622A] uppercase tracking-[0.3em] mb-4">Biz Kimiz?</h2><p className="text-2xl text-[#2D1B4E] font-black leading-tight mb-6">Bookcy, Kıbrıs’ta kurulan ilk ve tek kapsamlı online randevu platformlarından biri olarak, işletmelerin dijital dönüşümünü hızlandırmak için geliştirilmiştir.</p><p className="text-lg text-slate-500 font-medium mb-8">Güzellikten bakıma, spadan yaşam tarzı hizmetlerine kadar birçok sektörü tek çatı altında buluşturarak, hem işletmelere hem müşterilere yeni nesil bir deneyim sunuyoruz.</p><div className="bg-[#2D1B4E] text-white p-6 rounded-2xl inline-block font-bold text-lg shadow-xl">Biz sadece bir randevu sistemi değiliz — <br/><span className="text-[#E8622A]">işletmelerin büyümesini sağlayan dijital altyapıyız.</span></div></div><div className="grid grid-cols-1 md:grid-cols-2 gap-8"><div className="bg-white p-8 rounded-[32px] border border-slate-200"><h2 className="text-2xl font-black uppercase text-[#2D1B4E] mb-6 flex items-center gap-3"><Store className="text-[#E8622A]"/> İşletmeler İçin</h2><div className="flex flex-col gap-4"><div className="flex gap-3"><CheckCircle2 className="text-[#E8622A]" size={24}/><div><h4 className="font-bold text-[#2D1B4E]">Daha Fazla Müşteri</h4><p className="text-sm text-slate-500">Binlerce potansiyel müşteriye anında ulaşın.</p></div></div><div className="flex gap-3"><CheckCircle2 className="text-[#E8622A]" size={24}/><div><h4 className="font-bold text-[#2D1B4E]">Tüm Yönetim Tek Panelde</h4><p className="text-sm text-slate-500">Randevularınızı kolayca yönetin.</p></div></div><div className="flex gap-3"><CheckCircle2 className="text-[#E8622A]" size={24}/><div><h4 className="font-bold text-[#2D1B4E]">Güçlü Dijital Kimlik</h4><p className="text-sm text-slate-500">Profesyonel ve güvenilir bir imaj oluşturun.</p></div></div></div></div><div className="bg-white p-8 rounded-[32px] border border-slate-200"><h2 className="text-2xl font-black uppercase text-[#2D1B4E] mb-6 flex items-center gap-3"><User className="text-[#E8622A]"/> Müşteriler İçin</h2><div className="flex flex-col gap-4"><div className="flex gap-3"><Star className="text-yellow-500 fill-yellow-500" size={24}/><div><h4 className="font-bold text-[#2D1B4E]">En İyileri Keşfet</h4><p className="text-sm text-slate-500">En yüksek puanlı işletmeleri bul.</p></div></div><div className="flex gap-3"><Clock className="text-[#E8622A]" size={24}/><div><h4 className="font-bold text-[#2D1B4E]">7/24 Randevu Özgürlüğü</h4><p className="text-sm text-slate-500">İstediğin zaman randevunu oluştur.</p></div></div><div className="flex gap-3"><MessageCircle className="text-[#E8622A]" size={24}/><div><h4 className="font-bold text-[#2D1B4E]">Gerçek Yorumlar</h4><p className="text-sm text-slate-500">Sadece hizmet almış kullanıcıları oku.</p></div></div></div></div></div><div className="mt-16 text-center"><h2 className="text-3xl font-black text-[#2D1B4E] mb-8 uppercase">Paketlerimiz</h2><div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left"><div className="bg-white p-8 rounded-[32px] border border-slate-200"><h3 className="text-2xl font-black text-[#2D1B4E]">Standart Paket</h3><p className="text-3xl font-black text-[#E8622A] mt-2 mb-6">60 STG <span className="text-sm text-slate-500">/ Ay</span></p><ul className="space-y-3 mb-8"><li className="flex items-center gap-2 text-sm font-bold text-slate-600"><Check size={16} className="text-[#E8622A]"/> Online randevu sistemi</li><li className="flex items-center gap-2 text-sm font-bold text-slate-600"><Check size={16} className="text-[#E8622A]"/> Sınırsız randevu</li><li className="flex items-center gap-2 text-sm font-bold text-slate-600"><Check size={16} className="text-[#E8622A]"/> İşletme profil sayfası</li></ul><button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="w-full py-4 bg-slate-100 font-black rounded-xl text-[#2D1B4E] border-none cursor-pointer hover:text-[#E8622A]">Hemen Başla</button></div><div className="bg-[#2D1B4E] p-8 rounded-[32px] border-2 border-[#E8622A] relative text-white md:scale-105"><div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#E8622A] text-white px-4 py-1 rounded-full text-xs font-black uppercase">En Popüler</div><h3 className="text-2xl font-black">Premium Paket</h3><p className="text-3xl font-black text-[#E8622A] mt-2 mb-6">100 STG <span className="text-sm text-slate-400">/ Ay</span></p><ul className="space-y-3 mb-8"><li className="flex items-center gap-2 text-sm font-bold"><CheckCircle2 size={16} className="text-[#E8622A]"/> Tüm Standart özellikler</li><li className="flex items-center gap-2 text-sm font-bold"><CheckCircle2 size={16} className="text-[#E8622A]"/> Öncelikli listeleme</li><li className="flex items-center gap-2 text-sm font-bold"><CheckCircle2 size={16} className="text-[#E8622A]"/> Öne çıkan işletme rozeti</li></ul><button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="w-full py-4 bg-[#E8622A] text-white font-black rounded-xl border-none cursor-pointer">Premium'a Geç</button></div></div></div></div></div>
-        )}
-
-        {/* NEDEN BOOKCY SAYFASI */}
-        {step === 'why_bookcy' && (
-            <div className="w-full bg-[#FAF7F2] pb-24"><div className="bg-[#2D1B4E] pt-24 pb-24 px-4 text-center"><span className="bg-white/10 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 inline-block">Farkı Keşfedin</span><h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-6">Neden <span className="text-[#E8622A]">Bookcy</span> Kullanıyorlar?</h1><p className="text-lg text-slate-300 max-w-2xl mx-auto">Kişisel bakım yolculuğunuzun en güvenilir ortağıyız.</p></div><div className="max-w-6xl mx-auto px-4 -mt-10"><div className="grid grid-cols-1 md:grid-cols-3 gap-8"><div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-200"><div className="w-16 h-16 bg-orange-50 text-[#E8622A] rounded-2xl flex items-center justify-center mb-6"><Crown size={32}/></div><h3 className="font-black text-xl text-[#2D1B4E] mb-3">Öncü Platform</h3><p className="text-slate-500 font-medium">Kıbrıs’ta ilk ve öncü randevu platformlarından biri olarak, sektöre yön veriyoruz.</p></div><div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-200"><div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6"><Grid size={32}/></div><h3 className="font-black text-xl text-[#2D1B4E] mb-3">Entegre Sistem</h3><p className="text-slate-500 font-medium">Farklı sektörleri tek çatı altında toplayarak kapsamlı deneyim sunuyoruz.</p></div><div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-200"><div className="w-16 h-16 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center mb-6"><Users size={32}/></div><h3 className="font-black text-xl text-[#2D1B4E] mb-3">Gerçek Müşteri</h3><p className="text-slate-500 font-medium">İşletmelere gerçek müşteri kazandıran aktif bir trafik sağlıyoruz.</p></div><div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-200"><div className="w-16 h-16 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center mb-6"><Smartphone size={32}/></div><h3 className="font-black text-xl text-[#2D1B4E] mb-3">Üst Düzey Arayüz</h3><p className="text-slate-500 font-medium">Sade, hızlı ve kullanıcı dostu modern bir arayüz sunuyoruz.</p></div><div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-200"><div className="w-16 h-16 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center mb-6"><TrendingUp size={32}/></div><h3 className="font-black text-xl text-[#2D1B4E] mb-3">Maksimum Kazanç</h3><p className="text-slate-500 font-medium">İşletmeler için adil, şeffaf ve komisyonsuz modelimiz ile gelirinizi katlamanızı sağlıyoruz.</p></div><div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-200"><div className="w-16 h-16 bg-teal-50 text-teal-500 rounded-2xl flex items-center justify-center mb-6"><MessageSquare size={32}/></div><h3 className="font-black text-xl text-[#2D1B4E] mb-3">Gelişmiş Otomasyon</h3><p className="text-slate-500 font-medium">Yüksek performanslı altyapımızla yakında eklenecek SMS ve gelişmiş bildirim sistemleri.</p></div></div><div className="mt-16 text-center"><button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="bg-[#E8622A] hover:bg-[#d4561f] text-white px-12 py-5 rounded-full font-black uppercase tracking-widest text-sm border-none cursor-pointer inline-flex items-center gap-2">Hemen Aramıza Katıl <ArrowRight size={18}/></button></div></div></div>
         )}
 
         {/* İLETİŞİM SAYFASI */}
