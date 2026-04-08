@@ -4132,7 +4132,134 @@ export default function Home() {
 
         )}
 
+{/* === NEDEN BOOKCY (YENİ SAYFA) === */}
+        {step === 'why_bookcy' && (
+            <div className="w-full bg-[#FAF7F2] animate-in fade-in overflow-hidden pb-24">
+                <div className="bg-[#2D1B4E] pt-32 pb-24 px-4 md:px-8 text-center relative overflow-hidden border-b border-slate-800">
+                    <div className="absolute top-0 left-0 w-64 md:w-96 h-64 md:h-96 bg-[#E8622A]/20 rounded-full blur-[100px] pointer-events-none"></div>
+                    <div className="absolute bottom-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-[#F5C5A3]/20 rounded-full blur-[100px] pointer-events-none"></div>
+                    
+                    <span className="bg-white/10 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 inline-block border border-white/20 relative z-10">Farkı Keşfedin</span>
+                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-6 relative z-10">Neden <span className="text-[#E8622A]">Binlerce Kişi</span><br/>Bookcy Kullanıyor?</h1>
+                    <p className="text-lg md:text-xl font-medium text-slate-300 max-w-2xl mx-auto leading-relaxed relative z-10">Sadece bir randevu sistemi değil, kişisel bakım yolculuğunuzun en güvenilir ortağıyız.</p>
+                </div>
+                
+                <div className="max-w-[1200px] mx-auto px-4 md:px-8 -mt-10 relative z-20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
+                            <div className="w-16 h-16 bg-orange-50 text-[#E8622A] rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-orange-100"><Crown size={32}/></div>
+                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Öncü Platform</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed">Kıbrıs’ta ilk ve öncü randevu platformlarından biri olarak, sektöre yön veriyoruz.</p>
+                        </div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
+                            <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-100"><Grid size={32}/></div>
+                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Entegre Sistem</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed">Farklı sektörleri tek çatı altında toplayarak kapsamlı bir arama ve randevu deneyimi sunuyoruz.</p>
+                        </div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
+                            <div className="w-16 h-16 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-green-100"><Users size={32}/></div>
+                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Gerçek Müşteri</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed">İşletmelere gerçek müşteri kazandıran, dönüşüm odaklı aktif ve büyük bir trafik sağlıyoruz.</p>
+                        </div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
+                            <div className="w-16 h-16 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-purple-100"><Smartphone size={32}/></div>
+                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Üst Düzey Arayüz</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed">Karmaşadan uzak; sade, son derece hızlı ve kullanıcı dostu modern bir arayüz sunuyoruz.</p>
+                        </div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
+                            <div className="w-16 h-16 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-pink-100"><TrendingUp size={32}/></div>
+                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Maksimum Kazanç</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed">İşletmeler için adil, şeffaf ve komisyonsuz modelimiz ile gelirinizi katlamanızı sağlıyoruz.</p>
+                        </div>
+                        <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 hover:-translate-y-2 transition-transform">
+                            <div className="w-16 h-16 bg-teal-50 text-teal-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-teal-100"><MessageSquare size={32}/></div>
+                            <h3 className="font-black text-xl text-[#2D1B4E] mb-3">Gelişmiş Otomasyon</h3>
+                            <p className="text-slate-500 font-medium leading-relaxed">Yüksek performanslı altyapımızla yakında eklenecek SMS ve gelişmiş bildirim sistemleri.</p>
+                        </div>
+                    </div>
+                    
+                    <div className="mt-16 text-center">
+                        <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="bg-[#E8622A] hover:bg-[#d4561f] text-white px-12 py-5 rounded-full font-black uppercase tracking-widest text-sm shadow-[0_0_40px_rgba(232,98,42,0.4)] border-none cursor-pointer transition-transform hover:scale-105 inline-flex items-center gap-2">Hemen Aramıza Katıl <ArrowRight size={18}/></button>
+                    </div>
+                </div>
+            </div>
+        )}
 
+        {/* === HAKKIMIZDA & PAKETLER SAYFASI === */}
+        {step === 'about' && (
+            <div className="w-full bg-[#FAF7F2] animate-in fade-in overflow-hidden pb-24">
+                <div className="bg-[#2D1B4E] pt-32 pb-24 px-4 md:px-8 text-center relative overflow-hidden border-b border-slate-800">
+                    <div className="absolute top-0 left-0 w-64 md:w-96 h-64 md:h-96 bg-[#E8622A]/20 rounded-full blur-[100px] pointer-events-none"></div>
+                    <div className="absolute bottom-0 right-0 w-64 md:w-96 h-64 md:h-96 bg-[#F5C5A3]/20 rounded-full blur-[100px] pointer-events-none"></div>
+                    
+                    <span className="bg-white/10 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-6 inline-block border border-white/20 relative z-10">Kıbrıs'ın #1 Randevu Platformu</span>
+                    <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white mb-6 relative z-10">İşletmeni Dijitale Taşı,<br/><span className="text-[#E8622A]">Müşterilerini Katla</span></h1>
+                    <p className="text-lg md:text-xl font-medium text-slate-300 max-w-2xl mx-auto leading-relaxed relative z-10 mb-10">Kıbrıs’taki en iyi işletmeler artık Bookcy’de. Sen de yerini al, müşterilerine 7/24 ulaş, randevularını otomatik yönet.</p>
+                    
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
+                        <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="bg-[#E8622A] hover:bg-[#d4561f] text-white px-8 py-4 rounded-full font-black uppercase tracking-widest text-sm transition-all shadow-[0_0_30px_rgba(232,98,42,0.4)] border-none cursor-pointer w-full sm:w-auto">Hemen Başla</button>
+                        <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="bg-transparent border-2 border-white/20 hover:bg-white/10 text-white px-8 py-4 rounded-full font-black uppercase tracking-widest text-sm transition-all cursor-pointer w-full sm:w-auto">İşletmeni Ekle</button>
+                    </div>
+                </div>
+
+                <div className="max-w-[1000px] mx-auto px-4 md:px-8 py-20 text-center">
+                    <h2 className="text-sm font-black text-[#E8622A] uppercase tracking-[0.3em] mb-4">Biz Kimiz?</h2>
+                    <p className="text-xl md:text-3xl text-[#2D1B4E] font-black leading-tight mb-8">Bookcy, Kıbrıs’ta kurulan ilk ve tek kapsamlı online randevu platformlarından biri olarak, işletmelerin dijital dönüşümünü hızlandırmak için geliştirilmiştir.</p>
+                    <p className="text-base md:text-lg text-slate-500 font-medium leading-relaxed max-w-3xl mx-auto mb-8">Güzellikten bakıma, spadan yaşam tarzı hizmetlerine kadar birçok sektörü tek çatı altında buluşturarak, hem işletmelere hem müşterilere yeni nesil bir deneyim sunuyoruz.</p>
+                    <div className="bg-[#2D1B4E] text-white p-6 md:p-8 rounded-[24px] inline-block font-bold text-lg md:text-xl shadow-xl">
+                        Biz sadece bir randevu sistemi değiliz — <br/><span className="text-[#E8622A]">işletmelerin büyümesini sağlayan dijital altyapıyız.</span>
+                    </div>
+                </div>
+
+                <div className="bg-slate-50 py-24 border-y border-slate-200">
+                    <div className="max-w-[1000px] mx-auto px-4 md:px-8">
+                        <div className="text-center mb-16">
+                            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-[#2D1B4E] mb-4">Paketlerimiz</h2>
+                            <p className="text-slate-500 font-medium">Sürpriz kesintiler yok, gizli ücretler yok.</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div className="bg-white border border-slate-200 rounded-[32px] p-8 md:p-10 shadow-lg flex flex-col hover:border-[#E8622A] transition-colors">
+                                <h3 className="text-2xl font-black text-[#2D1B4E] mb-2">Standart Paket</h3>
+                                <div className="flex items-baseline gap-2 mb-8 border-b border-slate-100 pb-8">
+                                    <span className="text-4xl font-black text-[#2D1B4E]">60 STG</span>
+                                    <span className="text-slate-500 font-bold">/ Aylık</span>
+                                </div>
+                                <ul className="flex flex-col gap-5 mb-10 flex-1">
+                                    <li className="flex items-center gap-3 font-bold text-slate-600 text-sm"><Check className="text-[#E8622A]" size={20}/> Online randevu sistemi</li>
+                                    <li className="flex items-center gap-3 font-bold text-slate-600 text-sm"><Check className="text-[#E8622A]" size={20}/> Sınırsız randevu</li>
+                                    <li className="flex items-center gap-3 font-bold text-slate-600 text-sm"><Check className="text-[#E8622A]" size={20}/> İşletme profil sayfası</li>
+                                    <li className="flex items-center gap-3 font-bold text-slate-600 text-sm"><Check className="text-[#E8622A]" size={20}/> E-posta hatırlatma sistemi</li>
+                                    <li className="flex items-center gap-3 font-bold text-slate-600 text-sm"><Check className="text-[#E8622A]" size={20}/> Müşteri yönetimi</li>
+                                    <li className="flex items-center gap-3 font-bold text-slate-600 text-sm"><Check className="text-[#E8622A]" size={20}/> Temel raporlama</li>
+                                </ul>
+                                <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="w-full bg-slate-100 text-[#2D1B4E] hover:bg-slate-200 hover:text-[#E8622A] py-4 rounded-xl font-black uppercase tracking-widest text-xs transition-colors cursor-pointer border-none">Hemen Başla</button>
+                            </div>
+
+                            <div className="bg-[#2D1B4E] border-2 border-[#E8622A] rounded-[32px] p-8 md:p-10 shadow-[0_20px_50px_rgba(232,98,42,0.2)] flex flex-col relative transform md:scale-105 z-10">
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#E8622A] text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest flex items-center gap-2 shadow-lg">
+                                    <Star className="fill-white" size={14}/> En Popüler
+                                </div>
+                                <h3 className="text-2xl font-black text-white mb-2 mt-4">Premium Paket</h3>
+                                <div className="flex items-baseline gap-2 mb-8 border-b border-white/10 pb-8">
+                                    <span className="text-5xl font-black text-[#E8622A]">100 STG</span>
+                                    <span className="text-slate-400 font-bold">/ Aylık</span>
+                                </div>
+                                <ul className="flex flex-col gap-5 mb-10 flex-1">
+                                    <li className="flex items-center gap-3 font-bold text-white text-sm"><CheckCircle2 className="text-[#E8622A]" size={20}/> Tüm Standart özellikler</li>
+                                    <li className="flex items-center gap-3 font-bold text-white text-sm"><CheckCircle2 className="text-[#E8622A]" size={20}/> Öncelikli listeleme (Görünürlük)</li>
+                                    <li className="flex items-center gap-3 font-bold text-white text-sm"><CheckCircle2 className="text-[#E8622A]" size={20}/> Gelişmiş raporlama ve analiz</li>
+                                    <li className="flex items-center gap-3 font-bold text-white text-sm"><CheckCircle2 className="text-[#E8622A]" size={20}/> Öne çıkan işletme rozeti</li>
+                                    <li className="flex items-center gap-3 font-bold text-white text-sm"><CheckCircle2 className="text-[#E8622A]" size={20}/> Öncelikli destek</li>
+                                    <li className="flex items-center gap-3 font-bold text-white text-sm"><CheckCircle2 className="text-[#E8622A]" size={20}/> Yeni özelliklere erken erişim</li>
+                                </ul>
+                                <button onClick={() => {setShowRegister(true); window.scrollTo(0,0);}} className="w-full bg-[#E8622A] hover:bg-[#d4561f] text-white py-5 rounded-xl font-black uppercase tracking-widest text-xs transition-all shadow-lg cursor-pointer border-none flex items-center justify-center gap-2">Premium'a Geç <ArrowRight size={16}/></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
 
       </main>
 
