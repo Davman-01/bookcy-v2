@@ -9,106 +9,14 @@ import {
   ShieldCheck, Moon, Sun, Instagram
 } from 'lucide-react';
 
-// ... (Diğer importların yanına ekle)
+import { supabase } from '@/lib/supabase';
 import { 
   getRegistrationTemplate, 
   getNewBookingShopTemplate, 
   getBookingConfirmationTemplate 
 } from '@/lib/emailTemplates';
 
-// --- (Home fonksiyonu içindeki handleRegisterSubmit kısmını bununla güncelle) ---
-async function handleRegisterSubmit(e) {
-  e.preventDefault();
-  if (emailValid === false || phoneValid === false || adminEmailValid === false) { return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz."); }
-  setIsUploading(true); 
-  let uploadedLogoUrl = null;
-  if (newShop.logoFile) {
-    const fileName = `${Math.random()}.${newShop.logoFile.name.split('.').pop()}`;
-    const { error: uploadError } = await supabase.storage.from('logos').upload(fileName, newShop.logoFile);
-    if (!uploadError) { uploadedLogoUrl = supabase.storage.from('logos').getPublicUrl(fileName).data.publicUrl; }
-  }
-  const fullPhone = newShop.phoneCode + " " + newShop.contactPhone;
-  
-  const { error } = await supabase.from('shops').insert([{ name: newShop.name, category: newShop.category, location: newShop.location, address: newShop.address, maps_link: newShop.maps_link, admin_email: newShop.email, admin_username: newShop.username, admin_password: newShop.password, description: newShop.description, logo_url: uploadedLogoUrl, package: newShop.package, status: 'pending', contact_phone: fullPhone, contact_insta: newShop.contactInsta, contact_email: newShop.contactEmail, services: [], staff: [], gallery: [], closed_dates: [], events: [] }]);
-  
-  if (!error) {
-    // 1. KAYIT MAİLİ (İşletmeye)
-    await fetch('/api/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        to: newShop.email,
-        subject: 'Bookcy Kayıt Talebiniz Alındı',
-        html: getRegistrationTemplate({
-          shopName: newShop.name,
-          date: new Date().toLocaleDateString('tr-TR'),
-          packageName: newShop.package.toUpperCase(),
-          price: newShop.package === 'Premium Paket' ? '100 STG' : '60 STG'
-        })
-      }),
-    });
-    setRegisterSuccess(true); 
-  } else { alert("Hata oluştu. Lütfen tekrar deneyiniz."); }
-  setIsUploading(false);
-}
-
-// --- (Home fonksiyonu içindeki handleBooking kısmını bununla güncelle) ---
-async function handleBooking(e) {
-  e.preventDefault();
-  if (bookingEmailValid === false || bookingPhoneValid === false) { return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz."); }
-  
-  // ... (Mevcut slot hesaplama kodların aynen kalsın) ...
-  const fullPhone = formData.phoneCode + " " + formData.phone;
-  const finalDate = isClub ? bookingData.selectedEvent.date : bookingData.date;
-  const finalTime = isClub ? bookingData.selectedEvent.time : bookingData.time;
-
-  const { error } = await supabase.from('appointments').insert([{ shop_id: selectedShop.id, customer_name: formData.name, customer_surname: formData.surname, customer_phone: fullPhone, customer_email: formData.email, appointment_date: finalDate, appointment_time: finalTime, service_name: bookingData.selectedShopService.name, staff_name: assignedStaffName, occupied_slots: occupied_slots, status: 'Bekliyor' }]);
-  
-  if (!error) {
-    // 2. YENİ RANDEVU MAİLİ (İşletmeye)
-    await fetch('/api/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        to: selectedShop.admin_email,
-        subject: 'Yeni Randevu Bildirimi - Bookcy',
-        html: getNewBookingShopTemplate({
-          shopName: selectedShop.name,
-          date: finalDate,
-          time: finalTime,
-          service: bookingData.selectedShopService.name,
-          staff: assignedStaffName,
-          customerName: formData.name + " " + formData.surname,
-          customerPhone: fullPhone,
-          customerEmail: formData.email
-        })
-      }),
-    });
-
-    // 3. RANDEVU ONAY MAİLİ (Müşteriye)
-    await fetch('/api/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        to: formData.email,
-        subject: 'Randevunuz Alındı - Bookcy',
-        html: getBookingConfirmationTemplate({
-          customerName: formData.name,
-          shopName: selectedShop.name,
-          date: finalDate,
-          time: finalTime,
-          service: bookingData.selectedShopService.name,
-          staff: assignedStaffName,
-          address: selectedShop.address || selectedShop.location
-        })
-      }),
-    });
-
-    setStep('success'); 
-    window.scrollTo(0,0);
-  } else { alert("Rezervasyon alınırken bir hata oluştu!"); }
-}
-
+// Yardımcı Fonksiyonlar
 const InstagramIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
@@ -188,7 +96,7 @@ export default function Home() {
         boost: { purpose: "Görünürlük paketi.", adv1: { title: "Zirve", desc: "En üstte yer alın." }, adv2: { title: "Vitrin", desc: "Önerilenlerde gösterilin." }, adv3: { title: "İmaj", desc: "Kalitenizi vurgulayın." } },
         stats: { purpose: "Veri sistemi.", adv1: { title: "Ciro", desc: "Anlık takip." }, adv2: { title: "Analiz", desc: "Strateji belirleyin." }, adv3: { title: "Raporlar", desc: "Performansı görün." } }
       },
-      featUI: { purposeTitle: "Amacı ve Ne İşe Yarar?", benefitsTitle: "Avantajları", allFeaturesTitle: "Tüm Özellikler", allFeaturesSub: "İşletmenizi büyütmek için ihtiyacınız olan her şey." },
+      featUI: { purposeTitle: "Amacı ve Ne İşe Yarar?", benefitsTitle: "Avantajları", allFeaturesTitle: "All Features", allFeaturesSub: "Everything you need to grow your business." },
       home: { eyebrow: "Kıbrıs'ın #1 Güzellik Platformu", title1: "Kendine", title2: "iyi bak,", title3: "hemen", title4: "randevu al.", subtitle: "Yakınındaki en iyi berber, kuaför, spa ve güzellik uzmanlarını bul. Tek tıkla randevu al, zamanın senin olsun.", searchPlace: "Hizmet veya mekan ara...", searchLoc: "Nerede?", searchBtn: "Ara", popTitle: "Popüler:", stats: {s1:"Aktif İşletme", s2:"Mutlu Müşteri", s3:"Tamamlanan İşlem", s4:"Memnuniyet"} },
       cats: { catTitle: "Kategoriler", catSub: "Bugün ne yaptırmak istersiniz?", seeAll: "Tümünü Gör →", tattoo: "Dövme", barber: "Berber", hair: "Kuaför", nail: "Tırnak & Güzellik", club: "Bar & Club", spa: "Spa & Masaj", makeup: "Makyaj", skincare: "Cilt Bakımı" },
       homeInfo: { recLabel: "Öne Çıkanlar", recTitle: "Kıbrıs'ta Bu Hafta 🔥", howLabel: "Nasıl Çalışır?", howTitle: "4 Basit Adımda Randevun Hazır", how1Title: "Keşfet", how1Desc: "Yakındaki mekanları incele ve filtrele.", how2Title: "Tarih Seç", how2Desc: "Sana en uygun zamanı tek tıkla seç.", how3Title: "Onayla", how3Desc: "Saniyeler içinde rezervasyonun onaylanır.", how4Title: "Keyif Çıkar", how4Desc: "Git, hizmetini al ve puan ver.", ctaLabel: "İşletme Sahibi misiniz?", ctaTitle1: "Bookcy ile İşletmeni", ctaTitle2: "Dijitalleştir.", ctaSub: "Randevu sistemini kolaylaştır, yeni müşteri kazan." },
@@ -346,46 +254,79 @@ export default function Home() {
   const handleLogout = () => { localStorage.removeItem('bookcy_biz_session'); setLoggedInShop(null); };
   const goToFeature = (featureKey) => { setActiveFeature(featureKey); setStep('feature_detail'); setShowFeaturesMenu(false); window.scrollTo(0,0); };
 
-  // GÜNCEL handleRegisterSubmit Fonksiyonu (Mail Tetikleyicili)
+  // GÜNCEL handleRegisterSubmit Fonksiyonu (DÜZELTİLDİ)
   async function handleRegisterSubmit(e) {
     e.preventDefault();
-    if (emailValid === false || phoneValid === false || adminEmailValid === false) { return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz."); }
-    setIsUploading(true); let uploadedLogoUrl = null;
-    if (newShop.logoFile) {
-      const fileName = `${Math.random()}.${newShop.logoFile.name.split('.').pop()}`;
-      const { error: uploadError } = await supabase.storage.from('logos').upload(fileName, newShop.logoFile);
-      if (!uploadError) { uploadedLogoUrl = supabase.storage.from('logos').getPublicUrl(fileName).data.publicUrl; }
+    if (emailValid === false || phoneValid === false || adminEmailValid === false) { 
+      return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz."); 
     }
-    const fullPhone = newShop.phoneCode + " " + newShop.contactPhone;
     
-    // Veritabanına Ekleme
-    const { error } = await supabase.from('shops').insert([{ name: newShop.name, category: newShop.category, location: newShop.location, address: newShop.address, maps_link: newShop.maps_link, admin_email: newShop.email, admin_username: newShop.username, admin_password: newShop.password, description: newShop.description, logo_url: uploadedLogoUrl, package: newShop.package, status: 'pending', contact_phone: fullPhone, contact_insta: newShop.contactInsta, contact_email: newShop.contactEmail, services: [], staff: [], gallery: [], closed_dates: [], events: [] }]);
+    setIsUploading(true); 
     
-    if (!error) {
-      // Başarılı kayıttan sonra Mail Gönderimini tetikle
-      try {
-        await fetch('/api/email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: newShop.email, 
-            subject: 'Bookcy Kayıt Talebiniz Alındı',
-            html: getRegistrationTemplate({
-              shopName: newShop.name,
-              date: new Date().toLocaleDateString('tr-TR'),
-              packageName: newShop.package.toUpperCase(),
-              price: newShop.package === 'Premium Paket' ? '100 STG' : '60 STG'
-            })
-          }),
-        });
-      } catch (mailErr) {
-        console.error("Mail gönderilemedi:", mailErr);
+    try {
+      let uploadedLogoUrl = null;
+      if (newShop.logoFile) {
+        const fileName = `${Math.random()}.${newShop.logoFile.name.split('.').pop()}`;
+        const { error: uploadError } = await supabase.storage.from('logos').upload(fileName, newShop.logoFile);
+        if (!uploadError) { 
+          uploadedLogoUrl = supabase.storage.from('logos').getPublicUrl(fileName).data.publicUrl; 
+        }
       }
-      setRegisterSuccess(true); 
-    } else { 
-      alert("Hata oluştu. Lütfen tekrar deneyiniz."); 
+      const fullPhone = newShop.phoneCode + " " + newShop.contactPhone;
+      
+      const { error } = await supabase.from('shops').insert([{ 
+        name: newShop.name, 
+        category: newShop.category, 
+        location: newShop.location, 
+        address: newShop.address, 
+        maps_link: newShop.maps_link, 
+        admin_email: newShop.email, 
+        admin_username: newShop.username, 
+        admin_password: newShop.password, 
+        description: newShop.description, 
+        logo_url: uploadedLogoUrl, 
+        package: newShop.package, 
+        status: 'pending', 
+        contact_phone: fullPhone, 
+        contact_insta: newShop.contactInsta, 
+        contact_email: newShop.contactEmail, 
+        services: [], 
+        staff: [], 
+        gallery: [], 
+        closed_dates: [], 
+        events: [] 
+      }]);
+      
+      if (!error) {
+        try {
+          await fetch('/api/email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: newShop.email, 
+              subject: 'Bookcy Kayıt Talebiniz Alındı',
+              html: getRegistrationTemplate({
+                shopName: newShop.name,
+                date: new Date().toLocaleDateString('tr-TR'),
+                packageName: newShop.package.toUpperCase(),
+                price: newShop.package === 'Premium Paket' ? '100 STG' : '60 STG'
+              })
+            }),
+          });
+        } catch (mailErr) {
+          console.error("Mail gönderilemedi:", mailErr);
+        }
+        setRegisterSuccess(true); 
+      } else { 
+        alert("Veritabanı Hatası: " + error.message); 
+      }
+    } catch (err) {
+      console.error("Sistem Hatası:", err);
+      alert("Bir hata oluştu: " + err.message);
+    } finally {
+      // HATA OLSUN VEYA OLMASIN YÜKLENİYOR DURUMUNU KAPATIR
+      setIsUploading(false);
     }
-    setIsUploading(false);
   }
 
   async function handleBooking(e) {
@@ -418,7 +359,51 @@ export default function Home() {
     const finalTime = isClub ? bookingData.selectedEvent.time : bookingData.time;
 
     const { error } = await supabase.from('appointments').insert([{ shop_id: selectedShop.id, customer_name: formData.name, customer_surname: formData.surname, customer_phone: fullPhone, customer_email: formData.email, appointment_date: finalDate, appointment_time: finalTime, service_name: bookingData.selectedShopService.name, staff_name: assignedStaffName, occupied_slots: occupied_slots, status: 'Bekliyor' }]);
-    if (!error) { setStep('success'); window.scrollTo(0,0); } else { alert("Rezervasyon alınırken bir hata oluştu!"); }
+    
+    if (!error) {
+       // YENİ RANDEVU MAİLLERİ
+       try {
+          await fetch('/api/email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: selectedShop.admin_email,
+              subject: 'Yeni Randevu Bildirimi - Bookcy',
+              html: getNewBookingShopTemplate({
+                shopName: selectedShop.name,
+                date: finalDate,
+                time: finalTime,
+                service: bookingData.selectedShopService.name,
+                staff: assignedStaffName,
+                customerName: formData.name + " " + formData.surname,
+                customerPhone: fullPhone,
+                customerEmail: formData.email
+              })
+            }),
+          });
+
+          await fetch('/api/email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: formData.email,
+              subject: 'Randevunuz Alındı - Bookcy',
+              html: getBookingConfirmationTemplate({
+                customerName: formData.name,
+                shopName: selectedShop.name,
+                date: finalDate,
+                time: finalTime,
+                service: bookingData.selectedShopService.name,
+                staff: assignedStaffName,
+                address: selectedShop.address || selectedShop.location
+              })
+            }),
+          });
+       } catch (mErr) { console.error(mErr); }
+
+       setStep('success'); 
+       window.scrollTo(0,0); 
+    } else { alert("Rezervasyon alınırken bir hata oluştu!"); }
   }
 
   async function submitFeedback(e) {
@@ -479,9 +464,9 @@ export default function Home() {
         .hero-sub { font-size:17px; font-weight:400; color: rgba(255,255,255,0.55); line-height:1.6; margin-bottom: 48px; max-width:580px; margin-left:auto; margin-right:auto; animation: fadeUp 0.8s 0.3s ease both; }
         .search-wrap { display:flex; align-items:center; background: var(--c-bg-card); border-radius: 20px; padding: 8px 8px 8px 24px; gap: 0; max-width: 680px; width:100%; box-shadow: 0 24px 80px rgba(0,0,0,0.35); margin: 0 auto; animation: fadeUp 0.8s 0.4s ease both; transition: box-shadow 0.3s; border: none; }
         .search-wrap:focus-within { box-shadow: 0 24px 80px rgba(0,0,0,0.4), 0 0 0 3px rgba(232,98,42,0.3); } .search-field { flex:1; display:flex; align-items:center; gap:10px; } .search-icon { color: var(--c-text-muted); font-size:18px; flex-shrink:0; }
-        .search-field input, .search-location select { border:none; outline:none; width:100%; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; color:var(--c-text-main); background:transparent; } .search-field input::placeholder { color:var(--c-text-light); font-weight:400; }
+        .search-field input, .search-location select { border:none; outline:none; width:100%; font-family:'DM Sans', sans-serif; font-size:15px; font-weight:600; color:var(--c-text-main); background:transparent; } .search-field input::placeholder { color:var(--c-text-light); font-weight:400; }
         .search-divider { width:1px; height:32px; background: var(--c-border); margin: 0 16px; } .search-location { display:flex; align-items:center; gap:8px; min-width:140px; flex:1; }
-        .search-btn { border:none; background: var(--terra); color:white; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700; padding: 14px 28px; border-radius:14px; transition: all 0.25s; white-space:nowrap; display:flex; align-items:center; gap:8px; cursor:pointer;} .search-btn:hover { background:#d4561f; transform:scale(1.03); }
+        .search-btn { border:none; background: var(--terra); color:white; font-family:'DM Sans', sans-serif; font-size:14px; font-weight:700; padding: 14px 28px; border-radius:14px; transition: all 0.25s; white-space:nowrap; display:flex; align-items:center; gap:8px; cursor:pointer;} .search-btn:hover { background:#d4561f; transform:scale(1.03); }
         .hero-popular { display:flex; align-items:center; gap:10px; margin-top:20px; flex-wrap:wrap; justify-content:center; animation: fadeUp 0.8s 0.5s ease both; } .hero-popular span { font-size:12px; color:rgba(255,255,255,0.4); font-weight:500; letter-spacing:0.5px; }
         .pop-tag { font-size:12px; font-weight:500; padding:5px 14px; border-radius:50px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.65); transition:all 0.2s; cursor:pointer; background:none;} .pop-tag:hover { background:rgba(255,255,255,0.15); color:white; }
         .hero-stats { display:flex; gap:0; margin-top: 60px; margin-bottom: 20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:40px; width:100%; max-width:680px; animation: fadeUp 0.8s 0.6s ease both; position: relative; z-index: 10; }
@@ -503,7 +488,7 @@ export default function Home() {
         .venue-badge { position:absolute; top:14px; left:14px; background:var(--terra); color:white; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:4px 10px; border-radius:50px; z-index:10; } .venue-badge.hot { background:linear-gradient(135deg,#E8622A,#c94e1f); display:flex; align-items:center; gap:4px; } .venue-badge.new { background:var(--fig); }
         .venue-fav { position:absolute; top:14px; right:14px; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.9); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; font-size:14px; transition:transform 0.2s; z-index:10; color: #2D1B4E;} .venue-fav:hover { transform:scale(1.15); color: red; }
         .venue-info { padding:20px; display:flex; flex-direction:column; flex:1; } .venue-cat { font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--terra); margin-bottom:6px; } .venue-name { font-family:'Plus Jakarta Sans',sans-serif; font-size:18px; font-weight:800; color:var(--c-text-main); letter-spacing:-0.5px; margin-bottom:8px; } .venue-meta { display:flex; align-items:center; gap:16px; font-size:12px; color:var(--c-text-muted); }
-        .venue-book-btn { width:100%; margin-top:auto; padding:11px; background:var(--fig); color:white; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; transition:all 0.25s; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;} .venue-book-btn:hover { background:var(--terra); }
+        .venue-book-btn { width:100%; margin-top:auto; padding:11px; background:var(--fig); color:white; border:none; border-radius:12px; font-family:'DM Sans', sans-serif; font-size:13px; font-weight:700; transition:all 0.25s; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;} .venue-book-btn:hover { background:var(--terra); }
         .section-how { background: var(--fig); padding: 100px 48px; position:relative; overflow:hidden; } .section-how::before { content:''; position:absolute; inset:0; background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
         .how-inner { max-width:1200px; margin:0 auto; position:relative; z-index:1; } .how-header { text-align:center; margin-bottom:72px; } .how-header .section-label-sm { color:var(--blush); opacity:0.7; } .how-header .section-title { color:white; }
         .steps-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:32px; position:relative; } .steps-grid::before { content:''; position:absolute; top:40px; left:12.5%; right:12.5%; height:1px; background: linear-gradient(90deg, transparent, rgba(232,98,42,0.4), rgba(232,98,42,0.4), transparent); z-index:0; }
@@ -519,7 +504,7 @@ export default function Home() {
         footer { background:var(--fig); padding:60px 48px 32px; color:rgba(255,255,255,0.5); } .footer-top { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:48px; max-width:1200px; margin:0 auto 48px; }
         .footer-brand-name { font-family:'Plus Jakarta Sans',sans-serif; font-size:24px; font-weight:800; color:white; letter-spacing:-1px; margin-bottom:12px; display:flex; align-items:baseline; } .footer-brand-name span { color:var(--terra); }
         .footer-desc { font-size:13px; line-height:1.7; max-width:260px; } .footer-col-title { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:white; margin-bottom:20px; }
-        .footer-links { list-style:none; display:flex; flex-direction:column; gap:10px; padding:0; margin:0; } .footer-links button { font-size:13px; color:rgba(255,255,255,0.45); text-decoration:none; transition:color 0.2s; background:none; border:none; text-align:left; padding:0; font-family:'DM Sans',sans-serif; cursor:pointer;} .footer-links button:hover { color:white; }
+        .footer-links { list-style:none; display:flex; flex-direction:column; gap:10px; padding:0; margin:0; } .footer-links button { font-size:13px; color:rgba(255,255,255,0.45); text-decoration:none; transition:color 0.2s; background:none; border:none; text-align:left; padding:0; font-family:'DM Sans', sans-serif; cursor:pointer;} .footer-links button:hover { color:white; }
         .footer-bottom { max-width:1200px; margin:0 auto; border-top:1px solid rgba(255,255,255,0.07); padding-top:24px; display:flex; justify-content:space-between; align-items:center; font-size:12px; } .footer-socials { display:flex; gap:12px; }
         .social-btn { width:36px; height:36px; border-radius:10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; transition:all 0.2s; text-decoration:none; color:white; } .social-btn:hover { background:rgba(232,98,42,0.3); border-color:var(--terra); }
         .reveal { opacity:0; transform:translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; } .reveal.visible { opacity:1; transform:translateY(0); }
