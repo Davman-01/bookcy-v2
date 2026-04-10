@@ -83,7 +83,6 @@ export default function Home() {
       { key: "club", dbName: "Bar & Club", bg: "linear-gradient(135deg,#1a0a0a,#3d1515)", emoji: "🍸" } 
   ];
 
-  // Metin özellikleri sözlüğü (Özellikler sayfası için)
   const featNames = { profile: "Bookcy Profili", market: "Pazaryeri Listeleme", team: "Ekip Yönetimi", booking: "Online Randevu", app: "Müşteri Uygulaması", marketing: "Pazarlama Araçları", calendar: "Takvim & Planlama", crm: "Müşteri Yönetimi", boost: "Öne Çık", stats: "İstatistik & Raporlar" };
   const featDesc = { profile: "İşletmenizin dijital vitrinini saniyeler içinde oluşturun.", market: "Bookcy kullanan binlerce aktif müşteriye doğrudan ulaşın.", team: "Personelinizin çalışma saatlerini kolayca yönetin.", booking: "Müşterilerinizin 7/24 randevu almasını sağlayın.", app: "Müşterilerinize özel mobil uygulama konforu sunun.", marketing: "Doğru zamanda doğru mesajı gönderin.", calendar: "Akıllı dijital takvim ile çakışmaları önleyin.", crm: "Müşteri geçmişini güvenle saklayın.", boost: "Aramalarda üst sıralara çıkın.", stats: "Anlık ve net raporlarla kazancınızı görün." };
 
@@ -152,7 +151,6 @@ export default function Home() {
 
   const handleLogout = () => { localStorage.removeItem('bookcy_biz_session'); setLoggedInShop(null); };
   
-  // ÖZELLİKLER ARASI YÖNLENDİRME (BOŞ EKRAN HATASI DÜZELTİLDİ)
   const goToFeature = (featureKey) => { 
     if(featNames[featureKey]) {
       setActiveFeature(featureKey); 
@@ -346,12 +344,19 @@ export default function Home() {
       <style dangerouslySetInnerHTML={{__html: `
         :root { --fig: #2D1B4E; --terra: #E8622A; --blush: #F5C5A3; --sand: #FAF7F2; --white: #FFFFFF; --c-bg-main: #FAF7F2; --c-bg-card: #FFFFFF; --c-bg-sub: #F8FAFC; --c-border: #E2E8F0; --c-text-main: #2D1B4E; --c-text-muted: #64748B; --c-nav-bg: rgba(250,247,242,0.95); }
         body { background: var(--c-bg-main); color: var(--c-text-main); font-family: 'DM Sans', sans-serif; overflow-x: hidden; margin: 0; padding: 0; }
+        .theme-bg-main { background-color: var(--c-bg-main); } .theme-bg-card { background-color: var(--c-bg-card); } .theme-bg-sub { background-color: var(--c-bg-sub); } .theme-bg-accent { background-color: var(--terra); } .theme-border { border-color: var(--c-border); border-style: solid; border-width: 1px; } .theme-border-sub { border-color: var(--c-border-sub); border-style: solid; border-width: 1px; } .theme-text-main { color: var(--c-text-main); } .theme-text-muted { color: var(--c-text-muted); } .theme-text-light { color: var(--c-text-light); }
         nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 48px; height: 68px; display: flex; align-items: center; justify-content: space-between; background: var(--c-nav-bg); backdrop-filter: blur(20px); border-bottom: 1px solid var(--c-border); transition: background 0.3s; }
-        .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; height: 40px; } 
-        .nav-logo img { height: 100%; width: auto; object-fit: contain; mix-blend-mode: multiply;} /* LOGO ARKA PLANI GİZLEME */
+        
+        /* LOGO CSS GÜNCELLENDİ: BOYUTU BÜYÜTÜLDÜ VE ŞEFFAFLIK EKLENDİ */
+        .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; height: 50px; } 
+        .nav-logo img { height: 100%; width: auto; object-fit: contain; mix-blend-mode: multiply; transform: scale(1.2); transform-origin: left center;} 
+        
         .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; height: 100%; margin:0; padding:0; }
-        .nav-links > li > button { text-decoration: none; font-size: 14px; font-weight: 600; color: var(--c-text-main); opacity: 0.7; transition: opacity 0.2s; position: relative; background:none; border:none; outline:none; font-family:'DM Sans', sans-serif; cursor:pointer;}
-        .nav-links > li > button:hover, .nav-links > li > button.active { opacity:1; color: var(--terra); }
+        
+        /* MENÜ BUTONLARI CSS'İ DÜZELTİLDİ: SADECE ANA MENÜ ETKİLENSİN */
+        .nav-main-btn { text-decoration: none; font-size: 14px; font-weight: 600; color: var(--c-text-main); opacity: 0.7; transition: opacity 0.2s; position: relative; background:none; border:none; outline:none; font-family:'DM Sans', sans-serif; cursor:pointer;}
+        .nav-main-btn:hover, .nav-main-btn.active { opacity:1; color: var(--terra); }
+        
         .nav-right { display: flex; flex-direction: row; align-items: center; gap: 16px; flex-shrink: 0; white-space: nowrap; }
         .btn-outline { font-family:'DM Sans',sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 50px; border: 1.5px solid var(--c-text-main); background: transparent; color: var(--c-text-main); transition: all 0.25s; cursor:pointer; text-decoration:none;} .btn-outline:hover { background:var(--c-text-main); color:var(--c-bg-card); }
         .btn-primary { font-family:'DM Sans',sans-serif; font-size: 13px; font-weight: 700; padding: 10px 22px; border-radius: 50px; border: none; background: var(--terra); color: white; transition: all 0.25s; display:flex; align-items:center; gap:7px; cursor:pointer; text-decoration:none;} .btn-primary:hover { background: #d4561f; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(232,98,42,0.35); }
@@ -381,6 +386,11 @@ export default function Home() {
         .cat-name { font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--c-text-main); text-align:center; }
         .venue-card { border-radius:24px; overflow:hidden; background: var(--c-bg-card); transition:transform 0.3s, box-shadow 0.3s; position:relative; display:flex; flex-direction:column; cursor:pointer; border: 1px solid var(--c-border);} .venue-card:hover { transform:translateY(-8px); box-shadow:0 24px 60px rgba(0,0,0,0.15); } .venue-card.featured { grid-row: span 2; }
         .venue-img { width:100%; height:200px; background:var(--c-bg-sub); position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:60px; } .venue-card.featured .venue-img { height:320px; } .venue-img img { width:100%; height:100%; object-fit:cover; }
+        footer { background:var(--fig); padding:60px 48px 32px; color:rgba(255,255,255,0.7); } .footer-top { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:48px; max-width:1200px; margin:0 auto 48px; }
+        .footer-brand-name { font-family:'Plus Jakarta Sans',sans-serif; font-size:24px; font-weight:800; color:white; letter-spacing:-1px; margin-bottom:12px; display:flex; align-items:baseline; } 
+        .footer-desc { font-size:13px; line-height:1.7; max-width:260px; } .footer-col-title { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:white; margin-bottom:20px; }
+        .footer-links { list-style:none; display:flex; flex-direction:column; gap:10px; padding:0; margin:0; } .footer-links button { font-size:13px; color:rgba(255,255,255,0.7); text-decoration:none; transition:color 0.2s; background:none; border:none; text-align:left; padding:0; font-family:'DM Sans', sans-serif; cursor:pointer;} .footer-links button:hover { color:white; }
+        .footer-bottom { max-width:1200px; margin:0 auto; border-top:1px solid rgba(255,255,255,0.1); padding-top:24px; display:flex; justify-content:space-between; align-items:center; font-size:12px; }
         @media(max-width:900px){ nav { padding:0 20px; background: var(--c-bg-card) !important; border-bottom: 1px solid var(--c-border) !important;} .hero { padding-top: 100px; } .search-wrap { flex-direction: column; border-radius:24px; padding:16px; gap:12px; } .search-field { border-right: none; border-bottom: 1px solid var(--c-border); padding-bottom: 12px; } .search-location { border-left: none; padding-left: 0; margin-left: 0;} .nav-links { display:none; } .categories-grid { grid-template-columns:repeat(4,1fr); } .footer-top { grid-template-columns:1fr 1fr; } .hero-stats { flex-direction:column; gap:24px; } .stat { border-right:none; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:16px; } .nav-right .btn-outline { display:none; } .nav-right .btn-primary span { display:none; } }
       `}} />
 
@@ -391,13 +401,13 @@ export default function Home() {
 
         <ul className="nav-links">
           <li>
-            <button onClick={() => {setStep('all_shops'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={['all_shops', 'shops', 'shop_profile', 'booking'].includes(step) ? 'active' : ''}>
+            <button onClick={() => {setStep('all_shops'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={`nav-main-btn ${['all_shops', 'shops', 'shop_profile', 'booking'].includes(step) ? 'active' : ''}`}>
               İşletmeler
             </button>
           </li>
           <li style={{height:'100%', display:'flex', alignItems:'center'}}>
               <div className="relative h-full flex items-center group" onMouseEnter={() => setShowFeaturesMenu(true)} onMouseLeave={() => setShowFeaturesMenu(false)}>
-                  <button onClick={() => {setStep('all_features'); setShowFeaturesMenu(false); window.scrollTo(0,0);}} className={`flex items-center gap-1 transition-colors h-full ${['features', 'feature_detail', 'all_features'].includes(step) || showFeaturesMenu ? 'active' : ''}`}>
+                  <button onClick={() => {setStep('all_features'); setShowFeaturesMenu(false); window.scrollTo(0,0);}} className={`nav-main-btn flex items-center gap-1 transition-colors h-full ${['features', 'feature_detail', 'all_features'].includes(step) || showFeaturesMenu ? 'active' : ''}`}>
                       Özellikler <ChevronDown size={14} className={`transition-transform duration-200 ${showFeaturesMenu ? 'rotate-180' : ''}`} />
                   </button>
                   {showFeaturesMenu && (
@@ -407,25 +417,25 @@ export default function Home() {
                                   <div>
                                     <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">Kurulum</h4>
                                     <ul className="space-y-5 font-bold text-slate-300 capitalize text-sm">
-                                      {['profile', 'market', 'team'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-white cursor-pointer transition-colors flex items-center gap-2 text-decoration-none bg-transparent border-none text-slate-300 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {key === 'profile' ? 'Bookcy Profili' : key === 'market' ? 'Pazaryeri' : 'Ekip Yönetimi'}</button></li>)}
+                                      {['profile', 'market', 'team'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:!text-white cursor-pointer transition-colors flex items-center gap-2 text-decoration-none bg-transparent border-none !text-slate-300 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {key === 'profile' ? 'Bookcy Profili' : key === 'market' ? 'Pazaryeri' : 'Ekip Yönetimi'}</button></li>)}
                                     </ul>
                                   </div>
                                   <div>
                                     <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">Müşterileri Etkile</h4>
                                     <ul className="space-y-5 font-bold text-slate-300 capitalize text-sm">
-                                      {['booking', 'app'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-white cursor-pointer transition-colors flex items-center gap-2 text-decoration-none bg-transparent border-none text-slate-300 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {key === 'booking' ? 'Online Randevu' : 'Müşteri Uygulaması'}</button></li>)}
+                                      {['booking', 'app'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:!text-white cursor-pointer transition-colors flex items-center gap-2 text-decoration-none bg-transparent border-none !text-slate-300 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {key === 'booking' ? 'Online Randevu' : 'Müşteri Uygulaması'}</button></li>)}
                                     </ul>
                                   </div>
                                   <div>
                                     <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">İşletmeni Yönet</h4>
                                     <ul className="space-y-5 font-bold text-slate-300 capitalize text-sm">
-                                      {['marketing', 'calendar', 'crm'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-white cursor-pointer transition-colors flex items-center gap-2 text-decoration-none bg-transparent border-none text-slate-300 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {key === 'marketing' ? 'Pazarlama Araçları' : key === 'calendar' ? 'Takvim' : 'Müşteri Yönetimi'}</button></li>)}
+                                      {['marketing', 'calendar', 'crm'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:!text-white cursor-pointer transition-colors flex items-center gap-2 text-decoration-none bg-transparent border-none !text-slate-300 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {key === 'marketing' ? 'Pazarlama Araçları' : key === 'calendar' ? 'Takvim' : 'Müşteri Yönetimi'}</button></li>)}
                                     </ul>
                                   </div>
                                   <div>
                                     <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">Büyümeye Devam Et</h4>
                                     <ul className="space-y-5 font-bold text-slate-300 capitalize text-sm">
-                                      {['boost', 'stats'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-white cursor-pointer transition-colors flex items-center gap-2 text-decoration-none bg-transparent border-none text-slate-300 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {key === 'boost' ? 'Öne Çık' : 'İstatistikler'}</button></li>)}
+                                      {['boost', 'stats'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:!text-white cursor-pointer transition-colors flex items-center gap-2 text-decoration-none bg-transparent border-none !text-slate-300 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {key === 'boost' ? 'Öne Çık' : 'İstatistikler'}</button></li>)}
                                     </ul>
                                   </div>
                               </div>
@@ -438,17 +448,17 @@ export default function Home() {
               </div>
           </li>
           <li>
-            <button onClick={() => {setStep('why_bookcy'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'why_bookcy' ? 'active' : ''}>
+            <button onClick={() => {setStep('why_bookcy'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={`nav-main-btn ${step === 'why_bookcy' ? 'active' : ''}`}>
               Neden Bookcy
             </button>
           </li>
           <li>
-            <button onClick={() => {setStep('about'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'about' ? 'active' : ''}>
+            <button onClick={() => {setStep('about'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={`nav-main-btn ${step === 'about' ? 'active' : ''}`}>
               Hakkımızda & Paketler
             </button>
           </li>
           <li>
-            <button onClick={() => {setStep('contact'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={step === 'contact' ? 'active' : ''}>
+            <button onClick={() => {setStep('contact'); setShowLogin(false); setShowRegister(false); window.scrollTo(0,0);}} className={`nav-main-btn ${step === 'contact' ? 'active' : ''}`}>
               İletişim
             </button>
           </li>
@@ -837,7 +847,7 @@ export default function Home() {
       <footer className="w-full bg-[#2D1B4E] pt-16 pb-8 px-6 text-white/60 text-sm border-t border-[#3E296A] z-10 relative">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 border-b border-white/10 pb-8">
           <div>
-            <div className="mb-6 h-10"><img src="/logo.png" alt="Bookcy Logo" className="h-full w-auto object-contain filter brightness-0 invert" /></div>
+            <div className="mb-6 h-14"><img src="/logo.png" alt="Bookcy Logo" className="h-full w-auto object-contain filter brightness-0 invert origin-left transform scale-125" /></div>
             <p className="mb-6 leading-relaxed font-medium">Bookcy, Kıbrıs'ın pazar lideri ve en kapsamlı yeni nesil randevu platformudur.</p>
             <div className="flex gap-3">
               <a href="https://instagram.com/bookcy" target="_blank" className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white hover:bg-[#E1306C] transition-colors"><InstagramIcon size={18}/></a>
