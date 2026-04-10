@@ -22,6 +22,9 @@ export default function Footer() {
     setCookieConsent(true);
   };
 
+  const text = t?.[lang] || t?.['TR'];
+  if (!text) return null;
+
   return (
     <>
       {!cookieConsent && (
@@ -29,16 +32,16 @@ export default function Footer() {
           <div className="flex items-start gap-4 flex-1 max-w-4xl">
             <div className="bg-indigo-50 text-indigo-500 p-3 rounded-full shrink-0 hidden md:block"><Info size={24}/></div>
             <div>
-              <h4 className="font-black text-[#2D1B4E] mb-1">{t[lang].cookie.title}</h4>
+              <h4 className="font-black text-[#2D1B4E] mb-1">{text.cookie?.title}</h4>
               <p className="text-xs font-medium text-slate-500 leading-relaxed">
-                {t[lang].cookie.desc1} 
-                <Link href="/gizlilik" className="text-[#E8622A] font-bold mx-1 hover:underline">{t[lang].cookie.l1}</Link> {t[lang].cookie.desc2} 
-                <Link href="/gizlilik" className="text-[#E8622A] font-bold mx-1 hover:underline">{t[lang].cookie.l2}</Link> {t[lang].cookie.desc3}
+                {text.cookie?.desc1} 
+                <Link href="/yasal/gizlilik" className="text-[#E8622A] font-bold mx-1 hover:underline">{text.cookie?.l1}</Link> {text.cookie?.desc2} 
+                <Link href="/yasal/gizlilik" className="text-[#E8622A] font-bold mx-1 hover:underline">{text.cookie?.l2}</Link> {text.cookie?.desc3}
               </p>
             </div>
           </div>
           <div className="flex gap-3 w-full md:w-auto shrink-0">
-            <button onClick={acceptCookies} className="flex-1 md:flex-none px-6 py-3 rounded-xl font-black text-xs bg-[#E8622A] text-white border-none cursor-pointer shadow-md uppercase tracking-widest">{t[lang].cookie.btn2}</button>
+            <button onClick={acceptCookies} className="flex-1 md:flex-none px-6 py-3 rounded-xl font-black text-xs bg-[#E8622A] text-white border-none cursor-pointer shadow-md uppercase tracking-widest">{text.cookie?.btn2}</button>
           </div>
         </div>
       )}
@@ -47,23 +50,29 @@ export default function Footer() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-8 md:mb-12 border-b border-white/10 pb-8 md:pb-12">
           <div>
             <div className="mb-6 md:mb-8 h-16 w-fit bg-white p-3 rounded-2xl overflow-hidden flex items-center justify-center border border-white/10 shadow-lg"><img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" /></div>
-            <p className="mb-6 md:mb-8 leading-relaxed font-medium text-white/70">{t[lang].footer.desc}</p>
+            <p className="mb-6 md:mb-8 leading-relaxed font-medium text-white/70">{text.footer?.desc}</p>
+            <div className="flex gap-4">
+              <a href="https://instagram.com/bookcy" target="_blank" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-[#E1306C] transition-all hover:-translate-y-1"><InstagramIcon size={20}/></a>
+            </div>
           </div>
           <div>
-            <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{t[lang].footer.col1}</h4>
+            <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{text.footer?.col1}</h4>
             <Link href="/" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Ana Sayfa</Link>
-            <Link href="/hakkimizda" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{t[lang].nav.about}</Link>
+            <Link href="/hakkimizda" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.about}</Link>
           </div>
           <div>
-            <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{t[lang].footer.col2}</h4>
-            {cyprusRegions.map(r => <Link href="/isletmeler" key={r} className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{r}</Link>)}
+            <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{text.footer?.col2}</h4>
+            {cyprusRegions.map(r => <Link href={`/isletmeler?r=${r}`} key={r} className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{r}</Link>)}
           </div>
           <div>
-            <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{t[lang].footer.col3}</h4>
-            <Link href="/gizlilik" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Gizlilik Politikası</Link>
+            <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{text.footer?.col3}</h4>
+            <Link href="/yasal/gizlilik" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Gizlilik Politikası</Link>
+            <Link href="/yasal/kvkk" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">KVKK Aydınlatma Metni</Link>
+            <Link href="/yasal/sartlar" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Kullanım Şartları</Link>
+            <Link href="/yasal/cerez" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Çerez Politikası</Link>
           </div>
         </div>
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-medium"><p>© {new Date().getFullYear()} BOOKCY LTD. {t[lang].footer.right1}</p><p className="font-black text-white/40 tracking-[0.3em] uppercase bg-white/5 px-4 py-2 rounded-lg">One Click Booking™</p></div>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-medium"><p>© {new Date().getFullYear()} BOOKCY LTD. {text.footer?.right1}</p><p className="font-black text-white/40 tracking-[0.3em] uppercase bg-white/5 px-4 py-2 rounded-lg">One Click Booking™</p></div>
       </footer>
     </>
   );

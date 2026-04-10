@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ChevronDown, ChevronRight, Menu, X, UserCircle, CheckCircle2, Lock, Upload, MessageCircle } from 'lucide-react';
+import { ChevronDown, ChevronRight, Menu, X, UserCircle, CheckCircle2, XCircle, Lock, Upload, MessageCircle } from 'lucide-react';
 import { useAppContext } from '@/app/providers';
 import { supabase } from '@/lib/supabase';
 import { getRegistrationTemplate } from '@/lib/emailTemplates';
-import { cyprusRegions, categories, packages } from '@/lib/constants';
+import { cyprusRegions, categories, packages, featNames } from '@/lib/constants';
 
 export default function Navbar() {
   const router = useRouter();
@@ -18,7 +18,6 @@ export default function Navbar() {
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
-  // Modallar için stateler
   const [loginType, setLoginType] = useState('owner'); 
   const [loginUsername, setLoginUsername] = useState(''); 
   const [loginPassword, setLoginPassword] = useState(''); 
@@ -38,7 +37,7 @@ export default function Navbar() {
 
   const performLogin = async (e) => {
     e.preventDefault(); setIsLoginLoading(true);
-    const shop = shops.find(s => s.admin_username?.toLowerCase() === loginUsername.trim().toLowerCase());
+    const shop = (shops || []).find(s => s.admin_username?.toLowerCase() === loginUsername.trim().toLowerCase());
     if (!shop) { alert("Hatalı İşletme Kullanıcı Adı!"); setIsLoginLoading(false); return; }
     if (shop.status !== 'approved' && shop.status) { alert("Hesabınız henüz onaylanmamış! Lütfen dekontunuzu iletip onay bekleyiniz."); setIsLoginLoading(false); return; }
     if (loginType === 'owner') {
@@ -63,24 +62,23 @@ export default function Navbar() {
         if (!uploadError) uploadedLogoUrl = supabase.storage.from('logos').getPublicUrl(fileName).data.publicUrl; 
       }
       const fullPhone = newShop.phoneCode + " " + newShop.contactPhone;
-      const { error } = await supabase.from('shops').insert([{ 
-        name: newShop.name, category: newShop.category, location: newShop.location, address: newShop.address, maps_link: newShop.maps_link, admin_email: newShop.email, admin_username: newShop.username, admin_password: newShop.password, description: newShop.description, logo_url: uploadedLogoUrl, package: newShop.package, status: 'pending', contact_phone: fullPhone, contact_insta: newShop.contactInsta, contact_email: newShop.contactEmail, services: [], staff: [], gallery: [], closed_dates: [], events: [] 
-      }]);
+      const { error } = await supabase.from('shops').insert([{ name: newShop.name, category: newShop.category, location: newShop.location, address: newShop.address, maps_link: newShop.maps_link, admin_email: newShop.email, admin_username: newShop.username, admin_password: newShop.password, description: newShop.description, logo_url: uploadedLogoUrl, package: newShop.package, status: 'pending', contact_phone: fullPhone, contact_insta: newShop.contactInsta, contact_email: newShop.contactEmail, services: [], staff: [], gallery: [], closed_dates: [], events: [] }]);
       if (!error) {
         try {
-          await fetch('/api/email', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              to: newShop.email, subject: 'Bookcy Kayıt Talebiniz Alındı',
-              html: getRegistrationTemplate({ shopName: newShop.name, date: new Date().toLocaleDateString('tr-TR'), packageName: newShop.package.toUpperCase(), price: newShop.package === 'Premium Paket' ? '100 STG' : '60 STG' })
-            }),
-          });
+          await fetch('/api/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: newShop.email, subject: 'Bookcy Kayıt Talebiniz Alındı', html: getRegistrationTemplate({ shopName: newShop.name, date: new Date().toLocaleDateString('tr-TR'), packageName: newShop.package.toUpperCase(), price: newShop.package === 'Premium Paket' ? '100 STG' : '60 STG' }) })});
         } catch (mailErr) { console.error(mailErr); }
         setRegisterSuccess(true); 
       } else { alert("Veritabanı Hatası: " + error.message); }
-    } catch (err) { alert("Bir hata oluştu: " + err.message); } 
-    finally { setIsUploading(false); }
+    } catch (err) { alert("Bir hata oluştu: " + err.message); } finally { setIsUploading(false); }
   };
+
+  const goToFeature = (key) => {
+      setShowFeaturesMenu(false);
+      setIsMobileMenuOpen(false);
+      router.push('/ozellikler/' + key);
+  };
+
+  const text = t?.[lang] || t?.['TR'];
 
   return (
     <>
@@ -90,22 +88,21 @@ export default function Navbar() {
                 <div className="nav-logo-box"><img src="/logo.png" alt="Bookcy Logo" /></div>
                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-500 bg-slate-50 rounded-full border-none cursor-pointer"><X size={24}/></button>
             </div>
-            
             <div className="flex flex-col gap-2 p-6 overflow-y-auto">
-                <Link href="/isletmeler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{t[lang].nav.places}</Link>
-                <Link href="/neden-bookcy" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{t[lang].nav.why}</Link>
-                <Link href="/hakkimizda" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{t[lang].nav.about}</Link>
-                <Link href="/iletisim" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{t[lang].nav.contact}</Link>
+                <Link href="/isletmeler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{text.nav?.places}</Link>
+                <Link href="/ozellikler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{text.nav?.features}</Link>
+                <Link href="/neden-bookcy" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{text.nav?.why}</Link>
+                <Link href="/hakkimizda" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{text.nav?.about}</Link>
+                <Link href="/iletisim" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{text.nav?.contact}</Link>
             </div>
-            
             <div className="mt-auto p-6 flex flex-col gap-4 bg-slate-50 border-t border-slate-100">
                  <div className="flex gap-2 justify-center mb-4">
                     <button onClick={()=>setLang('TR')} className={`lang-pill ${lang==='TR' ? 'active' : ''}`}>TR</button>
                     <button onClick={()=>setLang('EN')} className={`lang-pill ${lang==='EN' ? 'active' : ''}`}>EN</button>
                     <button onClick={()=>setLang('RU')} className={`lang-pill ${lang==='RU' ? 'active' : ''}`}>RU</button>
                  </div>
-                 <button onClick={() => {setShowRegister(true); setIsMobileMenuOpen(false);}} className="w-full py-5 rounded-2xl border-2 border-[#2D1B4E] text-[#2D1B4E] font-black uppercase tracking-widest text-sm bg-transparent cursor-pointer">{t[lang].nav.addShop}</button>
-                 <button onClick={() => {setShowLogin(true); setIsMobileMenuOpen(false);}} className="w-full py-5 rounded-2xl bg-[#E8622A] text-white font-black uppercase tracking-widest text-sm border-none cursor-pointer shadow-lg shadow-orange-500/30">{t[lang].nav.login}</button>
+                 <button onClick={() => {setShowRegister(true); setIsMobileMenuOpen(false);}} className="w-full py-5 rounded-2xl border-2 border-[#2D1B4E] text-[#2D1B4E] font-black uppercase tracking-widest text-sm bg-transparent cursor-pointer">{text.nav?.addShop}</button>
+                 <button onClick={() => {setShowLogin(true); setIsMobileMenuOpen(false);}} className="w-full py-5 rounded-2xl bg-[#E8622A] text-white font-black uppercase tracking-widest text-sm border-none cursor-pointer shadow-lg shadow-orange-500/30">{text.nav?.login}</button>
             </div>
         </div>
       )}
@@ -116,50 +113,52 @@ export default function Navbar() {
         </Link>
 
         <ul className="nav-links">
-          <li><Link href="/isletmeler" className={`nav-main-btn ${pathname === '/isletmeler' ? 'active' : ''}`}>{t[lang].nav.places}</Link></li>
+          <li><Link href="/isletmeler" className={`nav-main-btn ${pathname === '/isletmeler' ? 'active' : ''}`}>{text.nav?.places}</Link></li>
           <li style={{height:'100%', display:'flex', alignItems:'center'}}>
               <div className="relative h-full flex items-center group" onMouseEnter={() => setShowFeaturesMenu(true)} onMouseLeave={() => setShowFeaturesMenu(false)}>
-                  <button className={`nav-main-btn flex items-center gap-1 transition-colors h-full ${showFeaturesMenu ? 'active' : ''}`}>
-                      {t[lang].nav.features} <ChevronDown size={14} className={`transition-transform duration-200 ${showFeaturesMenu ? 'rotate-180' : ''}`} />
-                  </button>
+                  <Link href="/ozellikler" className={`nav-main-btn flex items-center gap-1 transition-colors h-full text-decoration-none ${pathname.includes('/ozellikler') ? 'active' : ''}`}>
+                      {text.nav?.features} <ChevronDown size={14} className={`transition-transform duration-200 ${showFeaturesMenu ? 'rotate-180' : ''}`} />
+                  </Link>
                   {showFeaturesMenu && (
                       <div className="absolute top-[76px] left-1/2 -translate-x-1/2 w-screen bg-white text-[#2D1B4E] shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-t border-slate-200 cursor-default animate-in slide-in-from-top-2 duration-200 z-50">
                           <div className="max-w-[1100px] mx-auto py-12 px-8">
                               <div className="grid grid-cols-4 gap-8 mb-10 text-left">
-                                  {/* Mega Menu Links (Example to reduce lines, keep static visually) */}
                                   <div>
-                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{t[lang].mega.setup}</h4>
+                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{text.mega?.setup}</h4>
                                     <ul className="space-y-4 font-bold text-slate-600 capitalize text-sm">
-                                      {['profile', 'market', 'team'].map(key => <li key={key}><button className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {t[lang].featNames[key]}</button></li>)}
+                                      {['profile', 'market', 'team'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {text.featNames?.[key]}</button></li>)}
                                     </ul>
                                   </div>
                                   <div>
-                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{t[lang].mega.engage}</h4>
+                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{text.mega?.engage}</h4>
                                     <ul className="space-y-4 font-bold text-slate-600 capitalize text-sm">
-                                      {['booking', 'app'].map(key => <li key={key}><button className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {t[lang].featNames[key]}</button></li>)}
+                                      {['booking', 'app'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {text.featNames?.[key]}</button></li>)}
                                     </ul>
                                   </div>
                                   <div>
-                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{t[lang].mega.manage}</h4>
+                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{text.mega?.manage}</h4>
                                     <ul className="space-y-4 font-bold text-slate-600 capitalize text-sm">
-                                      {['marketing', 'calendar', 'crm'].map(key => <li key={key}><button className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {t[lang].featNames[key]}</button></li>)}
+                                      {['marketing', 'calendar', 'crm'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {text.featNames?.[key]}</button></li>)}
                                     </ul>
                                   </div>
                                   <div>
-                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{t[lang].mega.grow}</h4>
+                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{text.mega?.grow}</h4>
                                     <ul className="space-y-4 font-bold text-slate-600 capitalize text-sm">
-                                      {['boost', 'stats'].map(key => <li key={key}><button className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {t[lang].featNames[key]}</button></li>)}
+                                      {['boost', 'stats'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0"><ChevronRight size={14} className="text-[#E8622A]"/> {text.featNames?.[key]}</button></li>)}
                                     </ul>
                                   </div>
+                              </div>
+                              <div className="flex justify-center border-t border-slate-100 pt-8">
+                                <button onClick={() => { setShowFeaturesMenu(false); router.push('/ozellikler'); }} className="bg-slate-50 border border-slate-200 text-[#2D1B4E] px-8 py-3 rounded-xl font-black hover:bg-slate-100 transition-colors cursor-pointer text-sm">{text.mega?.btn}</button>
                               </div>
                           </div>
                       </div>
                   )}
               </div>
           </li>
-          <li><Link href="/neden-bookcy" className={`nav-main-btn ${pathname === '/neden-bookcy' ? 'active' : ''}`}>{t[lang].nav.why}</Link></li>
-          <li><Link href="/hakkimizda" className={`nav-main-btn ${pathname === '/hakkimizda' ? 'active' : ''}`}>{t[lang].nav.about}</Link></li>
-          <li><Link href="/iletisim" className={`nav-main-btn ${pathname === '/iletisim' ? 'active' : ''}`}>{t[lang].nav.contact}</Link></li>
+          <li><Link href="/neden-bookcy" className={`nav-main-btn ${pathname === '/neden-bookcy' ? 'active' : ''}`}>{text.nav?.why}</Link></li>
+          <li><Link href="/hakkimizda" className={`nav-main-btn ${pathname === '/hakkimizda' ? 'active' : ''}`}>{text.nav?.about}</Link></li>
+          <li><Link href="/iletisim" className={`nav-main-btn ${pathname === '/iletisim' ? 'active' : ''}`}>{text.nav?.contact}</Link></li>
         </ul>
 
         <div className="nav-right">
@@ -170,21 +169,110 @@ export default function Navbar() {
           </div>
           {loggedInShop ? (
                <div className="flex gap-2 items-center">
-                   <button onClick={handleLogout} className="btn-outline hidden md:block">{t[lang].nav.logout}</button>
-                   <Link href="/dashboard" className="btn-primary text-decoration-none"><UserCircle size={18}/> <span className="hidden md:inline">{t[lang].nav.panel}</span></Link>
+                   <button onClick={handleLogout} className="btn-outline hidden md:block">{text.nav?.logout}</button>
+                   <Link href="/dashboard" className="btn-primary text-decoration-none"><UserCircle size={18}/> <span className="hidden md:inline">{text.nav?.panel}</span></Link>
                    <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-[#2D1B4E] bg-transparent border-none cursor-pointer"><Menu size={28}/></button>
                </div>
           ) : (
               <div className="flex items-center gap-3">
-                  <button onClick={() => setShowRegister(true)} className="btn-outline hidden md:block">{t[lang].nav.addShop}</button>
-                  <button onClick={() => setShowLogin(true)} className="btn-primary"><UserCircle size={18}/> <span className="hidden md:inline">{t[lang].nav.login}</span></button>
+                  <button onClick={() => setShowRegister(true)} className="btn-outline hidden md:block">{text.nav?.addShop}</button>
+                  <button onClick={() => setShowLogin(true)} className="btn-primary"><UserCircle size={18}/> <span className="hidden md:inline">{text.nav?.login}</span></button>
                   <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-[#2D1B4E] bg-transparent border-none cursor-pointer ml-1"><Menu size={28}/></button>
               </div>
           )}
         </div>
       </nav>
 
-      {/* KAYIT & GİRİŞ MODALLARI BURADA AYNEN DURUYOR... (Metin uzunluğunu korumak için kısa geçiyorum, yukarıdaki modal kodunun birebir aynısını buraya ekleyebilirsin) */}
+      {/* KAYIT MODALI */}
+      {showRegister && (
+          <div className="fixed inset-0 w-screen h-screen bg-[#2D1B4E]/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto py-20">
+            <div className="bg-white border border-slate-200 w-full max-w-[800px] rounded-[32px] p-8 md:p-10 relative shadow-2xl my-auto animate-in zoom-in-95 duration-300">
+              <button onClick={() => {setShowRegister(false); setRegisterSuccess(false);}} className="absolute top-6 right-6 md:right-8 text-slate-400 hover:text-[#2D1B4E] p-2 font-bold bg-transparent border-none cursor-pointer"><X size={24}/></button>
+              {registerSuccess ? (
+                  <div className="text-center py-10">
+                      <CheckCircle2 size={64} className="mx-auto text-[#00c48c] mb-6" />
+                      <h2 className="text-2xl md:text-3xl font-black text-[#E8622A] uppercase italic mb-4">{text.modal?.success}</h2>
+                      <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 inline-block text-left mt-4 text-[#2D1B4E] w-full max-w-sm">
+                          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">{text.modal?.bank}</p>
+                          <p className="font-bold text-sm">Banka: <span className="font-normal">İş Bankası</span></p>
+                          <p className="font-bold text-sm">Alıcı: <span className="font-normal">BOOKCY LTD.</span></p>
+                          <p className="font-bold text-sm">IBAN: <span className="text-[#E8622A]">TR99 0006 4000 0012 3456 7890 12</span></p>
+                          <p className="text-sm font-bold text-slate-500 mt-6 mb-4 text-center">{text.modal?.bankDesc}</p>
+                          <a href="https://wa.me/905555555555" target="_blank" rel="noreferrer" className="w-full bg-[#25D366] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg flex justify-center items-center gap-2 text-decoration-none text-xs border-none cursor-pointer mt-4"><MessageCircle size={18}/> {text.modal?.btnBank}</a>
+                      </div>
+                  </div>
+              ) : (
+                  <>
+                      <div className="flex flex-col mb-8 text-center mt-4">
+                          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight italic text-[#2D1B4E]">{text.modal?.regTitle}</h2>
+                          <p className="text-[10px] text-[#E8622A] font-bold uppercase tracking-[0.2em] mt-2 flex items-center justify-center gap-2"><Lock size={12}/> {text.modal?.regSub}</p>
+                      </div>
+                      <form onSubmit={handleRegisterSubmit} className="flex flex-col gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <input required placeholder={text.modal?.shopName} className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.name} onChange={e => setNewShop({...newShop, name: e.target.value})} />
+                              <select className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold text-[#2D1B4E] outline-none" value={newShop.category} onChange={e => setNewShop({...newShop, category: e.target.value})}>{categories.map(c => <option key={c.dbName} value={c.dbName}>{c.dbName}</option>)}</select>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <select required className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold text-[#2D1B4E] outline-none" value={newShop.location} onChange={e => setNewShop({...newShop, location: e.target.value})}>{cyprusRegions.map(region => <option key={region} value={region}>{region}</option>)}</select>
+                              <input required placeholder={text.modal?.address} className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none uppercase text-[#2D1B4E]" value={newShop.address} onChange={e => setNewShop({...newShop, address: e.target.value})} />
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-4">
+                              <div className="flex gap-2 w-full relative">
+                                <select className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-2 outline-none font-bold text-xs text-[#2D1B4E] w-20" value={newShop.phoneCode} onChange={e => setNewShop({...newShop, phoneCode: e.target.value})}><option value="+90">TR</option></select>
+                                <div className="relative flex-1">
+                                  <input required type="tel" placeholder={text.modal?.phone} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 outline-none font-bold text-xs text-[#2D1B4E]" value={newShop.contactPhone} onChange={handlePhoneChange} />
+                                </div>
+                              </div>
+                              <input placeholder={text.modal?.insta} className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.contactInsta} onChange={e => setNewShop({...newShop, contactInsta: e.target.value})} />
+                              <div className="relative">
+                                <input type="email" placeholder={text.modal?.mail} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.contactEmail} onChange={handleAdminEmailChange} />
+                              </div>
+                          </div>
+                          <input required type="email" placeholder={text.modal?.adminMail} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E] mt-2" value={newShop.email} onChange={handleEmailChange} />
+                          <textarea placeholder={text.modal?.desc} rows="2" className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none resize-none text-[#2D1B4E]" value={newShop.description} onChange={e => setNewShop({...newShop, description: e.target.value})}></textarea>
+                          <div className="bg-slate-50 border border-slate-200 border-dashed rounded-2xl p-4 relative group">
+                              <input type="file" accept=".png, .jpg, .jpeg" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={e => setNewShop({...newShop, logoFile: e.target.files[0]})} />
+                              {newShop.logoFile ? <span className="text-[10px] font-bold text-[#00c48c] flex items-center justify-center gap-2"><CheckCircle2 size={16}/> {newShop.logoFile.name}</span> : <div className="flex flex-col items-center justify-center text-center text-[10px] font-bold text-slate-500 uppercase"><Upload size={20} className="mb-2"/> {text.modal?.logo}</div>}
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                              {packages.map(p => (
+                                  <div key={p.name} onClick={() => setNewShop({...newShop, package: p.name})} className={`cursor-pointer p-4 rounded-xl border transition-all ${newShop.package === p.name ? 'bg-orange-50 border-[#E8622A]' : 'bg-white border-slate-200'}`}>
+                                      <h4 className={`text-sm font-black uppercase ${newShop.package === p.name ? 'text-[#E8622A]' : 'text-[#2D1B4E]'}`}>{p.name === 'Standart Paket' ? text.aboutPage?.std : text.aboutPage?.pr}</h4>
+                                      <p className="text-xs font-bold text-slate-500">{p.price.split('/')[0]} {text.aboutPage?.mo}</p>
+                                  </div>
+                              ))}
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
+                              <input required placeholder={text.modal?.user} className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.username} onChange={e => setNewShop({...newShop, username: e.target.value})} />
+                              <input required placeholder={text.modal?.pass} className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.password} onChange={e => setNewShop({...newShop, password: e.target.value})} />
+                          </div>
+                          <button type="submit" disabled={isUploading || emailValid === false || phoneValid === false || adminEmailValid === false} className="w-full btn-primary justify-center py-5 rounded-xl mt-2 shadow-lg border-none cursor-pointer tracking-widest text-xs uppercase">{isUploading ? text.modal?.loading : text.modal?.btnReg}</button>
+                      </form>
+                  </>
+              )}
+            </div>
+          </div>
+      )}
+
+      {/* GİRİŞ MODALI */}
+      {showLogin && (
+        <div className="fixed inset-0 bg-[#2D1B4E]/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-[400px] rounded-[32px] p-8 relative shadow-2xl border border-slate-200">
+            <button onClick={() => setShowLogin(false)} className="absolute top-6 right-6 text-slate-400 hover:text-[#2D1B4E] bg-transparent border-none cursor-pointer"><X size={24}/></button>
+            <div className="text-center mb-6 mt-2"><h1 className="text-2xl font-black text-[#2D1B4E] uppercase mb-2">{text.modal?.logTitle}</h1><p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">{text.modal?.logSub}</p></div>
+            <div className="flex bg-slate-50 p-1 rounded-xl mb-6 border border-slate-100">
+              <button onClick={() => setLoginType('owner')} className={`flex-1 py-3 text-xs font-black uppercase rounded-lg border-none cursor-pointer flex justify-center items-center gap-2 transition-all ${loginType === 'owner' ? 'bg-white text-[#E8622A] shadow-sm' : 'bg-transparent text-slate-400'}`}>{text.modal?.own}</button>
+              <button onClick={() => setLoginType('staff')} className={`flex-1 py-3 text-xs font-black uppercase rounded-lg border-none cursor-pointer flex justify-center items-center gap-2 transition-all ${loginType === 'staff' ? 'bg-white text-[#E8622A] shadow-sm' : 'bg-transparent text-slate-400'}`}>{text.modal?.stf}</button>
+            </div>
+            <form onSubmit={performLogin} className="space-y-4">
+              <input type="text" required placeholder={text.modal?.user} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm outline-none text-[#2D1B4E] focus:border-[#E8622A]" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} />
+              {loginType === 'staff' && <input type="text" required placeholder={text.modal?.stf + " Adı"} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm outline-none text-[#2D1B4E] focus:border-[#E8622A]" value={loginStaffName} onChange={(e) => setLoginStaffName(e.target.value)} />}
+              <input type="password" required placeholder={text.modal?.pass} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm outline-none text-[#2D1B4E] focus:border-[#E8622A]" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
+              <button type="submit" disabled={isLoginLoading} className="w-full btn-primary justify-center py-5 rounded-xl font-black uppercase tracking-widest text-xs mt-4 border-none cursor-pointer">{isLoginLoading ? text.modal?.wait : text.modal?.btnLog}</button>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

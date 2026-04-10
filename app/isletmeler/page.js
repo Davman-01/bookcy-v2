@@ -8,21 +8,24 @@ import { categories, cyprusRegions } from '@/lib/constants';
 function ShopList() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  
   const { lang = 'TR', t, shops = [] } = useAppContext();
-  const text = t?.[lang]?.shops;
+  
+  // Güvenlik: Eğer text objesi yüklenmemişse boş çevirme, dilleri manuel doldur.
+  const text = t?.[lang]?.shops || {
+    back: "GERİ DÖN", title: "Arama Sonuçları", found: "Mekan Bulundu", search: "Mekan Ara...", allReg: "Tüm Bölgeler", allCat: "Tüm Kategoriler", select: "SEÇ", empty: "Aradığınız kriterlere uygun mekan bulunamadı."
+  };
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [filterRegion, setFilterRegion] = useState(searchParams.get('r') || 'All');
   const [filterService, setFilterService] = useState(searchParams.get('c') || 'All');
-
-  if (!text) return null;
 
   const approvedShops = (shops || []).filter(s => s?.status === 'approved');
 
   const displayShops = approvedShops.filter(shop => {
       const matchRegion = filterRegion === 'All' || (shop.location && shop.location.toLowerCase().includes(filterRegion.toLowerCase()));
       const matchService = filterService === 'All' || shop.category === filterService;
-      const matchSearch = shop.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchSearch = shop.name?.toLowerCase().includes(searchQuery.toLowerCase());
       return matchRegion && matchService && matchSearch;
   });
 
@@ -50,7 +53,7 @@ function ShopList() {
         <div className="flex-1 w-full flex flex-col gap-5">
             {sortedShops.map((shop) => (
                 <div key={shop.id} onClick={() => router.push(`/isletmeler/${shop.id}`)} className="flex flex-col sm:flex-row items-center p-6 bg-white border border-slate-200 hover:border-[#E8622A] rounded-[32px] cursor-pointer transition-all shadow-sm hover:shadow-md">
-                    <div className="w-24 h-24 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0 flex items-center justify-center text-xs font-black text-[#E8622A] relative">{(shop.package === 'Premium Paket' || shop.package === 'Premium') && <div className="absolute inset-0 border-4 border-yellow-400 rounded-2xl"></div>}{shop.logo_url ? <img loading="lazy" src={shop.logo_url} className="w-full h-full object-cover" /> : "LOGO"}</div>
+                    <div className="w-24 h-24 rounded-2xl bg-slate-50 border border-slate-100 overflow-hidden shrink-0 flex items-center justify-center text-xs font-black text-[#E8622A] relative">{(shop.package === 'Premium Paket' || shop.package === 'Premium') && <div className="absolute inset-0 border-4 border-yellow-400 rounded-2xl"></div>}{shop.logo_url ? <img loading="lazy" src={shop.logo_url} className="w-full h-full object-cover" /> : (categories.find(c=>c.dbName===shop.category)?.emoji || '💈')}</div>
                     <div className="flex-1 sm:ml-6 mt-4 sm:mt-0 text-center sm:text-left"><div className="flex items-center justify-center sm:justify-start gap-2 mb-2"><h3 className="text-xl font-black uppercase text-[#2D1B4E]">{shop.name}</h3>{(shop.package === 'Premium Paket' || shop.package === 'Premium') && <Gem size={16} className="text-yellow-500 fill-yellow-500"/>}</div><div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest"><span className="bg-slate-100 px-3 py-1.5 rounded-lg">{shop.category}</span><span className="flex items-center gap-1"><MapPin size={12}/> {shop.location}</span></div></div>
                     <button className="mt-6 sm:mt-0 w-full sm:w-auto btn-primary border-none cursor-pointer px-8 py-4 sm:py-3 text-center justify-center">{text.select}</button>
                 </div>
@@ -62,7 +65,6 @@ function ShopList() {
   );
 }
 
-// SearchParams kullanan yapılar Next.js'de Suspense içinde sarmalanmalıdır.
 export default function Page() {
   return (
     <Suspense fallback={<div className="p-20 text-center font-bold text-slate-400 tracking-widest uppercase">Yükleniyor...</div>}>
