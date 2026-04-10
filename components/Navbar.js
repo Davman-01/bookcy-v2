@@ -82,43 +82,62 @@ export default function Navbar() {
 
   return (
     <>
+      {/* MOBİL MENÜ OVERLAY (AÇILIR PENCERE) */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[9999] bg-white flex flex-col animate-in slide-in-from-right-full duration-300">
             <div className="flex justify-between items-center p-6 border-b border-slate-100">
-                <div className="nav-logo-box"><img src="/logo.png" alt="Bookcy Logo" /></div>
+                <div className="nav-logo-box flex items-center h-10">
+                  <img src="/logo.png" alt="Bookcy Logo" className="h-full w-auto object-contain mix-blend-multiply transform scale-125 origin-left" />
+                </div>
                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-500 bg-slate-50 rounded-full border-none cursor-pointer"><X size={24}/></button>
             </div>
+            
             <div className="flex flex-col gap-2 p-6 overflow-y-auto">
-                <Link href="/isletmeler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{text.nav?.places || "İşletmeler"}</Link>
-                <Link href="/ozellikler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{text.nav?.features || "Özellikler"}</Link>
-                <Link href="/neden-bookcy" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{text.nav?.why || "Neden Bookcy"}</Link>
-                <Link href="/hakkimizda" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{text.nav?.about || "Hakkımızda"}</Link>
-                <Link href="/iletisim" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none">{text.nav?.contact || "İletişim"}</Link>
+                <Link href="/isletmeler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.places || "İşletmeler"}</Link>
+                <Link href="/ozellikler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.features || "Özellikler"}</Link>
+                <Link href="/neden-bookcy" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.why || "Neden Bookcy"}</Link>
+                <Link href="/hakkimizda" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.about || "Hakkımızda"}</Link>
+                <Link href="/iletisim" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.contact || "İletişim"}</Link>
             </div>
+            
             <div className="mt-auto p-6 flex flex-col gap-4 bg-slate-50 border-t border-slate-100">
-                 <div className="flex gap-2 justify-center mb-4">
-                    <button onClick={()=>setLang('TR')} className={`lang-pill ${lang==='TR' ? 'active' : ''}`}>TR</button>
-                    <button onClick={()=>setLang('EN')} className={`lang-pill ${lang==='EN' ? 'active' : ''}`}>EN</button>
-                    <button onClick={()=>setLang('RU')} className={`lang-pill ${lang==='RU' ? 'active' : ''}`}>RU</button>
+                 {/* MOBİL DİL SEÇENEKLERİ */}
+                 <div className="flex gap-3 justify-center mb-2">
+                    <button onClick={()=>setLang('TR')} className={`px-6 py-2 rounded-full font-black text-xs transition-colors cursor-pointer border ${lang==='TR' ? 'bg-[#2D1B4E] text-white border-[#2D1B4E]' : 'bg-white text-slate-500 border-slate-200 hover:border-[#2D1B4E]'}`}>TR</button>
+                    <button onClick={()=>setLang('EN')} className={`px-6 py-2 rounded-full font-black text-xs transition-colors cursor-pointer border ${lang==='EN' ? 'bg-[#2D1B4E] text-white border-[#2D1B4E]' : 'bg-white text-slate-500 border-slate-200 hover:border-[#2D1B4E]'}`}>EN</button>
+                    <button onClick={()=>setLang('RU')} className={`px-6 py-2 rounded-full font-black text-xs transition-colors cursor-pointer border ${lang==='RU' ? 'bg-[#2D1B4E] text-white border-[#2D1B4E]' : 'bg-white text-slate-500 border-slate-200 hover:border-[#2D1B4E]'}`}>RU</button>
                  </div>
-                 <button onClick={() => {setShowRegister(true); setIsMobileMenuOpen(false);}} className="w-full py-5 rounded-2xl border-2 border-[#2D1B4E] text-[#2D1B4E] font-black uppercase tracking-widest text-sm bg-transparent cursor-pointer">{text.nav?.addShop || "İşletme Ekle"}</button>
-                 <button onClick={() => {setShowLogin(true); setIsMobileMenuOpen(false);}} className="w-full py-5 rounded-2xl bg-[#E8622A] text-white font-black uppercase tracking-widest text-sm border-none cursor-pointer shadow-lg shadow-orange-500/30">{text.nav?.login || "Giriş Yap"}</button>
+                 
+                 {loggedInShop ? (
+                    <>
+                       <Link href="/dashboard" className="w-full flex items-center justify-center py-5 rounded-2xl bg-[#E8622A] text-white font-black uppercase tracking-widest text-sm border-none text-decoration-none shadow-lg shadow-orange-500/30">{text.nav?.panel || "Panel"}</Link>
+                       <button onClick={handleLogout} className="w-full py-5 rounded-2xl border-2 border-[#2D1B4E] text-[#2D1B4E] font-black uppercase tracking-widest text-sm bg-transparent cursor-pointer">{text.nav?.logout || "Çıkış"}</button>
+                    </>
+                 ) : (
+                    <>
+                       <button onClick={() => {setShowRegister(true); setIsMobileMenuOpen(false);}} className="w-full py-5 rounded-2xl border-2 border-[#2D1B4E] text-[#2D1B4E] font-black uppercase tracking-widest text-sm bg-transparent cursor-pointer">{text.nav?.addShop || "İşletme Ekle"}</button>
+                       <button onClick={() => {setShowLogin(true); setIsMobileMenuOpen(false);}} className="w-full py-5 rounded-2xl bg-[#E8622A] text-white font-black uppercase tracking-widest text-sm border-none cursor-pointer shadow-lg shadow-orange-500/30">{text.nav?.login || "Giriş Yap"}</button>
+                    </>
+                 )}
             </div>
         </div>
       )}
 
+      {/* ÜST MENÜ (MASAÜSTÜ & MOBİL BAR) */}
       <nav>
         <Link href="/" className="nav-logo-box text-decoration-none">
           <img src="/logo.png" alt="Bookcy Logo" />
         </Link>
 
-        <ul className="nav-links">
+        {/* Masaüstü Menü Linkleri */}
+        <ul className="nav-links hidden md:flex">
           <li><Link href="/isletmeler" className={`nav-main-btn ${pathname === '/isletmeler' ? 'active' : ''}`}>{text.nav?.places || "İşletmeler"}</Link></li>
           <li style={{height:'100%', display:'flex', alignItems:'center'}}>
               <div className="relative h-full flex items-center group" onMouseEnter={() => setShowFeaturesMenu(true)} onMouseLeave={() => setShowFeaturesMenu(false)}>
                   <Link href="/ozellikler" className={`nav-main-btn flex items-center gap-1 transition-colors h-full text-decoration-none ${pathname?.includes('/ozellikler') ? 'active' : ''}`}>
                       {text.nav?.features || "Özellikler"} <ChevronDown size={14} className={`transition-transform duration-200 ${showFeaturesMenu ? 'rotate-180' : ''}`} />
                   </Link>
+                  {/* Masaüstü Açılır Menü */}
                   {showFeaturesMenu && (
                       <div className="absolute top-[76px] left-1/2 -translate-x-1/2 w-screen bg-white text-[#2D1B4E] shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-t border-slate-200 cursor-default animate-in slide-in-from-top-2 duration-200 z-50">
                           <div className="max-w-[1100px] mx-auto py-12 px-8">
@@ -161,23 +180,27 @@ export default function Navbar() {
           <li><Link href="/iletisim" className={`nav-main-btn ${pathname === '/iletisim' ? 'active' : ''}`}>{text.nav?.contact || "İletişim"}</Link></li>
         </ul>
 
-        <div className="nav-right">
+        {/* Sağ Taraf (Dil, Butonlar ve Hamburger) */}
+        <div className="nav-right flex items-center">
           <div className="lang-pills hidden lg:flex mr-4">
              <button onClick={()=>setLang('TR')} className={`lang-pill ${lang==='TR' ? 'active' : ''}`}>TR</button>
              <button onClick={()=>setLang('EN')} className={`lang-pill ${lang==='EN' ? 'active' : ''}`}>EN</button>
              <button onClick={()=>setLang('RU')} className={`lang-pill ${lang==='RU' ? 'active' : ''}`}>RU</button>
           </div>
+          
           {loggedInShop ? (
                <div className="flex gap-2 items-center">
                    <button onClick={handleLogout} className="btn-outline hidden md:block">{text.nav?.logout || "Çıkış"}</button>
-                   <Link href="/dashboard" className="btn-primary text-decoration-none"><UserCircle size={18}/> <span className="hidden md:inline">{text.nav?.panel || "Panel"}</span></Link>
-                   <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-[#2D1B4E] bg-transparent border-none cursor-pointer"><Menu size={28}/></button>
+                   <Link href="/dashboard" className="btn-primary text-decoration-none hidden md:flex"><UserCircle size={18}/> <span>{text.nav?.panel || "Panel"}</span></Link>
+                   {/* Mobil için Hamburger Menü İkonu */}
+                   <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-[#2D1B4E] bg-transparent border-none cursor-pointer"><Menu size={32}/></button>
                </div>
           ) : (
               <div className="flex items-center gap-3">
                   <button onClick={() => setShowRegister(true)} className="btn-outline hidden md:block">{text.nav?.addShop || "İşletme Ekle"}</button>
-                  <button onClick={() => setShowLogin(true)} className="btn-primary"><UserCircle size={18}/> <span className="hidden md:inline">{text.nav?.login || "Giriş"}</span></button>
-                  <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-[#2D1B4E] bg-transparent border-none cursor-pointer ml-1"><Menu size={28}/></button>
+                  <button onClick={() => setShowLogin(true)} className="btn-primary hidden md:flex"><UserCircle size={18}/> <span>{text.nav?.login || "Giriş"}</span></button>
+                  {/* Mobil için Hamburger Menü İkonu */}
+                  <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-[#2D1B4E] bg-transparent border-none cursor-pointer ml-2"><Menu size={32}/></button>
               </div>
           )}
         </div>
@@ -237,8 +260,8 @@ export default function Navbar() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                               {packages.map(p => (
                                   <div key={p.name} onClick={() => setNewShop({...newShop, package: p.name})} className={`cursor-pointer p-4 rounded-xl border transition-all ${newShop.package === p.name ? 'bg-orange-50 border-[#E8622A]' : 'bg-white border-slate-200'}`}>
-                                      <h4 className={`text-sm font-black uppercase ${newShop.package === p.name ? 'text-[#E8622A]' : 'text-[#2D1B4E]'}`}>{p.name}</h4>
-                                      <p className="text-xs font-bold text-slate-500">{p.price}</p>
+                                      <h4 className={`text-sm font-black uppercase ${newShop.package === p.name ? 'text-[#E8622A]' : 'text-[#2D1B4E]'}`}>{p.name === 'Standart Paket' ? text.aboutPage?.std : text.aboutPage?.pr}</h4>
+                                      <p className="text-xs font-bold text-slate-500">{p.price.split('/')[0]} {text.aboutPage?.mo}</p>
                                   </div>
                               ))}
                           </div>
