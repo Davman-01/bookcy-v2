@@ -16,7 +16,7 @@ export default function RootLayout({ children }) {
           :root { --fig: #2D1B4E; --terra: #E8622A; --c-bg-main: #FAF7F2; --c-text-main: #2D1B4E; --c-nav-bg: rgba(255,255,255,0.98); }
           body { background: var(--c-bg-main); color: var(--c-text-main); font-family: 'DM Sans', sans-serif; overflow-x: hidden; margin: 0; padding: 0; }
           
-          /* EKSİK OLAN NAVBAR ANA CSS KODLARI BURADA */
+          /* NAVBAR ANA CSS KODLARI */
           nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 40px; height: 76px; display: flex; align-items: center; justify-content: space-between; background: var(--c-nav-bg); backdrop-filter: blur(20px); border-bottom: 1px solid #F1F5F9; transition: all 0.3s; }
           
           .nav-logo-box { width: 140px; height: 50px; display: flex; align-items: center; cursor: pointer; text-decoration: none; } 
@@ -37,9 +37,13 @@ export default function RootLayout({ children }) {
           .btn-primary { font-family:'DM Sans',sans-serif; font-size: 13px; font-weight: 700; padding: 12px 24px; border-radius: 50px; border: none; background: var(--terra); color: white; transition: all 0.25s; display:flex; align-items:center; gap:8px; cursor:pointer; text-decoration:none; } 
           .btn-primary:hover { background: #d4561f; transform: translateY(-2px); box-shadow: 0 10px 25px rgba(232,98,42,0.3); }
 
-          /* MOBİL UYUM KODLARI */
+          /* MOBİL UYUM KODLARI (SORUN BURADA ÇÖZÜLÜYOR) */
           @media(max-width:900px){ 
-            nav { padding:0 20px; } 
+            nav { padding: 0 20px; } 
+            .nav-links { display: none !important; }
+            .nav-right .btn-outline { display: none !important; }
+            .nav-right .btn-primary { display: none !important; }
+            .nav-right .lang-pills { display: none !important; }
           }
         `}} />
       </head>
