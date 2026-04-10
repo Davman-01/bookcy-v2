@@ -19,36 +19,101 @@ import {
 // Yardımcı Fonksiyonlar
 const InstagramIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
   </svg>
 );
 
-function parseDuration(d) { const m = (d||'').match(/\d+/); return m ? parseInt(m[0]) : 30; }
-function getRequiredSlots(d) { return Math.ceil(parseDuration(d) / 30); }
+function parseDuration(d) { 
+  const m = (d||'').match(/\d+/); 
+  return m ? parseInt(m[0]) : 30; 
+}
 
-const allTimeSlots = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30","00:00","00:30","01:00","01:30","02:00"];
-const defaultWorkingHours = [{day:'Pazartesi',open:'09:00',close:'19:00',isClosed:false},{day:'Salı',open:'09:00',close:'19:00',isClosed:false},{day:'Çarşamba',open:'09:00',close:'19:00',isClosed:false},{day:'Perşembe',open:'09:00',close:'19:00',isClosed:false},{day:'Cuma',open:'09:00',close:'19:00',isClosed:false},{day:'Cumartesi',open:'09:00',close:'19:00',isClosed:false},{day:'Pazar',open:'09:00',close:'19:00',isClosed:true}];
+function getRequiredSlots(d) { 
+  return Math.ceil(parseDuration(d) / 30); 
+}
+
+const allTimeSlots = [
+  "08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30",
+  "14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30",
+  "20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30","00:00","00:30","01:00","01:30","02:00"
+];
+
+const defaultWorkingHours = [
+  {day:'Pazartesi',open:'09:00',close:'19:00',isClosed:false},
+  {day:'Salı',open:'09:00',close:'19:00',isClosed:false},
+  {day:'Çarşamba',open:'09:00',close:'19:00',isClosed:false},
+  {day:'Perşembe',open:'09:00',close:'19:00',isClosed:false},
+  {day:'Cuma',open:'09:00',close:'19:00',isClosed:false},
+  {day:'Cumartesi',open:'09:00',close:'19:00',isClosed:false},
+  {day:'Pazar',open:'09:00',close:'19:00',isClosed:true}
+];
+
 const cyprusRegions = ["Girne", "Lefkoşa", "Mağusa", "İskele", "Güzelyurt", "Lefke"];
 
 export default function Home() {
   const router = useRouter(); 
-  const [step, setStep] = useState('services'); const [shops, setShops] = useState([]);
-  const [showFeaturesMenu, setShowFeaturesMenu] = useState(false); const [activeFeature, setActiveFeature] = useState(null);
+  
+  const [step, setStep] = useState('services'); 
+  const [shops, setShops] = useState([]);
+  const [showFeaturesMenu, setShowFeaturesMenu] = useState(false); 
+  const [activeFeature, setActiveFeature] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [selectedShop, setSelectedShop] = useState(null); const [bookingData, setBookingData] = useState({ date: new Date().toISOString().split('T')[0], time: '', selectedShopService: null, selectedStaff: null, selectedEvent: null });
-  const [formData, setFormData] = useState({ name: '', surname: '', phoneCode: '+90', phone: '', email: '' }); const [bookingPhase, setBookingPhase] = useState(1);
-  const [bookingEmailValid, setBookingEmailValid] = useState(null); const [bookingPhoneValid, setBookingPhoneValid] = useState(null);
-  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false); const [feedbackData, setFeedbackData] = useState({ q1: null, q2: null, q3: null, q4: null });
-  const [showRegister, setShowRegister] = useState(false); const [loggedInShop, setLoggedInShop] = useState(null);
-  const [showLogin, setShowLogin] = useState(false); const [loginType, setLoginType] = useState('owner'); const [loginUsername, setLoginUsername] = useState(''); const [loginPassword, setLoginPassword] = useState(''); const [loginStaffName, setLoginStaffName] = useState(''); const [isLoginLoading, setIsLoginLoading] = useState(false);
-  const [filterRegion, setFilterRegion] = useState('All'); const [filterService, setFilterService] = useState('All'); const [filterSort, setFilterSort] = useState('High'); const [searchQuery, setSearchQuery] = useState('');
-  const [newShop, setNewShop] = useState({ name: '', category: 'Berber', location: 'Girne', address: '', maps_link: '', phoneCode: '+90', contactPhone: '', contactInsta: '', contactEmail: '', username: '', password: '', email: '', description: '', logoFile: null, package: 'Standart Paket' });
-  const [isUploading, setIsUploading] = useState(false); const [registerSuccess, setRegisterSuccess] = useState(false);
-  const [emailValid, setEmailValid] = useState(null); const [phoneValid, setPhoneValid] = useState(null); const [adminEmailValid, setAdminEmailValid] = useState(null);
-  const [appointments, setAppointments] = useState([]); const [globalAppointments, setGlobalAppointments] = useState([]); const [closedSlots, setClosedSlots] = useState([]); const [profileTab, setProfileTab] = useState('services');
+  const [selectedShop, setSelectedShop] = useState(null); 
+  
+  const [bookingData, setBookingData] = useState({ 
+    date: new Date().toISOString().split('T')[0], 
+    time: '', 
+    selectedShopService: null, 
+    selectedStaff: null, 
+    selectedEvent: null 
+  });
+  
+  const [formData, setFormData] = useState({ name: '', surname: '', phoneCode: '+90', phone: '', email: '' }); 
+  const [bookingPhase, setBookingPhase] = useState(1);
+  const [bookingEmailValid, setBookingEmailValid] = useState(null); 
+  const [bookingPhoneValid, setBookingPhoneValid] = useState(null);
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false); 
+  const [feedbackData, setFeedbackData] = useState({ q1: null, q2: null, q3: null, q4: null });
+  
+  const [showRegister, setShowRegister] = useState(false); 
+  const [loggedInShop, setLoggedInShop] = useState(null);
+  const [showLogin, setShowLogin] = useState(false); 
+  const [loginType, setLoginType] = useState('owner'); 
+  const [loginUsername, setLoginUsername] = useState(''); 
+  const [loginPassword, setLoginPassword] = useState(''); 
+  const [loginStaffName, setLoginStaffName] = useState(''); 
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  
+  const [filterRegion, setFilterRegion] = useState('All'); 
+  const [filterService, setFilterService] = useState('All'); 
+  const [filterSort, setFilterSort] = useState('High'); 
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const [newShop, setNewShop] = useState({ 
+    name: '', category: 'Berber', location: 'Girne', address: '', maps_link: '', 
+    phoneCode: '+90', contactPhone: '', contactInsta: '', contactEmail: '', 
+    username: '', password: '', email: '', description: '', logoFile: null, package: 'Standart Paket' 
+  });
+  
+  const [isUploading, setIsUploading] = useState(false); 
+  const [registerSuccess, setRegisterSuccess] = useState(false);
+  const [emailValid, setEmailValid] = useState(null); 
+  const [phoneValid, setPhoneValid] = useState(null); 
+  const [adminEmailValid, setAdminEmailValid] = useState(null);
+  
+  const [appointments, setAppointments] = useState([]); 
+  const [globalAppointments, setGlobalAppointments] = useState([]); 
+  const [closedSlots, setClosedSlots] = useState([]); 
+  const [profileTab, setProfileTab] = useState('services');
   
   const [cookieConsent, setCookieConsent] = useState(true);
-  const [lang, setLang] = useState('TR'); 
+  const [lang, setLang] = useState('TR');
+
+  // VERCEL'İ PATLATAN EKSİK SATIRLAR BURAYA EKLENDİ
+  const approvedShops = shops.filter(s => s.status === 'approved');
+  const isClub = selectedShop?.category === 'Bar & Club';
 
   // ================= DİL SÖZLÜĞÜ (TRANSLATIONS) =================
   const t = {
@@ -130,15 +195,76 @@ export default function Home() {
     setCookieConsent(true);
   };
 
-  const handleHeroSearch = (e) => { e.preventDefault(); setStep('all_shops'); window.scrollTo(0,0); };
-  const handleBookingEmailChange = (e) => { const val = e.target.value; setFormData(prev => ({...prev, email: val})); setBookingEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
-  const handleBookingPhoneChange = (e) => { const val = e.target.value; setFormData(prev => ({...prev, phone: val})); setBookingPhoneValid(val === '' ? null : val.replace(/\s/g, '').length >= 7); };
-  const handleEmailChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, email: val})); setEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
-  const handleAdminEmailChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, contactEmail: val})); setAdminEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
-  const handlePhoneChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, contactPhone: val})); setPhoneValid(val === '' ? null : val.replace(/\s/g, '').length >= 7); };
+  const handleHeroSearch = (e) => { 
+    e.preventDefault(); 
+    setStep('all_shops'); 
+    window.scrollTo(0,0); 
+  };
+  
+  const handleBookingEmailChange = (e) => { 
+    const val = e.target.value; 
+    setFormData(prev => ({...prev, email: val})); 
+    setBookingEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); 
+  };
+  
+  const handleBookingPhoneChange = (e) => { 
+    const val = e.target.value; 
+    setFormData(prev => ({...prev, phone: val})); 
+    setBookingPhoneValid(val === '' ? null : val.replace(/\s/g, '').length >= 7); 
+  };
+  
+  const handleEmailChange = (e) => { 
+    const val = e.target.value; 
+    setNewShop(prev => ({...prev, email: val})); 
+    setEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); 
+  };
+  
+  const handleAdminEmailChange = (e) => { 
+    const val = e.target.value; 
+    setNewShop(prev => ({...prev, contactEmail: val})); 
+    setAdminEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); 
+  };
+  
+  const handlePhoneChange = (e) => { 
+    const val = e.target.value; 
+    setNewShop(prev => ({...prev, contactPhone: val})); 
+    setPhoneValid(val === '' ? null : val.replace(/\s/g, '').length >= 7); 
+  };
 
-  const featureIcons = { profile: <Briefcase size={40} className="text-[#E8622A] mb-4"/>, market: <Store size={40} className="text-[#E8622A] mb-4"/>, team: <Users size={40} className="text-[#E8622A] mb-4"/>, booking: <Target size={40} className="text-[#E8622A] mb-4"/>, app: <Smartphone size={40} className="text-[#E8622A] mb-4"/>, marketing: <Target size={40} className="text-[#E8622A] mb-4"/>, calendar: <Calendar size={40} className="text-[#E8622A] mb-4"/>, crm: <User size={40} className="text-[#E8622A] mb-4"/>, boost: <TrendingUp size={40} className="text-[#E8622A] mb-4"/>, stats: <PieChart size={40} className="text-[#E8622A] mb-4"/> };
-  const featureIconsSmall = { profile: <Briefcase size={20}/>, market: <Store size={20}/>, team: <Users size={20}/>, booking: <Target size={20}/>, app: <Smartphone size={20}/>, marketing: <Target size={20}/>, calendar: <Calendar size={20}/>, crm: <User size={20}/>, boost: <TrendingUp size={20}/>, stats: <PieChart size={20}/> };
+  const packages = [ 
+    { name: "Standart Paket", price: `60 STG / Aylık` }, 
+    { name: "Premium Paket", price: `100 STG / Aylık` } 
+  ];
+  
+  const categories = [ 
+      { key: "barber", dbName: "Berber", bg: "linear-gradient(135deg,#1a1a2e,#2d1b4e)", emoji: "💈" }, 
+      { key: "hair", dbName: "Kuaför", bg: "linear-gradient(135deg,#f5c5a3,#e8622a)", emoji: "✂️" }, 
+      { key: "nail", dbName: "Tırnak & Güzellik", bg: "linear-gradient(135deg,#ffd6e7,#ff88b2)", emoji: "💅" }, 
+      { key: "tattoo", dbName: "Dövme", bg: "linear-gradient(135deg,#1a1a1a,#444)", emoji: "🖋️" }, 
+      { key: "spa", dbName: "Spa & Masaj", bg: "linear-gradient(135deg,#d4f5e9,#00c48c)", emoji: "💆" }, 
+      { key: "skincare", dbName: "Cilt Bakımı", bg: "linear-gradient(135deg,#e8f4fd,#3498db)", emoji: "🧴" }, 
+      { key: "makeup", dbName: "Makyaj", bg: "linear-gradient(135deg,#fff0e6,#e8622a)", emoji: "💄" }, 
+      { key: "club", dbName: "Bar & Club", bg: "linear-gradient(135deg,#1a0a0a,#3d1515)", emoji: "🍸" } 
+  ];
+
+  const featureIcons = { 
+    profile: <Briefcase size={40} className="text-[#E8622A] mb-4"/>, 
+    market: <Store size={40} className="text-[#E8622A] mb-4"/>, 
+    team: <Users size={40} className="text-[#E8622A] mb-4"/>, 
+    booking: <Target size={40} className="text-[#E8622A] mb-4"/>, 
+    app: <Smartphone size={40} className="text-[#E8622A] mb-4"/>, 
+    marketing: <Target size={40} className="text-[#E8622A] mb-4"/>, 
+    calendar: <Calendar size={40} className="text-[#E8622A] mb-4"/>, 
+    crm: <User size={40} className="text-[#E8622A] mb-4"/>, 
+    boost: <TrendingUp size={40} className="text-[#E8622A] mb-4"/>, 
+    stats: <PieChart size={40} className="text-[#E8622A] mb-4"/> 
+  };
+
+  const featureIconsSmall = { 
+    profile: <Briefcase size={20}/>, market: <Store size={20}/>, team: <Users size={20}/>, 
+    booking: <Target size={20}/>, app: <Smartphone size={20}/>, marketing: <Target size={20}/>, 
+    calendar: <Calendar size={20}/>, crm: <User size={20}/>, boost: <TrendingUp size={20}/>, stats: <PieChart size={20}/> 
+  };
 
   const displayShops = approvedShops.filter(shop => {
       const matchRegion = filterRegion === 'All' || (shop.location && shop.location.toLowerCase().includes(filterRegion.toLowerCase()));
@@ -157,18 +283,53 @@ export default function Home() {
 
   const recommendedShops = approvedShops.filter(s => s.package === 'Premium' || s.package === 'Premium Paket').slice(0, 4);
 
-  async function fetchGlobalAppointments() { const { data } = await supabase.from('appointments').select('customer_phone'); if (data) setGlobalAppointments(data); }
-  async function fetchShops() { const { data } = await supabase.from('shops').select('*'); if (data) setShops(data); }
-  async function fetchAppointments(shopId, date = null) { let query = supabase.from('appointments').select('*').eq('shop_id', shopId); if (date) query = query.eq('appointment_date', date); const { data } = await query; if (data) setAppointments(data); }
-  async function fetchClosedSlots(shopId, date = null) { let query = supabase.from('closed_slots').select('*').eq('shop_id', shopId); if (date) query = query.eq('date', date); const { data } = await query; if (data) setClosedSlots(data.map(item => item.slot)); }
+  async function fetchGlobalAppointments() { 
+    const { data } = await supabase.from('appointments').select('customer_phone'); 
+    if (data) setGlobalAppointments(data); 
+  }
+  
+  async function fetchShops() { 
+    const { data } = await supabase.from('shops').select('*'); 
+    if (data) setShops(data); 
+  }
+  
+  async function fetchAppointments(shopId, date = null) { 
+    let query = supabase.from('appointments').select('*').eq('shop_id', shopId); 
+    if (date) query = query.eq('appointment_date', date); 
+    const { data } = await query; 
+    if (data) setAppointments(data); 
+  }
+  
+  async function fetchClosedSlots(shopId, date = null) { 
+    let query = supabase.from('closed_slots').select('*').eq('shop_id', shopId); 
+    if (date) query = query.eq('date', date); 
+    const { data } = await query; 
+    if (data) setClosedSlots(data.map(item => item.slot)); 
+  }
 
-  useEffect(() => { fetchShops(); fetchGlobalAppointments(); const session = localStorage.getItem('bookcy_biz_session'); if(session) setLoggedInShop(JSON.parse(session)); }, []);
-  useEffect(() => { if (selectedShop && bookingData.date) { fetchAppointments(selectedShop.id, bookingData.date); fetchClosedSlots(selectedShop.id, bookingData.date); } }, [selectedShop, bookingData.date]);
+  useEffect(() => { 
+    fetchShops(); 
+    fetchGlobalAppointments(); 
+    const session = localStorage.getItem('bookcy_biz_session'); 
+    if(session) setLoggedInShop(JSON.parse(session)); 
+  }, []);
+
+  useEffect(() => { 
+    if (selectedShop && bookingData.date) { 
+      fetchAppointments(selectedShop.id, bookingData.date); 
+      fetchClosedSlots(selectedShop.id, bookingData.date); 
+    } 
+  }, [selectedShop, bookingData.date]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const reveals = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); } }); }, { threshold: 0.12 });
+    const observer = new IntersectionObserver(entries => { 
+      entries.forEach(e => { 
+        if(e.isIntersecting) { e.target.classList.add('visible'); } 
+      }); 
+    }, { threshold: 0.12 });
+    
     reveals.forEach(r => observer.observe(r));
 
     const handleScroll = () => {
@@ -183,26 +344,60 @@ export default function Home() {
             }
         }
     };
+    
     window.addEventListener('scroll', handleScroll);
-    return () => { window.removeEventListener('scroll', handleScroll); observer.disconnect(); };
+    return () => { 
+      window.removeEventListener('scroll', handleScroll); 
+      observer.disconnect(); 
+    };
   }, [step]);
 
   const handleLogin = async (e) => {
-    e.preventDefault(); setIsLoginLoading(true);
+    e.preventDefault(); 
+    setIsLoginLoading(true);
+    
     const shop = shops.find(s => s.admin_username?.toLowerCase() === loginUsername.trim().toLowerCase());
-    if (!shop) { alert("Hatalı İşletme Kullanıcı Adı!"); setIsLoginLoading(false); return; }
-    if (shop.status !== 'approved' && shop.status) { alert("Hesabınız henüz onaylanmamış! Lütfen dekontunuzu iletip onay bekleyiniz."); setIsLoginLoading(false); return; }
+    
+    if (!shop) { 
+      alert("Hatalı İşletme Kullanıcı Adı!"); 
+      setIsLoginLoading(false); 
+      return; 
+    }
+    
+    if (shop.status !== 'approved' && shop.status) { 
+      alert("Hesabınız henüz onaylanmamış! Lütfen dekontunuzu iletip onay bekleyiniz."); 
+      setIsLoginLoading(false); 
+      return; 
+    }
+    
     if (loginType === 'owner') {
-      if (shop.admin_password !== loginPassword.trim()) { alert("Hatalı Şifre!"); setIsLoginLoading(false); return; }
-      localStorage.setItem('bookcy_biz_session', JSON.stringify({ role: 'owner', shopData: shop })); setShowLogin(false); setIsLoginLoading(false); router.push('/dashboard');
+      if (shop.admin_password !== loginPassword.trim()) { 
+        alert("Hatalı Şifre!"); 
+        setIsLoginLoading(false); 
+        return; 
+      }
+      localStorage.setItem('bookcy_biz_session', JSON.stringify({ role: 'owner', shopData: shop })); 
+      setShowLogin(false); 
+      setIsLoginLoading(false); 
+      router.push('/dashboard');
     } else {
       const validStaff = (shop.staff || []).find(s => s.name.toLowerCase() === loginStaffName.trim().toLowerCase() && s.password === loginPassword.trim());
-      if (!validStaff) { alert("Hatalı Personel Adı veya Şifre!"); setIsLoginLoading(false); return; }
-      localStorage.setItem('bookcy_biz_session', JSON.stringify({ role: 'staff', staffName: validStaff.name, shopData: shop })); setShowLogin(false); setIsLoginLoading(false); router.push('/dashboard');
+      if (!validStaff) { 
+        alert("Hatalı Personel Adı veya Şifre!"); 
+        setIsLoginLoading(false); 
+        return; 
+      }
+      localStorage.setItem('bookcy_biz_session', JSON.stringify({ role: 'staff', staffName: validStaff.name, shopData: shop })); 
+      setShowLogin(false); 
+      setIsLoginLoading(false); 
+      router.push('/dashboard');
     }
   };
 
-  const handleLogout = () => { localStorage.removeItem('bookcy_biz_session'); setLoggedInShop(null); };
+  const handleLogout = () => { 
+    localStorage.removeItem('bookcy_biz_session'); 
+    setLoggedInShop(null); 
+  };
   
   const goToFeature = (featureKey) => { 
     if(t[lang].featNames[featureKey]) {
@@ -216,40 +411,88 @@ export default function Home() {
 
   async function handleRegisterSubmit(e) {
     e.preventDefault();
-    if (emailValid === false || phoneValid === false || adminEmailValid === false) { return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz."); }
+    if (emailValid === false || phoneValid === false || adminEmailValid === false) { 
+      return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz."); 
+    }
+    
     setIsUploading(true); 
+    
     try {
       let uploadedLogoUrl = null;
       if (newShop.logoFile) {
         const fileName = `${Math.random()}.${newShop.logoFile.name.split('.').pop()}`;
         const { error: uploadError } = await supabase.storage.from('logos').upload(fileName, newShop.logoFile);
-        if (!uploadError) { uploadedLogoUrl = supabase.storage.from('logos').getPublicUrl(fileName).data.publicUrl; }
+        if (!uploadError) { 
+          uploadedLogoUrl = supabase.storage.from('logos').getPublicUrl(fileName).data.publicUrl; 
+        }
       }
       const fullPhone = newShop.phoneCode + " " + newShop.contactPhone;
+      
       const { error } = await supabase.from('shops').insert([{ 
-        name: newShop.name, category: newShop.category, location: newShop.location, address: newShop.address, maps_link: newShop.maps_link, admin_email: newShop.email, admin_username: newShop.username, admin_password: newShop.password, description: newShop.description, logo_url: uploadedLogoUrl, package: newShop.package, status: 'pending', contact_phone: fullPhone, contact_insta: newShop.contactInsta, contact_email: newShop.contactEmail, services: [], staff: [], gallery: [], closed_dates: [], events: [] 
+        name: newShop.name, 
+        category: newShop.category, 
+        location: newShop.location, 
+        address: newShop.address, 
+        maps_link: newShop.maps_link, 
+        admin_email: newShop.email, 
+        admin_username: newShop.username, 
+        admin_password: newShop.password, 
+        description: newShop.description, 
+        logo_url: uploadedLogoUrl, 
+        package: newShop.package, 
+        status: 'pending', 
+        contact_phone: fullPhone, 
+        contact_insta: newShop.contactInsta, 
+        contact_email: newShop.contactEmail, 
+        services: [], 
+        staff: [], 
+        gallery: [], 
+        closed_dates: [], 
+        events: [] 
       }]);
+      
       if (!error) {
         try {
           await fetch('/api/email', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              to: newShop.email, subject: 'Bookcy Kayıt Talebiniz Alındı',
-              html: getRegistrationTemplate({ shopName: newShop.name, date: new Date().toLocaleDateString('tr-TR'), packageName: newShop.package.toUpperCase(), price: newShop.package === 'Premium Paket' ? '100 STG' : '60 STG' })
+              to: newShop.email, 
+              subject: 'Bookcy Kayıt Talebiniz Alındı',
+              html: getRegistrationTemplate({ 
+                shopName: newShop.name, 
+                date: new Date().toLocaleDateString('tr-TR'), 
+                packageName: newShop.package.toUpperCase(), 
+                price: newShop.package === 'Premium Paket' ? '100 STG' : '60 STG' 
+              })
             }),
           });
-        } catch (mailErr) { console.error(mailErr); }
+        } catch (mailErr) { 
+          console.error(mailErr); 
+        }
         setRegisterSuccess(true); 
-      } else { alert("Veritabanı Hatası: " + error.message); }
-    } catch (err) { alert("Bir hata oluştu: " + err.message); } 
-    finally { setIsUploading(false); }
+      } else { 
+        alert("Veritabanı Hatası: " + error.message); 
+      }
+    } catch (err) { 
+      alert("Bir hata oluştu: " + err.message); 
+    } finally { 
+      setIsUploading(false); 
+    }
   }
 
   async function handleBooking(e) {
     e.preventDefault();
-    if (bookingEmailValid === false || bookingPhoneValid === false) { return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz."); }
-    if(isClub) { if(!bookingData.selectedEvent) { alert("Etkinliği seçin."); return; } if(!bookingData.selectedShopService) { alert("VIP türünü seçin."); return; }
-    } else { if(!bookingData.selectedShopService) { alert("Devam etmek için hizmet seçin."); return; } if(!bookingData.selectedStaff) { alert("UZMAN SEÇİN"); return; } }
+    if (bookingEmailValid === false || bookingPhoneValid === false) { 
+      return alert("Lütfen iletişim bilgilerinizi doğru formatta giriniz."); 
+    }
+    if(isClub) { 
+      if(!bookingData.selectedEvent) { alert("Etkinliği seçin."); return; } 
+      if(!bookingData.selectedShopService) { alert("VIP türünü seçin."); return; }
+    } else { 
+      if(!bookingData.selectedShopService) { alert("Devam etmek için hizmet seçin."); return; } 
+      if(!bookingData.selectedStaff) { alert("UZMAN SEÇİN"); return; } 
+    }
 
     const availableSlotsForBooking = getCurrentAvailableSlots();
     const startIndex = availableSlotsForBooking.indexOf(bookingData.time);
@@ -274,45 +517,98 @@ export default function Home() {
     const finalDate = isClub ? bookingData.selectedEvent.date : bookingData.date;
     const finalTime = isClub ? bookingData.selectedEvent.time : bookingData.time;
 
-    const { error } = await supabase.from('appointments').insert([{ shop_id: selectedShop.id, customer_name: formData.name, customer_surname: formData.surname, customer_phone: fullPhone, customer_email: formData.email, appointment_date: finalDate, appointment_time: finalTime, service_name: bookingData.selectedShopService.name, staff_name: assignedStaffName, occupied_slots: occupied_slots, status: 'Bekliyor' }]);
+    const { error } = await supabase.from('appointments').insert([{ 
+      shop_id: selectedShop.id, 
+      customer_name: formData.name, 
+      customer_surname: formData.surname, 
+      customer_phone: fullPhone, 
+      customer_email: formData.email, 
+      appointment_date: finalDate, 
+      appointment_time: finalTime, 
+      service_name: bookingData.selectedShopService.name, 
+      staff_name: assignedStaffName, 
+      occupied_slots: occupied_slots, 
+      status: 'Bekliyor' 
+    }]);
     
     if (!error) {
        try {
           await fetch('/api/email', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              to: selectedShop.admin_email, subject: 'Yeni Randevu Bildirimi - Bookcy',
-              html: getNewBookingShopTemplate({ shopName: selectedShop.name, date: finalDate, time: finalTime, service: bookingData.selectedShopService.name, staff: assignedStaffName, customerName: formData.name + " " + formData.surname, customerPhone: fullPhone, customerEmail: formData.email })
+              to: selectedShop.admin_email, 
+              subject: 'Yeni Randevu Bildirimi - Bookcy',
+              html: getNewBookingShopTemplate({ 
+                shopName: selectedShop.name, 
+                date: finalDate, 
+                time: finalTime, 
+                service: bookingData.selectedShopService.name, 
+                staff: assignedStaffName, 
+                customerName: formData.name + " " + formData.surname, 
+                customerPhone: fullPhone, 
+                customerEmail: formData.email 
+              })
             }),
           });
+          
           await fetch('/api/email', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              to: formData.email, subject: 'Randevunuz Alındı - Bookcy',
-              html: getBookingConfirmationTemplate({ customerName: formData.name, shopName: selectedShop.name, date: finalDate, time: finalTime, service: bookingData.selectedShopService.name, staff: assignedStaffName, address: selectedShop.address || selectedShop.location })
+              to: formData.email, 
+              subject: 'Randevunuz Alındı - Bookcy',
+              html: getBookingConfirmationTemplate({ 
+                customerName: formData.name, 
+                shopName: selectedShop.name, 
+                date: finalDate, 
+                time: finalTime, 
+                service: bookingData.selectedShopService.name, 
+                staff: assignedStaffName, 
+                address: selectedShop.address || selectedShop.location 
+              })
             }),
           });
-       } catch (mErr) { console.error(mErr); }
-       setStep('success'); window.scrollTo(0,0); 
-    } else { alert("Rezervasyon alınırken bir hata oluştu!"); }
+       } catch (mErr) { 
+         console.error(mErr); 
+       }
+       
+       setStep('success'); 
+       window.scrollTo(0,0); 
+    } else { 
+      alert("Rezervasyon alınırken bir hata oluştu!"); 
+    }
   }
 
   async function submitFeedback(e) {
     e.preventDefault();
-    if(feedbackData.q1===null || feedbackData.q2===null || feedbackData.q3===null || feedbackData.q4===null) { return alert("Lütfen tüm soruları puanlayınız."); }
+    if(feedbackData.q1===null || feedbackData.q2===null || feedbackData.q3===null || feedbackData.q4===null) { 
+      return alert("Lütfen tüm soruları puanlayınız."); 
+    }
     setFeedbackSubmitted(true);
     const avg = Number(((feedbackData.q1 + feedbackData.q2 + feedbackData.q3 + feedbackData.q4) / 4).toFixed(1));
-    await supabase.from('platform_feedback').insert([{ q1: feedbackData.q1, q2: feedbackData.q2, q3: feedbackData.q3, q4: feedbackData.q4, average_score: avg }]);
+    await supabase.from('platform_feedback').insert([{ 
+      q1: feedbackData.q1, 
+      q2: feedbackData.q2, 
+      q3: feedbackData.q3, 
+      q4: feedbackData.q4, 
+      average_score: avg 
+    }]);
   }
 
   const getCurrentAvailableSlots = () => {
     if (!selectedShop || !bookingData.date || isClub) return allTimeSlots;
     if (selectedShop.closed_dates && selectedShop.closed_dates.includes(bookingData.date)) return [];
+    
     const dayName = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'][new Date(bookingData.date).getDay()];
     const workingHours = Array.isArray(selectedShop.working_hours) ? selectedShop.working_hours : defaultWorkingHours;
     const todayHours = workingHours.find(h => h.day === dayName);
-    if (todayHours && todayHours.isClosed) { return []; } 
-    else if (todayHours) { return allTimeSlots.filter(slot => slot >= todayHours.open && slot < todayHours.close); }
+    
+    if (todayHours && todayHours.isClosed) { 
+      return []; 
+    } else if (todayHours) { 
+      return allTimeSlots.filter(slot => slot >= todayHours.open && slot < todayHours.close); 
+    }
     return allTimeSlots;
   };
 
@@ -322,7 +618,14 @@ export default function Home() {
   const renderFeedbackScale = (qKey) => (
     <div className="flex gap-1 justify-center mt-3 mb-6 w-full max-w-full overflow-x-auto custom-scrollbar pb-2">
       {[0,1,2,3,4,5,6,7,8,9,10].map(num => (
-        <button key={num} type="button" onClick={() => setFeedbackData({...feedbackData, [qKey]: num})} className={`w-8 h-8 md:w-10 md:h-10 rounded-lg text-xs md:text-sm font-black transition-all border shrink-0 ${feedbackData[qKey] === num ? 'bg-[#E8622A] text-white border-[#E8622A] scale-110 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:border-[#E8622A] cursor-pointer'}`}>{num}</button>
+        <button 
+          key={num} 
+          type="button" 
+          onClick={() => setFeedbackData({...feedbackData, [qKey]: num})} 
+          className={`w-8 h-8 md:w-10 md:h-10 rounded-lg text-xs md:text-sm font-black transition-all border shrink-0 ${feedbackData[qKey] === num ? 'bg-[#E8622A] text-white border-[#E8622A] scale-110 shadow-md' : 'bg-white text-slate-500 border-slate-200 hover:border-[#E8622A] cursor-pointer'}`}
+        >
+          {num}
+        </button>
       ))}
     </div>
   );
@@ -330,10 +633,21 @@ export default function Home() {
   return (
     <>
       <style dangerouslySetInnerHTML={{__html: `
-        :root { --fig: #2D1B4E; --terra: #E8622A; --c-bg-main: #FAF7F2; --c-text-main: #2D1B4E; --c-nav-bg: rgba(255,255,255,0.98); }
-        body { background: var(--c-bg-main); color: var(--c-text-main); font-family: 'DM Sans', sans-serif; overflow-x: hidden; margin: 0; padding: 0; }
+        :root { 
+          --fig: #2D1B4E; --terra: #E8622A; --c-bg-main: #FAF7F2; 
+          --c-text-main: #2D1B4E; --c-nav-bg: rgba(255,255,255,0.98); 
+        }
+        body { 
+          background: var(--c-bg-main); color: var(--c-text-main); 
+          font-family: 'DM Sans', sans-serif; overflow-x: hidden; margin: 0; padding: 0; 
+        }
         
-        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 40px; height: 76px; display: flex; align-items: center; justify-content: space-between; background: var(--c-nav-bg); backdrop-filter: blur(20px); border-bottom: 1px solid #F1F5F9; transition: all 0.3s; }
+        nav { 
+          position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 40px; 
+          height: 76px; display: flex; align-items: center; justify-content: space-between; 
+          background: var(--c-nav-bg); backdrop-filter: blur(20px); 
+          border-bottom: 1px solid #F1F5F9; transition: all 0.3s; 
+        }
         
         .nav-logo-box { width: 180px; height: 50px; display: flex; align-items: center; cursor: pointer; } 
         .nav-logo-box img { max-height: 100%; max-width: 100%; object-fit: contain; mix-blend-mode: multiply; transform: scale(1.4); transform-origin: left center;} 
@@ -348,8 +662,10 @@ export default function Home() {
         .lang-pill:hover:not(.active) { border-color: #E2E8F0; color: var(--c-text-main); }
         
         .nav-right { display: flex; flex-direction: row; align-items: center; gap: 16px; flex-shrink: 0; }
-        .btn-outline { font-family:'DM Sans',sans-serif; font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 50px; border: 2px solid var(--c-text-main); background: transparent; color: var(--c-text-main); transition: all 0.25s; cursor:pointer; } .btn-outline:hover { background:var(--c-text-main); color:white; }
-        .btn-primary { font-family:'DM Sans',sans-serif; font-size: 13px; font-weight: 700; padding: 12px 24px; border-radius: 50px; border: none; background: var(--terra); color: white; transition: all 0.25s; display:flex; align-items:center; gap:8px; cursor:pointer; } .btn-primary:hover { background: #d4561f; transform: translateY(-2px); box-shadow: 0 10px 25px rgba(232,98,42,0.3); }
+        .btn-outline { font-family:'DM Sans',sans-serif; font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 50px; border: 2px solid var(--c-text-main); background: transparent; color: var(--c-text-main); transition: all 0.25s; cursor:pointer; } 
+        .btn-outline:hover { background:var(--c-text-main); color:white; }
+        .btn-primary { font-family:'DM Sans',sans-serif; font-size: 13px; font-weight: 700; padding: 12px 24px; border-radius: 50px; border: none; background: var(--terra); color: white; transition: all 0.25s; display:flex; align-items:center; gap:8px; cursor:pointer; } 
+        .btn-primary:hover { background: #d4561f; transform: translateY(-2px); box-shadow: 0 10px 25px rgba(232,98,42,0.3); }
         
         .hero { position: relative; min-height: 100vh; background: var(--fig); overflow: hidden; display: flex; flex-direction:column; align-items: center; justify-content: center; padding-top: 140px; padding-bottom: 100px; }
         .hero::before { content:''; position:absolute; inset:0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index:1; opacity:0.4; }
@@ -357,7 +673,8 @@ export default function Home() {
         .hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size: clamp(40px, 8vw, 86px); font-weight:800; color: white; letter-spacing: -3px; line-height: 1.0; margin-bottom:24px; position:relative; z-index:2; text-align:center;}
         .hero-title .accent { color: var(--terra); } 
         
-        .cat-card { display:flex; flex-direction:column; align-items:center; gap:12px; transition:transform 0.25s; cursor:pointer; background:none; border:none;} .cat-card:hover { transform:translateY(-6px); }
+        .cat-card { display:flex; flex-direction:column; align-items:center; gap:12px; transition:transform 0.25s; cursor:pointer; background:none; border:none;} 
+        .cat-card:hover { transform:translateY(-6px); }
         .cat-img-wrap { width:100%; aspect-ratio:1; border-radius:24px; overflow:hidden; position:relative; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid #E2E8F0; }
         .cat-emoji-bg { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:40px; border-radius:24px; }
         
@@ -705,7 +1022,7 @@ export default function Home() {
                 <div className="max-w-6xl mx-auto text-center">
                   <div className="text-[#E8622A] font-black text-sm tracking-widest uppercase mb-4">{t[lang].how.title}</div>
                   <div className="text-3xl md:text-5xl font-black text-[#2D1B4E] mb-12 md:mb-16 tracking-tight">{t[lang].how.sub}</div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 md:gap-8 relative"><div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-[2px] bg-slate-100 z-0"></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">🔍<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">1</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{t[lang].how.s1}</div><div className="text-sm text-slate-500 font-medium px-4">{t[lang].how.d1}</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">📅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">2</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{t[lang].how.s2}</div><div className="text-sm text-slate-500 font-medium px-4">{t[lang].how.d2}</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">✅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">3</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{t[lang].how.s3}</div><div className="text-sm text-slate-500 font-medium px-4">{t[lang].how.d3}</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">✨<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">4</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{t[lang].how.s4}</div><div className="text-sm text-slate-500 font-medium px-4">{t[lang].how.d4}</div></div></div>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 relative"><div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-[2px] bg-slate-100 z-0"></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">🔍<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">1</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{t[lang].how.s1}</div><div className="text-sm text-slate-500 font-medium">{t[lang].how.d1}</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">📅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">2</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{t[lang].how.s2}</div><div className="text-sm text-slate-500 font-medium">{t[lang].how.d2}</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">✅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">3</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{t[lang].how.s3}</div><div className="text-sm text-slate-500 font-medium">{t[lang].how.d3}</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">✨<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">4</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{t[lang].how.s4}</div><div className="text-sm text-slate-500 font-medium">{t[lang].how.d4}</div></div></div>
                 </div>
               </section>
             </div>
