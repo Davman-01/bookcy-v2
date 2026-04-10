@@ -47,7 +47,6 @@ export default function Home() {
   const [emailValid, setEmailValid] = useState(null); const [phoneValid, setPhoneValid] = useState(null); const [adminEmailValid, setAdminEmailValid] = useState(null);
   const [appointments, setAppointments] = useState([]); const [globalAppointments, setGlobalAppointments] = useState([]); const [closedSlots, setClosedSlots] = useState([]); const [profileTab, setProfileTab] = useState('services');
   
-  // Çerez Onayı State
   const [cookieConsent, setCookieConsent] = useState(true);
 
   const approvedShops = shops.filter(s => s.status === 'approved');
@@ -117,10 +116,6 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const reveals = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); } }); }, { threshold: 0.12 });
-    reveals.forEach(r => observer.observe(r));
-
     const handleScroll = () => {
         const nav = document.querySelector('nav');
         if(nav) {
@@ -134,7 +129,7 @@ export default function Home() {
         }
     };
     window.addEventListener('scroll', handleScroll);
-    return () => { window.removeEventListener('scroll', handleScroll); observer.disconnect(); };
+    return () => { window.removeEventListener('scroll', handleScroll); };
   }, [step]);
 
   const handleLogin = async (e) => {
@@ -285,16 +280,17 @@ export default function Home() {
         
         nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 40px; height: 76px; display: flex; align-items: center; justify-content: space-between; background: var(--c-nav-bg); backdrop-filter: blur(20px); border-bottom: 1px solid #F1F5F9; transition: all 0.3s; }
         
-        .nav-logo-box { width: 140px; height: 44px; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: flex-start; cursor: pointer; } 
-        .nav-logo-box img { width: 100%; height: 100%; object-fit: contain; } 
+        /* LOGO CSS GÜNCELLENDİ: BOYUTU BÜYÜTÜLDÜ VE ŞEFFAFLIK EKLENDİ */
+        .nav-logo-box { width: 180px; height: 50px; display: flex; align-items: center; cursor: pointer; } 
+        .nav-logo-box img { max-height: 100%; max-width: 100%; object-fit: contain; mix-blend-mode: multiply; transform: scale(1.4); transform-origin: left center;} 
         
         .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; height: 100%; margin:0; padding:0; }
         .nav-main-btn { text-decoration: none; font-size: 14px; font-weight: 700; color: #64748B; transition: all 0.2s; position: relative; background:none; border:none; outline:none; font-family:'DM Sans', sans-serif; cursor:pointer;}
         .nav-main-btn:hover, .nav-main-btn.active { color: var(--terra); }
         
         .nav-right { display: flex; flex-direction: row; align-items: center; gap: 16px; flex-shrink: 0; }
-        .btn-outline { font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 50px; border: 2px solid var(--c-text-main); background: transparent; color: var(--c-text-main); transition: all 0.25s; cursor:pointer; } .btn-outline:hover { background:var(--c-text-main); color:white; }
-        .btn-primary { font-size: 13px; font-weight: 700; padding: 12px 24px; border-radius: 50px; border: none; background: var(--terra); color: white; transition: all 0.25s; display:flex; align-items:center; gap:8px; cursor:pointer; } .btn-primary:hover { background: #d4561f; transform: translateY(-2px); box-shadow: 0 10px 25px rgba(232,98,42,0.3); }
+        .btn-outline { font-family:'DM Sans',sans-serif; font-size: 13px; font-weight: 700; padding: 10px 20px; border-radius: 50px; border: 2px solid var(--c-text-main); background: transparent; color: var(--c-text-main); transition: all 0.25s; cursor:pointer; } .btn-outline:hover { background:var(--c-text-main); color:white; }
+        .btn-primary { font-family:'DM Sans',sans-serif; font-size: 13px; font-weight: 700; padding: 12px 24px; border-radius: 50px; border: none; background: var(--terra); color: white; transition: all 0.25s; display:flex; align-items:center; gap:8px; cursor:pointer; } .btn-primary:hover { background: #d4561f; transform: translateY(-2px); box-shadow: 0 10px 25px rgba(232,98,42,0.3); }
         
         .hero { position: relative; min-height: 100vh; background: var(--fig); overflow: hidden; display: flex; flex-direction:column; align-items: center; justify-content: center; padding-top: 140px; padding-bottom: 100px; }
         .hero::before { content:''; position:absolute; inset:0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index:1; opacity:0.4; }
@@ -310,7 +306,7 @@ export default function Home() {
         @media(max-width:900px){ 
           nav { padding:0 20px; } 
           .nav-links, .nav-right .btn-outline { display:none; } 
-          .hero { padding-top: 120px; min-height: auto; padding-bottom:60px;} 
+          .hero { padding-top: 100px; min-height: auto; padding-bottom:60px;} 
           .hero-title { font-size: 48px; letter-spacing: -2px;}
           .hero-content { width: 100%; padding: 0 16px; }
         }
@@ -351,6 +347,7 @@ export default function Home() {
                   <button onClick={() => {setStep('all_features'); setShowFeaturesMenu(false); window.scrollTo(0,0);}} className={`nav-main-btn flex items-center gap-1 transition-colors h-full ${['features', 'feature_detail', 'all_features'].includes(step) || showFeaturesMenu ? 'active' : ''}`}>
                       Özellikler <ChevronDown size={14} className={`transition-transform duration-200 ${showFeaturesMenu ? 'rotate-180' : ''}`} />
                   </button>
+                  {/* ÖZELLİKLER AÇILIR MENÜSÜ DÜZELTİLDİ: Beyaz Arka Plan, Net Yazılar */}
                   {showFeaturesMenu && (
                       <div className="absolute top-[76px] left-1/2 -translate-x-1/2 w-screen bg-white text-[#2D1B4E] shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-t border-slate-200 cursor-default animate-in slide-in-from-top-2 duration-200 z-50">
                           <div className="max-w-[1100px] mx-auto py-12 px-8">
@@ -446,43 +443,43 @@ export default function Home() {
                       </div>
                       <form onSubmit={handleRegisterSubmit} className="flex flex-col gap-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <input required placeholder="İşletme Adı" className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.name} onChange={e => setNewShop({...newShop, name: e.target.value})} />
-                              <select className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold text-[#2D1B4E] outline-none" value={newShop.category} onChange={e => setNewShop({...newShop, category: e.target.value})}>
+                              <input required placeholder="İşletme Adı" className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.name} onChange={e => setNewShop({...newShop, name: e.target.value})} />
+                              <select className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold text-[#2D1B4E] outline-none" value={newShop.category} onChange={e => setNewShop({...newShop, category: e.target.value})}>
                                   {categories.map(c => <option key={c.dbName} value={c.dbName}>{c.dbName}</option>)}
                               </select>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <select required className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold text-[#2D1B4E] outline-none" value={newShop.location} onChange={e => setNewShop({...newShop, location: e.target.value})}>
+                              <select required className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold text-[#2D1B4E] outline-none" value={newShop.location} onChange={e => setNewShop({...newShop, location: e.target.value})}>
                                   {cyprusRegions.map(region => <option key={region} value={region}>{region}</option>)}
                               </select>
-                              <input required placeholder="Tam Adres" className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none uppercase text-[#2D1B4E]" value={newShop.address} onChange={e => setNewShop({...newShop, address: e.target.value})} />
+                              <input required placeholder="Tam Adres" className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none uppercase text-[#2D1B4E]" value={newShop.address} onChange={e => setNewShop({...newShop, address: e.target.value})} />
                           </div>
-                          <input type="url" placeholder="Google Maps Linki" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.maps_link} onChange={e => setNewShop({...newShop, maps_link: e.target.value})} />
+                          <input type="url" placeholder="Google Maps Linki" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.maps_link} onChange={e => setNewShop({...newShop, maps_link: e.target.value})} />
                           
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-4">
                               <div className="flex gap-2 w-full relative">
-                                <select className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-2 outline-none font-bold text-xs text-[#2D1B4E] w-20" value={newShop.phoneCode} onChange={e => setNewShop({...newShop, phoneCode: e.target.value})}>
+                                <select className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-2 outline-none font-bold text-xs text-[#2D1B4E] w-20" value={newShop.phoneCode} onChange={e => setNewShop({...newShop, phoneCode: e.target.value})}>
                                     <option value="+90">TR</option>
                                 </select>
                                 <div className="relative flex-1">
-                                  <input required type="tel" placeholder="İşletme Telefonu" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 outline-none font-bold text-xs text-[#2D1B4E]" value={newShop.contactPhone} onChange={handlePhoneChange} />
+                                  <input required type="tel" placeholder="İşletme Telefonu" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 outline-none font-bold text-xs text-[#2D1B4E]" value={newShop.contactPhone} onChange={handlePhoneChange} />
                                   {phoneValid === true && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" size={16}/>}
                                   {phoneValid === false && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500" size={16}/>}
                                 </div>
                               </div>
-                              <input placeholder="Instagram Linki" className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.contactInsta} onChange={e => setNewShop({...newShop, contactInsta: e.target.value})} />
+                              <input placeholder="Instagram Linki" className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.contactInsta} onChange={e => setNewShop({...newShop, contactInsta: e.target.value})} />
                               <div className="relative">
-                                <input type="email" placeholder="İletişim E-Posta" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.contactEmail} onChange={handleAdminEmailChange} />
+                                <input type="email" placeholder="İletişim E-Posta" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.contactEmail} onChange={handleAdminEmailChange} />
                                 {adminEmailValid === true && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" size={16}/>}
                                 {adminEmailValid === false && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500" size={16}/>}
                               </div>
                           </div>
                           
-                          <input required type="email" placeholder="Admin E-Posta (Giriş için)" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E] mt-2" value={newShop.email} onChange={handleEmailChange} />
+                          <input required type="email" placeholder="Admin E-Posta (Giriş için)" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E] mt-2" value={newShop.email} onChange={handleEmailChange} />
                           {emailValid === true && <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" size={16}/>}
                           {emailValid === false && <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500" size={16}/>}
                           
-                          <textarea placeholder="Hakkımızda" rows="2" className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none resize-none text-[#2D1B4E]" value={newShop.description} onChange={e => setNewShop({...newShop, description: e.target.value})}></textarea>
+                          <textarea placeholder="Hakkımızda" rows="2" className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none resize-none text-[#2D1B4E]" value={newShop.description} onChange={e => setNewShop({...newShop, description: e.target.value})}></textarea>
                           
                           <div className="bg-slate-50 border border-slate-200 border-dashed rounded-2xl p-4 relative group">
                               <input type="file" accept=".png, .jpg, .jpeg" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={e => setNewShop({...newShop, logoFile: e.target.files[0]})} />
@@ -499,10 +496,10 @@ export default function Home() {
                           </div>
                           
                           <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
-                              <input required placeholder="Kullanıcı Adı" className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.username} onChange={e => setNewShop({...newShop, username: e.target.value})} />
-                              <input required placeholder="Şifre" className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.password} onChange={e => setNewShop({...newShop, password: e.target.value})} />
+                              <input required placeholder="Kullanıcı Adı" className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.username} onChange={e => setNewShop({...newShop, username: e.target.value})} />
+                              <input required placeholder="Şifre" className="bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.password} onChange={e => setNewShop({...newShop, password: e.target.value})} />
                           </div>
-                          <button type="submit" disabled={isUploading || emailValid === false || phoneValid === false || adminEmailValid === false} className="w-full btn-primary justify-center py-5 rounded-xl mt-2 shadow-lg border-none cursor-pointer tracking-widest text-xs uppercase">{isUploading ? 'YÜKLENİYOR...' : 'BAŞVURUYU TAMAMLA'}</button>
+                          <button type="submit" disabled={isUploading || emailValid === false || phoneValid === false || adminEmailValid === false} className="w-full btn-primary justify-center py-4 rounded-xl mt-2 shadow-lg border-none cursor-pointer tracking-widest text-xs uppercase">{isUploading ? 'YÜKLENİYOR...' : 'BAŞVURUYU TAMAMLA'}</button>
                       </form>
                   </>
               )}
@@ -524,7 +521,7 @@ export default function Home() {
               <input type="text" required placeholder="Kullanıcı Adı" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm outline-none text-[#2D1B4E] focus:border-[#E8622A]" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} />
               {loginType === 'staff' && <input type="text" required placeholder="Personel Adı" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm outline-none text-[#2D1B4E] focus:border-[#E8622A]" value={loginStaffName} onChange={(e) => setLoginStaffName(e.target.value)} />}
               <input type="password" required placeholder="Şifre" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 font-bold text-sm outline-none text-[#2D1B4E] focus:border-[#E8622A]" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
-              <button type="submit" disabled={isLoginLoading} className="w-full btn-primary justify-center py-5 rounded-xl font-black uppercase tracking-widest text-xs mt-4 border-none cursor-pointer">{isLoginLoading ? 'BEKLEYİN...' : 'PANELE GİT'}</button>
+              <button type="submit" disabled={isLoginLoading} className="w-full btn-primary justify-center py-4 rounded-xl font-black uppercase tracking-widest text-xs mt-4 border-none cursor-pointer">{isLoginLoading ? 'BEKLEYİN...' : 'PANELE GİT'}</button>
             </form>
           </div>
         </div>
@@ -552,7 +549,7 @@ export default function Home() {
         </div>
       )}
 
-      <main className="flex-1 w-full relative z-10 min-h-[80vh]">
+      <main className="flex-1 w-full relative z-10 min-h-[80vh] mt-[72px]">
         {/* === ANA SAYFA === */}
         {step === 'services' && (
             <div className="w-full">
@@ -563,18 +560,18 @@ export default function Home() {
                     <p className="hero-sub">Yakınındaki en iyi berber, kuaför, spa ve güzellik uzmanlarını bul. Tek tıkla randevu al, zamanın senin olsun.</p>
                     
                     <form className="w-full bg-white rounded-[24px] md:rounded-[50px] p-2 md:p-3 shadow-2xl flex flex-col md:flex-row gap-2 mx-auto max-w-[800px] mb-6" onSubmit={handleHeroSearch}>
-                        <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-2xl md:rounded-none px-4 py-4 md:py-2 md:border-r border-slate-200">
+                        <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-2xl md:rounded-none px-4 py-3 md:py-2 md:border-r border-slate-200">
                             <Search size={20} className="text-slate-400 mr-3 shrink-0" />
                             <input type="text" className="w-full bg-transparent font-bold text-sm outline-none text-[#2D1B4E]" placeholder="Hizmet veya mekan ara..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                         </div>
-                        <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-2xl md:rounded-none px-4 py-4 md:py-2">
+                        <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-2xl md:rounded-none px-4 py-3 md:py-2">
                             <MapPin size={20} className="text-slate-400 mr-3 shrink-0" />
                             <select className="w-full bg-transparent font-bold text-sm outline-none text-[#2D1B4E] cursor-pointer" value={filterRegion} onChange={(e) => setFilterRegion(e.target.value)}>
                                 <option value="All">Nerede?</option>
                                 {cyprusRegions.map(r => <option key={r} value={r}>{r}</option>)}
                             </select>
                         </div>
-                        <button type="submit" className="bg-[#E8622A] text-white rounded-[16px] md:rounded-[40px] px-8 py-4 font-black text-sm hover:bg-[#d4561f] transition-colors w-full md:w-auto border-none cursor-pointer">ARA</button>
+                        <button type="submit" className="bg-[#E8622A] text-white rounded-[16px] md:rounded-[40px] px-8 py-3 md:py-4 font-black text-sm hover:bg-[#d4561f] transition-colors w-full md:w-auto border-none cursor-pointer">ARA</button>
                     </form>
                     
                     <div className="hero-popular"><span>Popüler:</span>{categories.slice(0,4).map(c=><button key={c.key} className="pop-tag" onClick={()=>{setFilterService(c.dbName); setStep('all_shops');}}>{c.emoji} {c.dbName}</button>)}</div>
@@ -611,7 +608,7 @@ export default function Home() {
                 <div className="max-w-6xl mx-auto text-center">
                   <div className="text-[#E8622A] font-black text-sm tracking-widest uppercase mb-4">Nasıl Çalışır?</div>
                   <div className="text-3xl md:text-5xl font-black text-[#2D1B4E] mb-12 md:mb-16 tracking-tight">4 Basit Adımda Randevun Hazır</div>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 relative"><div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-[2px] bg-slate-100 z-0"></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">🔍<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">1</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">Keşfet</div><div className="text-sm text-slate-500 font-medium">Yakındaki mekanları incele ve filtrele.</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">📅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">2</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">Tarih Seç</div><div className="text-sm text-slate-500 font-medium">Sana en uygun zamanı tek tıkla seç.</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">✅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">3</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">Onayla</div><div className="text-sm text-slate-500 font-medium">Saniyeler içinde rezervasyonun onaylanır.</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">✨<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">4</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">Keyif Çıkar</div><div className="text-sm text-slate-500 font-medium">Git, hizmetini al ve puan ver.</div></div></div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 md:gap-8 relative"><div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-[2px] bg-slate-100 z-0"></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">🔍<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">1</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">Keşfet</div><div className="text-sm text-slate-500 font-medium px-4">Yakındaki mekanları incele ve filtrele.</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">📅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">2</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">Tarih Seç</div><div className="text-sm text-slate-500 font-medium px-4">Sana en uygun zamanı tek tıkla seç.</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">✅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">3</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">Onayla</div><div className="text-sm text-slate-500 font-medium px-4">Saniyeler içinde rezervasyonun onaylanır.</div></div><div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">✨<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">4</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">Keyif Çıkar</div><div className="text-sm text-slate-500 font-medium px-4">Git, hizmetini al ve puan ver.</div></div></div>
                 </div>
               </section>
             </div>
@@ -755,7 +752,7 @@ export default function Home() {
                     <h1 className="text-4xl md:text-6xl font-black uppercase text-white mb-6 tracking-tight">BİZE ULAŞIN</h1>
                     <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto font-medium leading-relaxed">Sorularınız, destek talepleriniz veya sponsorluk görüşmeleri için bize her zaman ulaşabilirsiniz.</p>
                 </div>
-                <div className="max-w-[1100px] mx-auto px-6 -mt-24 relative z-10">
+                <div className="max-w-[1000px] mx-auto px-6 -mt-24 relative z-10">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div className="bg-white p-10 md:p-12 rounded-[40px] text-center shadow-2xl border border-slate-200 hover:-translate-y-2 transition-transform duration-300">
                             <div className="w-24 h-24 bg-green-50 text-[#25D366] rounded-full flex items-center justify-center mx-auto mb-8"><MessageCircle size={40}/></div>
@@ -795,20 +792,20 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="w-full bg-[#2D1B4E] pt-20 pb-10 px-6 text-white/60 text-sm border-t border-[#3E296A] z-10 relative">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 border-b border-white/10 pb-12">
+      <footer className="w-full bg-[#2D1B4E] pt-12 md:pt-20 pb-8 md:pb-10 px-6 text-white/60 text-sm border-t border-[#3E296A] z-10 relative">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-8 md:mb-12 border-b border-white/10 pb-8 md:pb-12">
           <div>
-            <div className="mb-8 h-12 w-fit bg-white/5 p-2 rounded-xl border border-white/10"><img src="/logo.png" alt="Bookcy Logo" className="h-full w-auto object-contain filter brightness-0 invert" /></div>
-            <p className="mb-8 leading-relaxed font-medium text-white/70">Bookcy, Kıbrıs'ın pazar lideri ve en kapsamlı yeni nesil randevu platformudur.</p>
+            <div className="mb-6 md:mb-8 h-16 w-fit bg-white p-3 rounded-2xl overflow-hidden flex items-center justify-center border border-white/10 shadow-lg"><img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" /></div>
+            <p className="mb-6 md:mb-8 leading-relaxed font-medium text-white/70">Bookcy, Kıbrıs'ın pazar lideri ve en kapsamlı yeni nesil randevu platformudur.</p>
             <div className="flex gap-4">
               <a href="https://instagram.com/bookcy" target="_blank" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-[#E1306C] transition-all hover:-translate-y-1"><InstagramIcon size={20}/></a>
               <a href="https://wa.me/905555555555" target="_blank" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-[#25D366] transition-all hover:-translate-y-1"><MessageCircle size={20}/></a>
               <a href="mailto:info@bookcy.co" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-blue-500 transition-all hover:-translate-y-1"><Mail size={20}/></a>
             </div>
           </div>
-          <div><h4 className="text-white font-black mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">Platform</h4><button onClick={()=>setStep('services')} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">Ana Sayfa</button><button onClick={()=>setStep('about')} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">Hakkımızda & Paketler</button><button onClick={()=>{setShowRegister(true); window.scrollTo(0,0);}} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-[#E8622A] font-medium transition-colors text-base p-0">İşletme Ekle</button></div>
-          <div><h4 className="text-white font-black mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">Bölgeler</h4>{cyprusRegions.map(r => <button key={r} onClick={()=>{setFilterRegion(r); setStep('all_shops'); window.scrollTo(0,0);}} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">{r}</button>)}</div>
-          <div><h4 className="text-white font-black mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">Yasal & Sözleşmeler</h4><button onClick={()=>{setStep('privacy'); window.scrollTo(0,0);}} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">Gizlilik Politikası</button><button onClick={()=>{setStep('kvkk'); window.scrollTo(0,0);}} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">KVKK Aydınlatma Metni</button><button onClick={()=>{setStep('terms'); window.scrollTo(0,0);}} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">Kullanım Şartları</button><button onClick={()=>{setStep('cookies'); window.scrollTo(0,0);}} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">Çerez Politikası</button></div>
+          <div><h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">Platform</h4><button onClick={()=>setStep('services')} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">Ana Sayfa</button><button onClick={()=>setStep('about')} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">Hakkımızda & Paketler</button><button onClick={()=>{setShowRegister(true); window.scrollTo(0,0);}} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-[#E8622A] font-medium transition-colors text-base p-0">İşletme Ekle</button></div>
+          <div><h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">Bölgeler</h4>{cyprusRegions.map(r => <button key={r} onClick={()=>{setFilterRegion(r); setStep('all_shops'); window.scrollTo(0,0);}} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">{r}</button>)}</div>
+          <div><h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">Yasal & Sözleşmeler</h4><button onClick={()=>{setStep('privacy'); window.scrollTo(0,0);}} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">Gizlilik Politikası</button><button onClick={()=>{setStep('kvkk'); window.scrollTo(0,0);}} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">KVKK Aydınlatma Metni</button><button onClick={()=>{setStep('terms'); window.scrollTo(0,0);}} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">Kullanım Şartları</button><button onClick={()=>{setStep('cookies'); window.scrollTo(0,0);}} className="block mb-4 bg-transparent border-none text-white/60 cursor-pointer hover:text-white font-medium transition-colors text-base p-0">Çerez Politikası</button></div>
         </div>
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-medium"><p>© {new Date().getFullYear()} BOOKCY LTD. Tüm hakları saklıdır.</p><p className="font-black text-white/40 tracking-[0.3em] uppercase bg-white/5 px-4 py-2 rounded-lg">One Click Booking™</p></div>
       </footer>
