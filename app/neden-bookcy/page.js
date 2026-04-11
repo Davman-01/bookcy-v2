@@ -1,9 +1,10 @@
-import Link from 'next/link';
+"use client";
+import { useAppContext } from '@/app/providers';
 
-// Gerekli İkonlar İçin Basit SVG Yer Tutucuları
+// İkonlar İçin Basit SVG Bileşenleri
 const IconCheck = () => (
-  <svg className="w-6 h-6 text-[#E9D5FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+  <svg className="w-5 h-5 text-[#E8622A] mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
   </svg>
 );
 
@@ -31,176 +32,147 @@ const IconUser = () => (
   </div>
 );
 
-export default function OzelliklerPage() {
+export default function NedenBookcyPage() {
+  const { t, lang } = useAppContext();
+
   return (
     <div className="bg-white min-h-screen text-[#111827]">
       
-      {/* SECTION 1: HERO (image_08347e.jpg) */}
-      <section className="bg-[#F9FAFB] py-16 md:py-24">
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold text-[#111827] leading-tight mb-6">
-              Ekibinin bir parçası gibi çalışan salon yazılımı
-            </h1>
-            <p className="text-xl text-[#4B5563] mb-10">
-              Takviminizi yönetin, yeni müşteriler kazanın ve işletmenizi büyütün. Hepsi tek bir platformda.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <button className="bg-[#E8622A] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#d4561f] transition">
-                Demo talep edin
-              </button>
-              <button className="text-[#111827] px-8 py-3 rounded-full font-semibold border border-[#D1D5DB] hover:bg-gray-100 transition">
-                Özellikleri keşfet
-              </button>
-            </div>
-          </div>
-          
-          {/* Mockup Yer Tutucu (Stilize Edilmiş) */}
-          <div className="bg-[#2D1B4E] p-8 rounded-3xl shadow-xl aspect-[5/4] flex flex-col gap-4">
-            <div className="h-12 bg-white/10 rounded-xl flex items-center px-4 gap-3">
-              <div className="w-8 h-8 bg-gray-400 rounded-full" />
-              <div className="h-4 w-32 bg-gray-400 rounded" />
-            </div>
-            <div className="flex-1 grid grid-cols-2 gap-4">
-              <div className="bg-white/10 rounded-xl p-4">
-                <div className="h-4 w-24 bg-[#E8622A] rounded mb-3" />
-                <div className="h-3 w-16 bg-white/20 rounded mb-1" />
-                <div className="h-3 w-20 bg-white/20 rounded" />
-              </div>
-              <div className="bg-white/10 rounded-xl p-4">
-                <div className="h-4 w-24 bg-gray-400 rounded mb-3" />
-                <div className="h-3 w-16 bg-white/20 rounded mb-1" />
-                <div className="h-3 w-20 bg-white/20 rounded" />
-              </div>
-            </div>
+      {/* SECTION 1: HERO (İşletme Odaklı Karşılama) */}
+      <section className="bg-[#2D1B4E] py-20 md:py-28 text-white">
+        <div className="container mx-auto px-6 text-center max-w-4xl">
+          <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-8">
+            Ekibinin bir parçası gibi çalışan salon yazılımı
+          </h1>
+          <p className="text-xl md:text-2xl text-[#E9D5FF] mb-12 max-w-2xl mx-auto">
+            Takviminizi yönetin, yeni müşteriler kazanın ve işletmenizi büyütün. Hepsi tek bir platformda.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <button className="bg-[#E8622A] text-white px-10 py-4 rounded-full font-bold text-lg hover:bg-[#d4561f] transition transform hover:scale-105">
+              Hemen Başlayın
+            </button>
+            <button className="text-white px-10 py-4 rounded-full font-bold text-lg border-2 border-white/20 hover:bg-white/10 transition">
+              Özellikleri Keşfet
+            </button>
           </div>
         </div>
       </section>
 
-      {/* SECTION 2: CALENDAR FEATURE (image_0834bb.png) */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-          
-          {/* Mockup Yer Tutucu - Takvim Grid */}
-          <div className="bg-white border border-gray-100 p-6 rounded-3xl shadow-sm aspect-[5/4]">
-            <div className="h-8 w-40 bg-gray-100 rounded mb-6" />
-            <div className="grid grid-cols-7 gap-2">
-              {[...Array(31)].map((_, i) => (
-                <div key={i} className={`aspect-square rounded-md flex items-center justify-center ${i === 15 ? 'bg-[#2D1B4E] text-white' : 'bg-gray-50 text-gray-400'}`}>
-                  {i + 1}
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#111827] mb-6">
-              Takviminizi zahmetsizce yönetin
-            </h2>
-            <p className="text-lg text-[#4B5563]">
-              Sürükle-bırak takvim ile randevuları saniyeler içinde planlayın, iptalleri azaltın ve doluluk oranınızı artırın.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 3: MARKETPLACE FEATURE (image_083784.png) */}
+      {/* SECTION 2: TEMEL FAYDALAR KARTLARI (Neden Biz?) */}
       <section className="py-16 md:py-24 bg-[#F9FAFB]">
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center md:flex-row-reverse flex-col-reverse">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#111827] mb-6">
-              Yeni müşterilere ulaşın
-            </h2>
-            <p className="text-lg text-[#4B5563]">
-              İşletmenizi pazar yerimizde listeyerek binlerce potansiyel müşterinin sizi keşfetmesini sağlayın ve online randevu alın.
-            </p>
-          </div>
-          
-          {/* Mockup Yer Tutucu - Salon Kartı */}
-          <div className="bg-white border border-gray-100 p-6 rounded-3xl shadow-lg aspect-[5/4] flex flex-col gap-4">
-            <div className="h-40 bg-gray-200 rounded-2xl" />
-            <div className="h-6 w-1/2 bg-gray-800 rounded" />
-            <div className="h-4 w-full bg-gray-100 rounded" />
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 4: LOYALTY FEATURE (image_0837a4.png) */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-          
-          {/* Mockup Yer Tutucu - Müşteri Profili */}
-          <div className="bg-white border border-gray-100 p-6 rounded-3xl shadow-sm aspect-[5/4] flex flex-col gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gray-200 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <div className="h-5 w-32 bg-gray-800 rounded" />
-                <div className="h-4 w-24 bg-gray-100 rounded" />
-              </div>
-            </div>
-            <div className="flex-1 bg-gray-50 rounded-xl p-4 space-y-2">
-              <div className="h-4 w-full bg-white rounded" />
-              <div className="h-4 w-full bg-white rounded" />
-              <div className="h-4 w-2/3 bg-white rounded" />
-            </div>
-          </div>
-          
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#111827] mb-6">
-              Müşteri sadakatini artırın
-            </h2>
-            <p className="text-lg text-[#4B5563]">
-              Müşteri geçmişini tutun, kişiselleştirilmiş kampanyalar oluşturun ve otomatik randevu hatırlatıcıları göndererek geri gelmelerini sağlayın.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 5: KEY BENEFITS CARDS (image_0837dc.png) */}
-      <section className="bg-[#F9FAFB] py-16 md:py-24">
         <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center text-[#111827] mb-16">
+          <h2 className="text-4xl font-bold text-center text-[#111827] mb-16">
             Kıbrıs'ın En Gelişmiş Salon Yazılımı
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {/* Card 1 */}
-            <div className="bg-[#2D1B4E] p-8 rounded-2xl shadow-lg text-white">
+            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-lg transition">
               <IconCoin />
-              <h3 className="text-2xl font-semibold mb-4">Sıfır Komisyon</h3>
-              <p className="text-[#E9D5FF] text-lg">Online randevularınızdan komisyon almıyoruz. Kazancınızın tamamı size kalır.</p>
+              <h3 className="text-2xl font-bold text-[#2D1B4E] mb-4">Sıfır Komisyon</h3>
+              <p className="text-[#4B5563] text-lg leading-relaxed">
+                Online randevularınızdan veya pazar yerinden gelen müşterilerden komisyon almıyoruz. Kazancınızın tamamı size kalır.
+              </p>
             </div>
             {/* Card 2 */}
-            <div className="bg-[#2D1B4E] p-8 rounded-2xl shadow-lg text-white">
+            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-lg transition">
               <IconChart />
-              <h3 className="text-2xl font-semibold mb-4">Daha Fazla Rezervasyon</h3>
-              <p className="text-[#E9D5FF] text-lg">Müşterilerinize 7/24 randevu alma imkanı sunarak doluluk oranınızı artırın.</p>
+              <h3 className="text-2xl font-bold text-[#2D1B4E] mb-4">Daha Fazla Rezervasyon</h3>
+              <p className="text-[#4B5563] text-lg leading-relaxed">
+                Müşterilerinize Google, Instagram ve web sitenizden 7/24 randevu alma imkanı sunarak doluluk oranınızı artırın.
+              </p>
             </div>
             {/* Card 3 */}
-            <div className="bg-[#2D1B4E] p-8 rounded-2xl shadow-lg text-white">
+            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-lg transition">
               <IconUser />
-              <h3 className="text-2xl font-semibold mb-4">Kolay Personel Yönetimi</h3>
-              <p className="text-[#E9D5FF] text-lg">Ekibinizin çalışma saatlerini, tatillerini ve performansını kolayca takip edin.</p>
+              <h3 className="text-2xl font-bold text-[#2D1B4E] mb-4">Kolay Yönetim</h3>
+              <p className="text-[#4B5563] text-lg leading-relaxed">
+                Tek tıkla takvim çakışmalarını önleyin, personelinizin çalışma saatlerini, tatillerini ve performansını kolayca takip edin.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 6: TESTIMONIALS (image_0837ff.png) */}
+      {/* SECTION 3: DETAYLI ÖZELLİKLER LİSTESİ */}
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-[#111827] mb-16">
+          <h2 className="text-4xl font-bold text-center text-[#111827] mb-20">
+            Tek Platform, Sonsuz Çözüm
+          </h2>
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            
+            {/* Sol Taraf - Madde Listesi */}
+            <div className="space-y-12">
+              <div className="flex items-start gap-4">
+                <IconCheck />
+                <div>
+                  <h4 className="text-xl font-semibold text-[#2D1B4E]">Akıllı Dijital Takvim 📅</h4>
+                  <p className="text-[#4B5563]">Sürükle-bırak ile randevuları yönetin, iptalleri azaltın.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <IconCheck />
+                <div>
+                  <h4 className="text-xl font-semibold text-[#2D1B4E]">Otomatik Randevu Hatırlatıcıları 📲</h4>
+                  <p className="text-[#4B5563]">Müşterilere SMS ve bildirim göndererek randevuya gelmeme oranını düşürün.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <IconCheck />
+                <div>
+                  <h4 className="text-xl font-semibold text-[#2D1B4E]">Müşteri Yönetimi (CRM) 👤</h4>
+                  <p className="text-[#4B5563]">Müşteri geçmişini, tercihlerini ve notlarını tek bir yerde güvenle saklayın.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <IconCheck />
+                <div>
+                  <h4 className="text-xl font-semibold text-[#2D1B4E]">İstatistik & Raporlar 📊</h4>
+                  <p className="text-[#4B5563]">Kazancınızı, popüler hizmetlerinizi ve personel performansını anlık görün.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Sağ Taraf - Demo Görsel / Mockup */}
+            <div className="bg-[#2D1B4E] p-8 rounded-3xl shadow-xl aspect-[5/4] flex flex-col gap-4 text-white">
+              <div className="h-12 bg-white/10 rounded-xl flex items-center px-4 gap-3">
+                <div className="w-8 h-8 bg-gray-400 rounded-full" />
+                <div className="h-4 w-32 bg-gray-400 rounded" />
+              </div>
+              <div className="flex-1 grid grid-cols-2 gap-4">
+                <div className="bg-white/10 rounded-xl p-4">
+                  <div className="h-4 w-24 bg-[#E8622A] rounded mb-3" />
+                  <div className="h-3 w-16 bg-white/20 rounded mb-1" />
+                  <div className="h-3 w-20 bg-white/20 rounded" />
+                </div>
+                <div className="bg-white/10 rounded-xl p-4">
+                  <div className="h-4 w-24 bg-gray-400 rounded mb-3" />
+                  <div className="h-3 w-16 bg-white/20 rounded mb-1" />
+                  <div className="h-3 w-20 bg-white/20 rounded" />
+                </div>
+              </div>
+              <p className="text-center text-sm text-white/50 mt-4">Dashboard Tasarım Örneği</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 4: İŞLETME YORUMLARI (Testimonials) */}
+      <section className="bg-[#2D1B4E] py-16 md:py-24 text-white">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
             İşletme sahipleri ne diyor?
           </h2>
           <div className="grid md:grid-cols-2 gap-8">
             {[
-              { quote: "Bookcy sayesinde takvim çakışmaları bitti. Müşterilerim online randevuyu çok sevdi, gelirimiz arttı.", name: "Mehmet Kaya", salon: "Peak Barber" },
-              { quote: "Personel yönetimim çok kolaylaştı. Kim ne zaman çalışıyor, ne kadar kazanıyor anlık görüyorum.", name: "Ayşe Demir", salon: "Beauty Lab Spa" },
-              { quote: "Pazar yerinde listelenmek bize bir sürü yeni müşteri getirdi. Reklam yapmamıza gerek kalmadı.", name: "Selin Yılmaz", salon: "Studio Cut" },
-              { quote: "Otomatik hatırlatıcılar sayesinde randevu iptallerimiz %80 azaldı. Zamanımız bize kaldı.", name: "Caner Öztürk", salon: "The Gentlemen" }
+              { quote: "Bookcy sayesinde takvim çakışmaları bitti. Müşterilerim online randevuyu çok sevdi, gelirimiz arttı.", name: "Mehmet Kaya", salon: "Peak Barber 💈", emoji: "🧔‍♂️" },
+              { quote: "Personel yönetimim çok kolaylaştı. Kim ne zaman çalışıyor, ne kadar kazanıyor anlık görüyorum.", name: "Ayşe Demir", salon: "Beauty Lab Spa 💅", emoji: "👩‍💼" },
+              { quote: "Pazar yerinde listelenmek bize bir sürü yeni müşteri getirdi. Reklam yapmamıza gerek kalmadı.", name: "Selin Yılmaz", salon: "Studio Cut ✂️", emoji: "💇‍♀️" },
+              { quote: "Otomatik hatırlatıcılar sayesinde randevu iptallerimiz %80 azaldı. Zamanımız bize kaldı.", name: "Caner Öztürk", salon: "The Gentlemen 🍸", emoji: "🤵‍♂️" }
             ].map((t, i) => (
-              <div key={i} className="bg-[#2D1B4E] p-8 rounded-2xl shadow-lg text-white flex gap-6">
-                <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center font-bold text-2xl text-[#E9D5FF]">
-                  {t.name.split(' ').map(n=>n[0]).join('')}
+              <div key={i} className="bg-white/10 p-8 rounded-3xl shadow-lg flex gap-6 border border-white/10 hover:border-white/20 transition">
+                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center font-bold text-4xl">
+                  {t.emoji}
                 </div>
                 <div className="flex-1">
                   <p className="text-lg text-[#E9D5FF] mb-4">"{t.quote}"</p>
@@ -213,29 +185,20 @@ export default function OzelliklerPage() {
         </div>
       </section>
 
-      {/* SECTION 7: CTA & DEMO FORM (image_08383f.png) */}
+      {/* SECTION 5: CTA & DEMO FORM (Lead Generation) */}
       <section className="py-16 md:py-24 bg-[#F9FAFB]">
-        <div className="container mx-auto px-6 text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#111827] mb-6">
-            İşletmenizi büyütmeye hazır mısınız?
-          </h2>
-          <button className="bg-[#E8622A] text-white px-10 py-4 rounded-full font-semibold text-lg hover:bg-[#d4561f] transition">
-            Hemen Başlayın
-          </button>
-        </div>
-        
         <div className="container mx-auto px-6 max-w-2xl bg-white p-12 rounded-3xl shadow-xl border border-gray-100">
-          <h3 className="text-3xl font-bold text-[#111827] mb-10">Demo talep edin</h3>
+          <h3 className="text-3xl font-bold text-[#111827] mb-10 text-center">İşletmenizi dijitale taşıyın</h3>
           <form className="space-y-6">
-            <input type="text" placeholder="Ad Soyad" className="w-full px-4 py-3 rounded-lg border border-[#D1D5DB] bg-white focus:ring-2 focus:ring-[#E8622A] focus:border-[#E8622A]" />
-            <input type="text" placeholder="İşletme Adı" className="w-full px-4 py-3 rounded-lg border border-[#D1D5DB] bg-white focus:ring-2 focus:ring-[#E8622A] focus:border-[#E8622A]" />
-            <input type="tel" placeholder="Telefon Numarası" className="w-full px-4 py-3 rounded-lg border border-[#D1D5DB] bg-white focus:ring-2 focus:ring-[#E8622A] focus:border-[#E8622A]" />
-            <input type="email" placeholder="E-posta Adresi" className="w-full px-4 py-3 rounded-lg border border-[#D1D5DB] bg-white focus:ring-2 focus:ring-[#E8622A] focus:border-[#E8622A]" />
+            <input type="text" placeholder="Ad Soyad" className="w-full px-4 py-3 rounded-xl border border-[#D1D5DB] bg-white focus:ring-2 focus:ring-[#E8622A] focus:border-[#E8622A]" />
+            <input type="text" placeholder="İşletme Adı" className="w-full px-4 py-3 rounded-xl border border-[#D1D5DB] bg-white focus:ring-2 focus:ring-[#E8622A] focus:border-[#E8622A]" />
+            <input type="tel" placeholder="Telefon Numarası" className="w-full px-4 py-3 rounded-xl border border-[#D1D5DB] bg-white focus:ring-2 focus:ring-[#E8622A] focus:border-[#E8622A]" />
+            <input type="email" placeholder="E-posta Adresi" className="w-full px-4 py-3 rounded-xl border border-[#D1D5DB] bg-white focus:ring-2 focus:ring-[#E8622A] focus:border-[#E8622A]" />
             <div className="flex items-start gap-3 text-left">
               <input type="checkbox" className="mt-1 accent-[#E8622A]" />
               <label className="text-sm text-[#4B5563]">Bookcy tarafından kişisel verilerimin işlenmesine ve iletişim kurulmasına izin veriyorum.</label>
             </div>
-            <button type="submit" className="w-full bg-[#E8622A] text-white px-8 py-4 rounded-lg font-semibold hover:bg-[#d4561f] transition text-lg">
+            <button type="submit" className="w-full bg-[#E8622A] text-white px-8 py-4 rounded-xl font-bold hover:bg-[#d4561f] transition text-lg transform hover:scale-105">
               Gönder
             </button>
           </form>
