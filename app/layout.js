@@ -1,21 +1,35 @@
+"use client";
 import './globals.css';
 import { AppProvider } from './providers';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { usePathname } from 'next/navigation'; // EKLENDİ
 
-export const metadata = {
-  title: 'Bookcy | Kıbrıs\'ın #1 Güzellik Platformu',
-  description: 'Yakınındaki en iyi berber, kuaför, spa ve güzellik uzmanlarını bul.',
-};
+// EKLENDİ: SEO Metadata tanımlamalarını layout içinden kaldırdık çünkü "use client" ile metadata kullanılamaz.
+// Eğer SEO ayarlarını eklemek istersen, "app/layout.js" yerine "app/page.js" (Ana sayfa) içine metadata export etmelisin.
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname(); // EKLENDİ: Hangi sayfada olduğumuzu anlar
+  
+  // EKLENDİ: Eğer bu sayfalardaysak üst boşluğu sıfırla, değilse 76px boşluk bırak
+  const isDashboardOrAdmin = pathname && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/panel'));
+  const mainMarginClass = isDashboardOrAdmin ? 'mt-0' : 'mt-[76px]';
+
   return (
     <html lang="tr">
       <head>
+        {/* EKLENDİ: SEO için temel title */}
+        <title>Bookcy | Kıbrıs'ın #1 Güzellik Platformu</title>
+        <meta name="description" content="Yakınındaki en iyi berber, kuaför, spa ve güzellik uzmanlarını bul." />
+        
         <style dangerouslySetInnerHTML={{__html: `
           :root { --fig: #2D1B4E; --terra: #E8622A; --c-bg-main: #FAF7F2; --c-text-main: #2D1B4E; --c-nav-bg: rgba(255,255,255,0.98); }
           body { background: var(--c-bg-main); color: var(--c-text-main); font-family: 'DM Sans', sans-serif; overflow-x: hidden; margin: 0; padding: 0; }
           
+          /* YENİ: Dashboard menüsü için kaydırma çubuğunu görünmez (şık) yapma */
+          .scrollbar-hide::-webkit-scrollbar { display: none; }
+          .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
           /* NAVBAR ANA CSS KODLARI */
           nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 40px; height: 76px; display: flex; align-items: center; justify-content: space-between; background: var(--c-nav-bg); backdrop-filter: blur(20px); border-bottom: 1px solid #F1F5F9; transition: all 0.3s; }
           
@@ -50,7 +64,8 @@ export default function RootLayout({ children }) {
       <body>
         <AppProvider>
           <Navbar />
-          <main className="flex-1 w-full relative z-10 min-h-[80vh] mt-[76px]">
+          {/* DİNAMİK MARGIN: mainMarginClass buraya eklendi */}
+          <main className={`flex-1 w-full relative z-10 min-h-[80vh] ${mainMarginClass}`}>
             {children}
           </main>
           <Footer />
