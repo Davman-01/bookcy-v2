@@ -393,22 +393,23 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex text-[#2D1B4E] font-['DM Sans']">
+    <div className="min-h-screen bg-[#F8F9FA] flex text-[#2D1B4E] font-['DM Sans'] overflow-hidden">
       
       {mobileMenuOpen && ( 
         <div className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div> 
       )}
 
-      <aside className={`fixed md:sticky top-0 left-0 h-screen bg-[#2D1B4E] text-white flex flex-col shrink-0 shadow-2xl z-40 transition-transform duration-300 w-64 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      {/* DÜZELTİLEN KISIM: Sol Menü (Sidebar) Flex ayarlarına min-w ve w eklendi */}
+      <aside className={`fixed md:relative top-0 left-0 h-screen bg-[#2D1B4E] text-white flex flex-col shadow-2xl z-40 transition-transform duration-300 w-64 min-w-[256px] shrink-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         
-        <div className="p-8 flex items-center justify-between border-b border-white/10">
+        <div className="p-8 flex items-center justify-between border-b border-white/10 shrink-0">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 bg-[#E8622A] rounded-xl flex items-center justify-center font-black shadow-lg text-white overflow-hidden">
+             <div className="w-10 h-10 bg-[#E8622A] rounded-xl flex items-center justify-center font-black shadow-lg text-white overflow-hidden shrink-0">
                {shop.logo_url ? <img src={shop.logo_url} className="w-full h-full object-cover"/> : 'B'}
              </div>
-             <div>
-               <span className="font-black text-xl tracking-tighter truncate block w-32">{shop.name}</span>
-               <span className="text-[10px] font-bold text-[#F5C5A3] uppercase tracking-widest">
+             <div className="overflow-hidden">
+               <span className="font-black text-xl tracking-tighter truncate block w-full">{shop.name}</span>
+               <span className="text-[10px] font-bold text-[#F5C5A3] uppercase tracking-widest block truncate">
                  {userRole === 'owner' ? 'YÖNETİCİ' : `UZMAN: ${loggedStaffName}`}
                </span>
              </div>
@@ -418,40 +419,42 @@ export default function Dashboard() {
           </button>
         </div>
         
-        <nav className="flex-1 p-4 space-y-1 mt-2 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 p-4 space-y-1 mt-2 overflow-y-auto flex flex-col scrollbar-hide">
           {menuItems.map(tab => (
              <button 
                 key={tab.id} 
                 onClick={() => {setActiveTab(tab.id); setMobileMenuOpen(false);}} 
-                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm transition-all border-none cursor-pointer text-left ${activeTab === tab.id ? 'bg-[#E8622A] text-white shadow-md' : 'bg-transparent text-slate-400 hover:text-white hover:bg-white/5'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm transition-all border-none cursor-pointer text-left shrink-0 ${activeTab === tab.id ? 'bg-[#E8622A] text-white shadow-md' : 'bg-transparent text-slate-400 hover:text-white hover:bg-white/5'}`}
              >
-               {tab.icon} {tab.label}
+               <span className="shrink-0">{tab.icon}</span> 
+               <span className="truncate">{tab.label}</span>
              </button>
           ))}
         </nav>
 
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-white/10 shrink-0">
           <button onClick={handleLogout} className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-xl font-bold text-xs text-white uppercase tracking-widest bg-red-500/10 hover:bg-red-500 transition-all border-none cursor-pointer">
             <LogOut size={16}/> Çıkış Yap
           </button>
         </div>
       </aside>
 
-      <main className="flex-1 overflow-x-hidden w-full relative">
-        <header className="bg-white border-b border-slate-200 px-4 md:px-10 py-5 flex justify-between items-center sticky top-0 z-20 shadow-sm gap-4">
-          <div className="flex items-center gap-4">
-            <button className="md:hidden text-[#2D1B4E] bg-slate-100 p-2 rounded-lg border-none cursor-pointer hover:bg-slate-200 transition-colors" onClick={() => setMobileMenuOpen(true)}>
+      {/* DÜZELTİLEN KISIM: Sağ tarafın (Main) yüksekliği sınırlandırıldı, scroll buraya verildi */}
+      <main className="flex-1 h-screen overflow-y-auto w-full relative bg-[#F8F9FA]">
+        <header className="bg-white border-b border-slate-200 px-4 md:px-10 py-5 flex justify-between items-center sticky top-0 z-20 shadow-sm gap-4 shrink-0">
+          <div className="flex items-center gap-4 overflow-hidden">
+            <button className="md:hidden text-[#2D1B4E] bg-slate-100 p-2 rounded-lg border-none cursor-pointer hover:bg-slate-200 transition-colors shrink-0" onClick={() => setMobileMenuOpen(true)}>
               <Menu size={24} />
             </button>
-            <div className="flex flex-col">
-              <h1 className="text-xl font-black uppercase tracking-tight">{shop.name}</h1>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+            <div className="flex flex-col overflow-hidden">
+              <h1 className="text-xl font-black uppercase tracking-tight truncate">{shop.name}</h1>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate">
                 {userRole === 'owner' ? 'Yönetici Paneli' : 'Personel Ekranı'}
               </p>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 shrink-0">
             {userRole === 'owner' && (
               <div className="relative">
                 <button onClick={() => setShowNotifications(!showNotifications)} className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-500 hover:text-[#E8622A] transition-colors border-none cursor-pointer relative">
@@ -486,7 +489,7 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <div className="p-4 md:p-10 max-w-[1400px] mx-auto overflow-x-hidden">
+        <div className="p-4 md:p-10 max-w-[1400px] mx-auto w-full">
           
           {/* TAB 1: ÖZET PANEL */}
           {userRole === 'owner' && activeTab === 'overview' && (
@@ -788,7 +791,7 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
-                            <div className="flex flex-col gap-4 overflow-y-auto max-h-[400px] custom-scrollbar pr-2">
+                            <div className="flex flex-col gap-4 overflow-y-auto max-h-[400px] scrollbar-hide pr-2">
                                 {eventsForm.map((ev) => (
                                     <div key={ev.id} className="flex gap-4 p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
                                         <div className="w-20 h-20 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200 overflow-hidden">
@@ -828,7 +831,7 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
-                            <div className="mt-4 flex flex-col gap-3 relative z-10 overflow-y-auto max-h-[300px] custom-scrollbar pr-2">
+                            <div className="mt-4 flex flex-col gap-3 relative z-10 overflow-y-auto max-h-[300px] scrollbar-hide pr-2">
                                 {servicesForm.map((srv, idx) => (
                                     <div key={idx} className="flex justify-between items-center p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
                                         <div>
@@ -966,69 +969,71 @@ export default function Dashboard() {
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                   <h2 className="text-2xl font-black uppercase tracking-tight mb-8">Müşteri Portföyü & Tüm İşlemler</h2>
                   <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden w-full">
-                      <table className="w-full text-left">
-                        <thead className="bg-slate-50">
-                          <tr className="text-[10px] font-black uppercase text-slate-400">
-                            <th className="px-8 py-5">Müşteri Bilgisi</th>
-                            <th className="px-8 py-5">Tarih & Saat</th>
-                            <th className="px-8 py-5">Hizmet / İşlem</th>
-                            <th className="px-8 py-5 text-center">İşlem Durumu</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                            {appointments.map((appt) => (
-                                <tr key={appt.id} className="border-t border-slate-50 hover:bg-slate-50 transition-colors">
-                                  <td className="px-8 py-5">
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center font-bold text-[#2D1B4E] text-sm shrink-0">
-                                        {appt.customer_name[0]}
+                      <div className="overflow-x-auto w-full">
+                        <table className="w-full text-left border-collapse">
+                          <thead className="bg-slate-50">
+                            <tr className="text-[10px] font-black uppercase text-slate-400">
+                              <th className="px-8 py-5 border-b border-slate-100">Müşteri Bilgisi</th>
+                              <th className="px-8 py-5 border-b border-slate-100">Tarih & Saat</th>
+                              <th className="px-8 py-5 border-b border-slate-100">Hizmet / İşlem</th>
+                              <th className="px-8 py-5 border-b border-slate-100 text-center">İşlem Durumu</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                              {appointments.map((appt) => (
+                                  <tr key={appt.id} className="border-t border-slate-50 hover:bg-slate-50 transition-colors">
+                                    <td className="px-8 py-5">
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center font-bold text-[#2D1B4E] text-sm shrink-0">
+                                          {appt.customer_name[0]}
+                                        </div>
+                                        <div>
+                                          <span className="font-bold text-sm uppercase block">{appt.customer_name} {appt.customer_surname}</span>
+                                          <span className="text-xs text-slate-500 font-bold">{appt.customer_phone}</span>
+                                        </div>
                                       </div>
-                                      <div>
-                                        <span className="font-bold text-sm uppercase block">{appt.customer_name} {appt.customer_surname}</span>
-                                        <span className="text-xs text-slate-500 font-bold">{appt.customer_phone}</span>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-8 py-5">
-                                    <span className="font-bold text-sm text-[#2D1B4E] block">{appt.appointment_date}</span>
-                                    <span className="text-xs text-[#E8622A] font-black">{appt.appointment_time}</span>
-                                  </td>
-                                  <td className="px-8 py-5">
-                                    <span className="font-bold text-sm text-slate-700 block">{appt.service_name}</span>
-                                    {!isClub && <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{appt.staff_name}</span>}
-                                  </td>
-                                  <td className="px-8 py-5 text-center">
-                                    {appt.status === 'İptal' ? (
-                                      <span className="bg-red-100 text-red-600 text-[10px] font-black px-4 py-2 rounded-xl uppercase inline-flex items-center justify-center gap-1 w-fit">
-                                        <XCircle size={14}/> İptal
-                                      </span>
-                                    ) : appt.status === 'Tamamlandı' ? (
-                                      <span className="bg-green-100 text-green-600 text-[10px] font-black px-4 py-2 rounded-xl uppercase inline-flex items-center justify-center gap-1 w-fit">
-                                        <Check size={14}/> Tamamlandı
-                                      </span>
-                                    ) : (
-                                      <div className="flex items-center justify-center gap-2">
-                                        <button onClick={() => updateApptStatus(appt.id, 'Tamamlandı')} className="bg-green-50 text-green-600 hover:bg-green-500 hover:text-white p-2 rounded-lg border border-green-200 transition-colors cursor-pointer" title="Tamamlandı İşaretle">
-                                          <Check size={16}/>
-                                        </button>
-                                        <button onClick={() => updateApptStatus(appt.id, 'İptal')} className="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white p-2 rounded-lg border border-red-200 transition-colors cursor-pointer" title="Randevuyu İptal Et">
-                                          <XCircle size={16}/>
-                                        </button>
-                                      </div>
-                                    )}
-                                    <button onClick={() => deleteAppointmentCompletely(appt.id)} className="ml-2 bg-transparent text-slate-300 hover:text-red-500 p-2 rounded-lg border-none cursor-pointer transition-colors" title="Kalıcı Olarak Sil">
-                                      <Trash2 size={16}/>
-                                    </button>
-                                  </td>
+                                    </td>
+                                    <td className="px-8 py-5">
+                                      <span className="font-bold text-sm text-[#2D1B4E] block">{appt.appointment_date}</span>
+                                      <span className="text-xs text-[#E8622A] font-black">{appt.appointment_time}</span>
+                                    </td>
+                                    <td className="px-8 py-5">
+                                      <span className="font-bold text-sm text-slate-700 block">{appt.service_name}</span>
+                                      {!isClub && <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{appt.staff_name}</span>}
+                                    </td>
+                                    <td className="px-8 py-5 text-center">
+                                      {appt.status === 'İptal' ? (
+                                        <span className="bg-red-100 text-red-600 text-[10px] font-black px-4 py-2 rounded-xl uppercase inline-flex items-center justify-center gap-1 w-fit">
+                                          <XCircle size={14}/> İptal
+                                        </span>
+                                      ) : appt.status === 'Tamamlandı' ? (
+                                        <span className="bg-green-100 text-green-600 text-[10px] font-black px-4 py-2 rounded-xl uppercase inline-flex items-center justify-center gap-1 w-fit">
+                                          <Check size={14}/> Tamamlandı
+                                        </span>
+                                      ) : (
+                                        <div className="flex items-center justify-center gap-2">
+                                          <button onClick={() => updateApptStatus(appt.id, 'Tamamlandı')} className="bg-green-50 text-green-600 hover:bg-green-500 hover:text-white p-2 rounded-lg border border-green-200 transition-colors cursor-pointer" title="Tamamlandı İşaretle">
+                                            <Check size={16}/>
+                                          </button>
+                                          <button onClick={() => updateApptStatus(appt.id, 'İptal')} className="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white p-2 rounded-lg border border-red-200 transition-colors cursor-pointer" title="Randevuyu İptal Et">
+                                            <XCircle size={16}/>
+                                          </button>
+                                        </div>
+                                      )}
+                                      <button onClick={() => deleteAppointmentCompletely(appt.id)} className="ml-2 bg-transparent text-slate-300 hover:text-red-500 p-2 rounded-lg border-none cursor-pointer transition-colors" title="Kalıcı Olarak Sil">
+                                        <Trash2 size={16}/>
+                                      </button>
+                                    </td>
+                                  </tr>
+                              ))}
+                              {appointments.length === 0 && (
+                                <tr>
+                                  <td colSpan="4" className="text-center p-10 text-slate-400 font-bold uppercase tracking-widest">Henüz hiç işlem yok.</td>
                                 </tr>
-                            ))}
-                            {appointments.length === 0 && (
-                              <tr>
-                                <td colSpan="4" className="text-center p-10 text-slate-400 font-bold uppercase tracking-widest">Henüz hiç işlem yok.</td>
-                              </tr>
-                            )}
-                        </tbody>
-                      </table>
+                              )}
+                          </tbody>
+                        </table>
+                      </div>
                   </div>
               </div>
           )}

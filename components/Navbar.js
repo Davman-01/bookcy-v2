@@ -13,6 +13,11 @@ export default function Navbar() {
   const pathname = usePathname();
   const { lang = 'TR', setLang, t, shops = [], loggedInShop, handleLogout } = useAppContext();
   
+  // EKLENEN KISIM: Panel ve Admin sayfalarında Navbar'ı gizle
+  if (pathname && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/panel'))) {
+    return null;
+  }
+
   const [showFeaturesMenu, setShowFeaturesMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showRegister, setShowRegister] = useState(false);

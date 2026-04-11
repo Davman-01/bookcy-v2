@@ -5,6 +5,8 @@ import { Info, MessageCircle, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAppContext } from '@/app/providers';
 import { cyprusRegions } from '@/lib/constants';
+// EKLENEN KISIM: Sayfa yolunu öğrenmek için
+import { usePathname } from 'next/navigation';
 
 // Özel Instagram İkonu
 const InstagramIcon = ({ size = 24 }) => (
@@ -19,6 +21,7 @@ const FacebookIcon = ({ size = 24 }) => (
 export default function Footer() {
   const { lang, t } = useAppContext();
   const [cookieConsent, setCookieConsent] = useState(true);
+  const pathname = usePathname(); // EKLENEN KISIM: Yolu tanımla
 
   useEffect(() => {
     if (!localStorage.getItem('bookcy_cookie_consent')) setCookieConsent(false);
@@ -28,6 +31,11 @@ export default function Footer() {
     localStorage.setItem('bookcy_cookie_consent', 'true');
     setCookieConsent(true);
   };
+
+  // EKLENEN KISIM: Panel ve Admin sayfalarında Footer'ı gizle
+  if (pathname && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/panel'))) {
+    return null;
+  }
 
   const text = t?.[lang] || t?.['TR'];
   if (!text) return null;
