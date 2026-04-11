@@ -8,7 +8,7 @@ import {
   MessageCircle, Mail, UploadCloud, Loader2, Bell, CalendarOff, Check, UserMinus, BarChart, Filter, Shield, Music, Ticket, CalendarHeart
 } from 'lucide-react';
 
-// VERCEL'İ KANDIRAN SAHTE VERİTABANI BAĞLANTISI (lib/supabase.js bulunamadı hatasını engeller)
+// VERCEL'İ KANDIRAN SAHTE VERİTABANI BAĞLANTISI
 const supabase = {
   from: () => ({
     select: () => ({ eq: () => ({ order: () => ({ data: [] }), single: () => ({ data: {} }) }), order: () => ({ data: [] }), single: () => ({ data: {} }) }),
@@ -24,7 +24,6 @@ const supabase = {
   }
 };
 
-// MANUEL EKLENEN İKONLAR (Vercel patlamasın diye)
 const InstagramIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
 );
@@ -32,7 +31,6 @@ const FacebookIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
 );
 
-// === GECE SAATLERİ DAHİL TÜM SLOTLAR ===
 const allTimeSlots = [
   "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", 
   "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", 
@@ -41,7 +39,6 @@ const allTimeSlots = [
   "00:00", "00:30", "01:00", "01:30", "02:00"
 ];
 
-// === SADECE ETKİNLİKLER İÇİN TAM 24 SAAT LİSTESİ ===
 const eventTimeSlots = Array.from({length: 48}, (_, i) => {
   const h = Math.floor(i / 2).toString().padStart(2, '0');
   const m = i % 2 === 0 ? '00' : '30';
@@ -61,11 +58,9 @@ const defaultWorkingHours = [
 export default function Dashboard() {
   const router = useRouter();
   
-  // ROL VE KİMLİK YÖNETİMİ
   const [userRole, setUserRole] = useState('owner');
   const [loggedStaffName, setLoggedStaffName] = useState('');
 
-  // TEMEL STATELER
   const [shop, setShop] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -79,16 +74,10 @@ export default function Dashboard() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [calendarStaffFilter, setCalendarStaffFilter] = useState('Tümü');
 
-  // FORM STATELERİ
   const [profileForm, setProfileForm] = useState({ 
-    logo_url: '', 
-    description: '', 
-    contact_phone: '', 
-    contact_email: '', 
-    working_hours: defaultWorkingHours, 
-    gallery: [], 
-    socials: { instagram: '', facebook: '', whatsapp: '' }, 
-    closed_dates: []
+    logo_url: '', description: '', contact_phone: '', contact_email: '', 
+    working_hours: defaultWorkingHours, gallery: [], 
+    socials: { instagram: '', facebook: '', whatsapp: '' }, closed_dates: []
   });
   
   const [servicesForm, setServicesForm] = useState([]);
@@ -100,16 +89,10 @@ export default function Dashboard() {
   const [newClosedDate, setNewClosedDate] = useState(''); 
 
   const [quickForm, setQuickForm] = useState({ 
-    customer_name: '', 
-    customer_surname: '', 
-    customer_phone: '', 
-    service_name: '', 
-    appointment_date: new Date().toISOString().split('T')[0], 
-    appointment_time: '10:00', 
-    staff_name: '' 
+    customer_name: '', customer_surname: '', customer_phone: '', service_name: '', 
+    appointment_date: new Date().toISOString().split('T')[0], appointment_time: '10:00', staff_name: '' 
   });
 
-  // UYGULAMA BAŞLANGICI VE HATA YAKALAYICI
   useEffect(() => {
     const initSession = async () => {
       const session = localStorage.getItem('bookcy_biz_session');
@@ -142,7 +125,6 @@ export default function Dashboard() {
   async function fetchDashboardData(shopId) {
     setLoading(true);
     try {
-      // Sahte veritabanı olduğu için şimdilik local storage'daki veriyi alıp kullanıyoruz
       const session = JSON.parse(localStorage.getItem('bookcy_biz_session'));
       const freshShop = session.shopData || session;
 
@@ -151,12 +133,9 @@ export default function Dashboard() {
         let parsedHours = Array.isArray(freshShop.working_hours) ? freshShop.working_hours : defaultWorkingHours;
         
         setProfileForm({ 
-          logo_url: freshShop.logo_url || '', 
-          description: freshShop.description || '', 
-          contact_phone: freshShop.contact_phone || '', 
-          contact_email: freshShop.contact_email || '', 
-          working_hours: parsedHours, 
-          gallery: freshShop.gallery || [], 
+          logo_url: freshShop.logo_url || '', description: freshShop.description || '', 
+          contact_phone: freshShop.contact_phone || '', contact_email: freshShop.contact_email || '', 
+          working_hours: parsedHours, gallery: freshShop.gallery || [], 
           socials: freshShop.socials || { instagram: '', facebook: '', whatsapp: '' }, 
           closed_dates: freshShop.closed_dates || []
         });
@@ -180,9 +159,7 @@ export default function Dashboard() {
     router.push('/');
   };
 
-  const saveProfile = async () => {
-    alert("Vitrin bilgileriniz başarıyla güncellendi!"); 
-  };
+  const saveProfile = async () => { alert("Vitrin bilgileriniz başarıyla güncellendi!"); };
 
   const addClosedDate = () => {
     if (!newClosedDate || profileForm.closed_dates.includes(newClosedDate)) return;
@@ -190,24 +167,16 @@ export default function Dashboard() {
     setNewClosedDate('');
   };
 
-  const removeClosedDate = (date) => { 
-    setProfileForm({ ...profileForm, closed_dates: profileForm.closed_dates.filter(d => d !== date) }); 
-  };
+  const removeClosedDate = (date) => { setProfileForm({ ...profileForm, closed_dates: profileForm.closed_dates.filter(d => d !== date) }); };
 
   const uploadImage = async (event, type) => {
     const file = event.target.files[0];
     if (!file) return;
     setIsUploading(true);
-    // Sahte yükleme simülasyonu
-    setTimeout(() => {
-        setIsUploading(false);
-        alert("Fotoğraf yüklendi.");
-    }, 1000);
+    setTimeout(() => { setIsUploading(false); alert("Fotoğraf yüklendi."); }, 1000);
   };
 
-  const removeGalleryImage = (index) => { 
-    setProfileForm({ ...profileForm, gallery: profileForm.gallery.filter((_, i) => i !== index) }); 
-  };
+  const removeGalleryImage = (index) => { setProfileForm({ ...profileForm, gallery: profileForm.gallery.filter((_, i) => i !== index) }); };
 
   const updateWorkingHour = (index, field, value) => { 
     const newHours = [...profileForm.working_hours]; 
@@ -215,82 +184,44 @@ export default function Dashboard() {
     setProfileForm({ ...profileForm, working_hours: newHours }); 
   };
 
-  const updateSocial = (network, value) => { 
-    setProfileForm({ ...profileForm, socials: { ...profileForm.socials, [network]: value } }); 
-  };
+  const updateSocial = (network, value) => { setProfileForm({ ...profileForm, socials: { ...profileForm.socials, [network]: value } }); };
 
-  // === ETKİNLİK EKLEME FONKSİYONLARI ===
   const addEvent = async () => {
     if (!newEvent.name || !newEvent.date || !newEvent.time) return alert("Etkinlik adı, tarihi ve saati zorunludur!");
-    const eventObj = { 
-      id: Date.now(), 
-      name: newEvent.name, 
-      date: newEvent.date, 
-      time: newEvent.time, 
-      description: newEvent.description, 
-      image_url: '' 
-    };
-    
-    const updatedEvents = [...eventsForm, eventObj];
-    setEventsForm(updatedEvents);
+    const eventObj = { id: Date.now(), name: newEvent.name, date: newEvent.date, time: newEvent.time, description: newEvent.description, image_url: '' };
+    setEventsForm([...eventsForm, eventObj]);
     setNewEvent({ name: '', date: '', time: '22:00', description: '', imageFile: null });
   };
 
-  const deleteEvent = async (id) => {
-    const updatedEvents = eventsForm.filter(e => e.id !== id);
-    setEventsForm(updatedEvents);
-  };
+  const deleteEvent = async (id) => { setEventsForm(eventsForm.filter(e => e.id !== id)); };
 
-  // === HİZMET / LOCA EKLEME FONKSİYONU ===
   const addService = async () => {
     if (!newService.name) return alert("Lütfen bir ad giriniz.");
     const isClub = shop?.category === 'Bar & Club';
-    
-    // Eğer kulüp ise süreyi otomatik 0 yap (Gece boyu) ve fiyat boşsa 0 yap
     const finalPrice = newService.price === '' || newService.price === undefined ? '0' : newService.price;
     const finalCapacity = isClub && newService.capacity ? newService.capacity.toString() : '1';
 
-    const finalService = { 
-      ...newService, 
-      price: finalPrice,
-      duration: isClub ? '0' : newService.duration,
-      capacity: finalCapacity
-    };
-    
-    const updatedServices = [...servicesForm, finalService];
-    setServicesForm(updatedServices); 
+    const finalService = { ...newService, price: finalPrice, duration: isClub ? '0' : newService.duration, capacity: finalCapacity };
+    setServicesForm([...servicesForm, finalService]); 
     setNewService({ name: '', price: '', duration: '30', capacity: '10' });
   };
 
-  const deleteService = async (index) => {
-    const updatedServices = servicesForm.filter((_, i) => i !== index);
-    setServicesForm(updatedServices);
-  };
+  const deleteService = async (index) => { setServicesForm(servicesForm.filter((_, i) => i !== index)); };
 
   const addStaff = async () => {
     if (!newStaff.name || !newStaff.password) return alert("Personel adı ve giriş şifresi zorunludur!");
-    const updatedStaff = [...staffForm, newStaff];
-    setStaffForm(updatedStaff); 
+    setStaffForm([...staffForm, newStaff]); 
     setNewStaff({ name: '', role: '', password: '' }); 
   };
 
-  const deleteStaff = async (index) => {
-    const updatedStaff = staffForm.filter((_, i) => i !== index);
-    setStaffForm(updatedStaff);
-  };
+  const deleteStaff = async (index) => { setStaffForm(staffForm.filter((_, i) => i !== index)); };
 
-  const updateApptStatus = async (id, newStatus) => {
-    alert(`İşlem ${newStatus} olarak işaretlendi!`);
-  };
+  const updateApptStatus = async (id, newStatus) => { alert(`İşlem ${newStatus} olarak işaretlendi!`); };
 
   const deleteAppointmentCompletely = async (id) => {
-    const isConfirmed = window.confirm("Bu kaydı tamamen SİLMEK istediğinize emin misiniz?");
-    if(isConfirmed) {
-        alert("Kayıt kalıcı olarak silindi!");
-    }
+    if(window.confirm("Bu kaydı tamamen SİLMEK istediğinize emin misiniz?")) alert("Kayıt kalıcı olarak silindi!");
   };
 
-  // === BUKALEMUN MODU (CLUB KONTROLÜ) ===
   const isClub = shop?.category === 'Bar & Club';
 
   const calculateOccupiedSlots = (startTime, durationStr) => {
@@ -304,16 +235,7 @@ export default function Dashboard() {
 
   const handleQuickAdd = async (e) => {
     e.preventDefault();
-    if (profileForm.closed_dates.includes(quickForm.appointment_date)) {
-      return alert("Seçtiğiniz tarih kapalı!");
-    }
-    
-    const selectedService = servicesForm.find(s => s.name === quickForm.service_name);
-    const slotsToOccupy = isClub ? [] : calculateOccupiedSlots(quickForm.appointment_time, selectedService ? selectedService.duration : '30');
-    
-    // Club ise personeli direkt Rezervasyon olarak ata
-    const finalStaffName = isClub ? 'Rezervasyon' : (quickForm.staff_name || (staffForm[0]?.name || 'Genel'));
-
+    if (profileForm.closed_dates.includes(quickForm.appointment_date)) return alert("Seçtiğiniz tarih kapalı!");
     alert(isClub ? "Rezervasyon eklendi!" : "Randevu eklendi!"); 
     setShowQuickAdd(false); 
   };
@@ -352,10 +274,8 @@ export default function Dashboard() {
   });
 
   const recentNotifications = appointments.slice(0, 3).map(a => ({ 
-    id: a.id, 
-    title: isClub ? 'Yeni Rezervasyon!' : 'Yeni İşlem Geldi!', 
-    desc: `${a.customer_name} ${a.appointment_date} için ${a.service_name} oluşturdu.`, 
-    time: 'Az önce' 
+    id: a.id, title: isClub ? 'Yeni Rezervasyon!' : 'Yeni İşlem Geldi!', 
+    desc: `${a.customer_name} ${a.appointment_date} için ${a.service_name} oluşturdu.`, time: 'Az önce' 
   }));
 
   const menuItems = userRole === 'owner' 
@@ -399,7 +319,6 @@ export default function Dashboard() {
         <div className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div> 
       )}
 
-      {/* DÜZELTİLEN KISIM: Sol Menü (Sidebar) Flex ayarlarına min-w ve w eklendi */}
       <aside className={`fixed md:relative top-0 left-0 h-screen bg-[#2D1B4E] text-white flex flex-col shadow-2xl z-40 transition-transform duration-300 w-64 min-w-[256px] shrink-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         
         <div className="p-8 flex items-center justify-between border-b border-white/10 shrink-0">
@@ -419,7 +338,8 @@ export default function Dashboard() {
           </button>
         </div>
         
-        <nav className="flex-1 p-4 space-y-1 mt-2 overflow-y-auto flex flex-col scrollbar-hide">
+        {/* DÜZELTİLEN KISIM: <nav> yerine <div> kullanıldı! CSS Çakışması önlendi. */}
+        <div className="flex-1 p-4 space-y-1 mt-2 overflow-y-auto flex flex-col scrollbar-hide">
           {menuItems.map(tab => (
              <button 
                 key={tab.id} 
@@ -430,7 +350,7 @@ export default function Dashboard() {
                <span className="truncate">{tab.label}</span>
              </button>
           ))}
-        </nav>
+        </div>
 
         <div className="p-4 border-t border-white/10 shrink-0">
           <button onClick={handleLogout} className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-xl font-bold text-xs text-white uppercase tracking-widest bg-red-500/10 hover:bg-red-500 transition-all border-none cursor-pointer">
@@ -439,7 +359,6 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* DÜZELTİLEN KISIM: Sağ tarafın (Main) yüksekliği sınırlandırıldı, scroll buraya verildi */}
       <main className="flex-1 h-screen overflow-y-auto w-full relative bg-[#F8F9FA]">
         <header className="bg-white border-b border-slate-200 px-4 md:px-10 py-5 flex justify-between items-center sticky top-0 z-20 shadow-sm gap-4 shrink-0">
           <div className="flex items-center gap-4 overflow-hidden">
@@ -649,7 +568,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* TAB 2: TAKVİM YÖNETİMİ (TAKİP VE İPTAL) */}
+          {/* TAB 2: TAKVİM YÖNETİMİ */}
           {activeTab === 'calendar' && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -695,7 +614,6 @@ export default function Dashboard() {
                                 const dayName = new Date(selectedDate).toLocaleDateString('tr-TR', { weekday: 'long' });
                                 const todayHours = profileForm.working_hours.find(h => h.day === dayName);
                                 
-                                // Gece kulüpleri için tüm saatler açık kalır
                                 const isWithinWorkingHours = isClub || (todayHours && !todayHours.isClosed && slot >= todayHours.open && slot < todayHours.close);
                                 
                                 if (!isWithinWorkingHours && slotAppts.length === 0) return null;
@@ -723,7 +641,6 @@ export default function Dashboard() {
                                             </div>
                                             
                                             <div className="flex items-center gap-3 w-full md:w-auto">
-                                              {/* İPTAL VE TAMAMLA BUTONLARI */}
                                               {(!a.status || a.status === 'Bekliyor') ? (
                                                 <>
                                                   <button onClick={() => updateApptStatus(a.id, 'İptal')} className="bg-red-50 hover:bg-red-100 text-red-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-200 cursor-pointer flex items-center gap-1 transition-colors">
@@ -758,9 +675,7 @@ export default function Dashboard() {
           {userRole === 'owner' && activeTab === 'services' && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                 {isClub ? (
-                    // ====== BAR & CLUB TASARIMI ======
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                        {/* SOL: ETKİNLİKLER */}
                         <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 p-8 flex flex-col gap-6">
                             <h3 className="font-black text-xl text-[#2D1B4E] flex items-center gap-2 border-b border-slate-100 pb-4">
                               <CalendarHeart size={24} className="text-[#E8622A]"/> Yaklaşan Etkinlikler
@@ -808,7 +723,6 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        {/* SAĞ: LOCA & BİSTRO FİYATLARI */}
                         <div className="bg-[#2D1B4E] rounded-[32px] shadow-sm border border-slate-200 p-8 flex flex-col gap-6 text-white h-fit relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-40 h-40 bg-[#E8622A]/20 rounded-bl-full blur-2xl pointer-events-none"></div>
                             <h3 className="font-black text-xl text-white flex items-center gap-2 border-b border-white/10 pb-4">
@@ -851,7 +765,6 @@ export default function Dashboard() {
                         </div>
                     </div>
                 ) : (
-                    // ====== NORMAL İŞLETME TASARIMI (BERBER VS) ======
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                       <div className="lg:col-span-2 bg-white rounded-[32px] shadow-sm border border-slate-200 p-8">
                         <h3 className="font-black text-lg mb-6 text-[#2D1B4E]">Menünüz</h3>
@@ -907,7 +820,7 @@ export default function Dashboard() {
               </div>
           )}
 
-          {/* TAB 4: PERSONEL (CLUB DEĞİLSE GÖRÜNÜR) */}
+          {/* TAB 4: PERSONEL */}
           {userRole === 'owner' && activeTab === 'staff' && !isClub && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                 <h2 className="text-2xl font-black uppercase tracking-tight mb-8">Personel Yönetimi</h2>
