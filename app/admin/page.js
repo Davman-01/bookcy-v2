@@ -32,43 +32,83 @@ const timeAgo = (dateString) => {
 
 export default function SuperAdmin() {
   const router = useRouter();
+  
+  // -- YENİ KİMLİK DOĞRULAMA STATELERİ --
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminEmail, setAdminEmail] = useState('');
   const [adminPass, setAdminPass] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
   
   const [shops, setShops] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [reviews, setReviews] = useState([]);
   
   const [activeTab, setActiveTab] = useState('overview');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Sayfa ilk açıldığında loading ile başlasın
   const [searchQuery, setSearchQuery] = useState('');
   const [customerSearch, setCustomerSearch] = useState('');
 
   const [isSendingMail, setIsSendingMail] = useState(false);
   const [showPasswords, setShowPasswords] = useState({});
 
+  // 1. UYGULAMA AÇILDIĞINDA OTURUM KONTROLÜ
   useEffect(() => {
-    const session = localStorage.getItem('bookcy_superadmin');
-    if (session === 'true') {
-      setIsAuthenticated(true);
-      fetchData();
-    }
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Eğer sistemde senin mailinle bir oturum açıksa içeri al
+      if (session && session.user.email === 'dogukandavman01@gmail.com') {
+        setIsAuthenticated(true);
+        fetchData(); // Sadece yetkiliyse verileri çek
+      } else {
+        setIsAuthenticated(false);
+        setLoading(false); // Yetkisizse login ekranını göster
+      }
+    };
+    
+    checkSession();
   }, []);
 
-  const handleLogin = (e) => {
+  // 2. SUPABASE İLE ASKERİ DÜZEY GİRİŞ SİSTEMİ
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (adminPass === 'admin2026') {
-      setIsAuthenticated(true);
-      localStorage.setItem('bookcy_superadmin', 'true');
-      fetchData();
-    } else {
-      alert("Hatalı Şifre! Yetkisiz Erişim.");
+    setLoginLoading(true);
+
+    try {
+      // Sadece admin maili ile girişe izin ver
+      if (adminEmail !== 'dogukandavman01@gmail.com') {
+        alert("Yetkisiz Kullanıcı! Sadece sistem yöneticisi giriş yapabilir.");
+        setLoginLoading(false);
+        return;
+      }
+
+      // Supabase'e giriş isteği at
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: adminEmail,
+        password: adminPass,
+      });
+
+      if (error) {
+        alert("Giriş Başarısız: Şifre veya E-posta hatalı.");
+      } else if (data.session) {
+        setIsAuthenticated(true);
+        fetchData(); // Giriş başarılıysa verileri çek
+      }
+    } catch (err) {
+      alert("Sistemsel bir hata oluştu.");
+    } finally {
+      setLoginLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('bookcy_superadmin');
+  // 3. GÜVENLİ ÇIKIŞ İŞLEMİ
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setIsAuthenticated(false);
+    // Verileri temizle ki arkada kalmasın
+    setShops([]);
+    setAppointments([]);
+    setReviews([]);
     router.push('/');
   };
 
@@ -91,6 +131,7 @@ export default function SuperAdmin() {
     }
   }
 
+  // İşletme Onaylama
   const approveShop = async (shop) => {
     const isConfirmed = window.confirm(`${shop.name} işletmesini ONAYLAMAK istediğinize emin misiniz?`);
     if (!isConfirmed) return;
@@ -117,17 +158,18 @@ export default function SuperAdmin() {
       alert("İşletme Başarıyla Onaylandı!");
       fetchData();
     } else {
-      alert("Kritik Hata: " + error.message);
+      alert("Kritik Hata (Silme İzini Yoksa RLS Ayarlarını Kontrol Edin): " + error.message);
     }
     setLoading(false);
   };
 
+  // İşletme Silme
   const deleteShop = async (id) => {
     const isConfirmed = window.confirm("DİKKAT: Bu işletmeyi sistemden TAMAMEN SİLMEK istediğinize emin misiniz?");
     if (isConfirmed) {
       const { error } = await supabase.from('shops').delete().eq('id', id);
       if (!error) { alert("İşletme kalıcı olarak silindi."); fetchData(); } 
-      else { alert("Silme hatası: " + error.message); }
+      else { alert("Silme hatası (Yetki Hatası Olabilir): " + error.message); }
     }
   };
 
@@ -202,11 +244,7 @@ export default function SuperAdmin() {
 
   const totalRevs = reviews.length;
   const avgTotal = totalRevs > 0 ? (reviews.reduce((a, b) => a + Number(b.average_score || 0), 0) / totalRevs).toFixed(1) : 0;
-  const avgQ1 = totalRevs > 0 ? (reviews.reduce((a, b) => a + Number(b.q1 || 0), 0) / totalRevs).toFixed(1) : 0;
-  const avgQ2 = totalRevs > 0 ? (reviews.reduce((a, b) => a + Number(b.q2 || 0), 0) / totalRevs).toFixed(1) : 0;
-  const avgQ3 = totalRevs > 0 ? (reviews.reduce((a, b) => a + Number(b.q3 || 0), 0) / totalRevs).toFixed(1) : 0;
-  const avgQ4 = totalRevs > 0 ? (reviews.reduce((a, b) => a + Number(b.q4 || 0), 0) / totalRevs).toFixed(1) : 0;
-
+  
   const categoryStats = {};
   appointments.forEach(app => {
     const shop = shops.find(s => s.id === app.shop_id);
@@ -223,21 +261,45 @@ export default function SuperAdmin() {
     return { end: end.toLocaleDateString('tr-TR'), remaining: diff };
   };
 
+  // 4. YENİ GÜVENLİ GİRİŞ EKRANI ARAYÜZÜ
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#0B0710] flex flex-col items-center justify-center p-4">
         <div className="bg-[#150D1E] w-full max-w-[400px] rounded-[32px] p-10 relative shadow-2xl border border-[#382252] text-center">
           <ShieldCheck size={48} className="mx-auto text-[#E8622A] mb-6" />
-          <h1 className="text-2xl font-black text-white uppercase tracking-tight mb-8">SUPER ADMIN</h1>
+          <h1 className="text-2xl font-black text-white uppercase tracking-tight mb-2">SİSTEM YÖNETİMİ</h1>
+          <p className="text-slate-400 text-sm mb-8">Devam etmek için yetkili hesapla giriş yapın.</p>
           <form onSubmit={handleLogin} className="space-y-4">
-            <input type="password" required placeholder="Şifre" className="w-full bg-[#1D122A] border border-[#382252] rounded-2xl py-4 px-6 text-white outline-none focus:border-[#E8622A]" value={adminPass} onChange={(e) => setAdminPass(e.target.value)} />
-            <button type="submit" className="w-full bg-[#E8622A] text-white py-4 rounded-2xl font-black uppercase border-none cursor-pointer">Sistemi Aç</button>
+            <input 
+              type="email" 
+              required 
+              placeholder="Yönetici E-Posta" 
+              className="w-full bg-[#1D122A] border border-[#382252] rounded-2xl py-4 px-6 text-white outline-none focus:border-[#E8622A]" 
+              value={adminEmail} 
+              onChange={(e) => setAdminEmail(e.target.value)} 
+            />
+            <input 
+              type="password" 
+              required 
+              placeholder="Sistem Şifresi" 
+              className="w-full bg-[#1D122A] border border-[#382252] rounded-2xl py-4 px-6 text-white outline-none focus:border-[#E8622A]" 
+              value={adminPass} 
+              onChange={(e) => setAdminPass(e.target.value)} 
+            />
+            <button 
+              type="submit" 
+              disabled={loginLoading}
+              className={`w-full text-white py-4 rounded-2xl font-black uppercase border-none cursor-pointer transition-all ${loginLoading ? 'bg-slate-600' : 'bg-[#E8622A] hover:bg-[#d5521b]'}`}
+            >
+              {loginLoading ? 'DOĞRULANIYOR...' : 'SİSTEMİ AÇ'}
+            </button>
           </form>
         </div>
       </div>
     );
   }
 
+  // --- AŞAĞISI STANDART ADMİN PANELİ (DEĞİŞİKLİK YOK) ---
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex text-[#2D1B4E] font-['DM_Sans']">
       <aside className="w-64 bg-[#2D1B4E] text-white h-screen sticky top-0 flex flex-col shrink-0 shadow-2xl z-40 hidden md:flex">
@@ -247,18 +309,18 @@ export default function SuperAdmin() {
         <div className="flex-1 p-4 space-y-2 mt-4">
           <button onClick={() => setActiveTab('overview')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'overview' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><LayoutDashboard size={18}/> Özet Panel</button>
           <button onClick={() => setActiveTab('pending')} className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'pending' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><span className="flex items-center gap-3"><Clock size={18}/> Yeni Başvurular</span> {pendingShops.length > 0 && <span className="bg-white text-[#E8622A] text-xs px-2 rounded-full font-black">{pendingShops.length}</span>}</button>
-          <button onClick={() => setActiveTab('active')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'active' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400'}`}><Store size={18}/> Aktif İşletmeler</button>
-          <button onClick={() => setActiveTab('appointments')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'appointments' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400'}`}><CalendarCheck size={18} /> Randevular</button>
-          <button onClick={() => setActiveTab('customers')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'customers' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400'}`}><Users size={18}/> Müşteriler</button>
-          <button onClick={() => setActiveTab('billing')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'billing' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400'}`}><CreditCard size={18} /> Abonelik</button>
-          <button onClick={() => setActiveTab('feedbacks')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'feedbacks' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400'}`}><Star size={18}/> Değerlendirmeler</button>
+          <button onClick={() => setActiveTab('active')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'active' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><Store size={18}/> Aktif İşletmeler</button>
+          <button onClick={() => setActiveTab('appointments')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'appointments' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><CalendarCheck size={18} /> Randevular</button>
+          <button onClick={() => setActiveTab('customers')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'customers' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><Users size={18}/> Müşteriler</button>
+          <button onClick={() => setActiveTab('billing')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'billing' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><CreditCard size={18} /> Abonelik</button>
+          <button onClick={() => setActiveTab('feedbacks')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'feedbacks' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><Star size={18}/> Değerlendirmeler</button>
         </div>
-        <div className="p-4"><button onClick={handleLogout} className="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-bold text-xs uppercase border-none cursor-pointer">Çıkış Yap</button></div>
+        <div className="p-4"><button onClick={handleLogout} className="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-bold text-xs uppercase border-none cursor-pointer hover:bg-red-500 hover:text-white transition-all">Çıkış Yap</button></div>
       </aside>
 
       <main className="flex-1 p-8 overflow-x-hidden">
         {loading ? (
-          <div className="text-center py-32 animate-pulse font-black text-[#2D1B4E]">VERİLER YÜKLENİYOR...</div>
+          <div className="text-center py-32 animate-pulse font-black text-[#2D1B4E]">SİSTEM YÜKLENİYOR...</div>
         ) : (
           <div className="max-w-[1400px] mx-auto">
             {activeTab === 'overview' && (
@@ -330,10 +392,10 @@ export default function SuperAdmin() {
                               <button onClick={() => sendReminderEmail(shop)} disabled={isSendingMail} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-blue-200 cursor-pointer transition-all">
                                 <Mail size={16} className="inline mr-1"/> Hatırlat
                               </button>
-                              <button onClick={() => approveShop(shop)} className="bg-[#00c48c] text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase border-none cursor-pointer shadow-lg">
+                              <button onClick={() => approveShop(shop)} className="bg-[#00c48c] text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase border-none cursor-pointer shadow-lg hover:bg-[#00a375]">
                                 <Check size={16} className="inline mr-1"/> Onayla
                               </button>
-                              <button onClick={() => deleteShop(shop.id)} className="bg-red-50 text-red-500 p-2 rounded-xl border border-red-200 cursor-pointer">
+                              <button onClick={() => deleteShop(shop.id)} className="bg-red-50 text-red-500 p-2 rounded-xl border border-red-200 cursor-pointer hover:bg-red-500 hover:text-white transition-all">
                                 <Trash2 size={16}/>
                               </button>
                             </div>
