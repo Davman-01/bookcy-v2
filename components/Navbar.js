@@ -13,7 +13,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const { lang = 'TR', setLang, t, shops = [], loggedInShop, handleLogout } = useAppContext();
   
-  // EKLENEN KISIM: Panel ve Admin sayfalarında Navbar'ı gizle
+  // Panel ve Admin sayfalarında Navbar'ı gizle
   if (pathname && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/panel'))) {
     return null;
   }
@@ -22,6 +22,9 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+
+  // YENİ EKLENEN KISIM: Sözleşme Onay Hafızası
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
 
   const [loginType, setLoginType] = useState('owner'); 
   const [loginUsername, setLoginUsername] = useState(''); 
@@ -87,7 +90,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* MOBİL MENÜ OVERLAY (AÇILIR PENCERE) */}
+      {/* MOBİL MENÜ OVERLAY */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[9999] bg-white flex flex-col animate-in slide-in-from-right-full duration-300">
             <div className="flex justify-between items-center p-6 border-b border-slate-100">
@@ -106,7 +109,6 @@ export default function Navbar() {
             </div>
             
             <div className="mt-auto p-6 flex flex-col gap-4 bg-slate-50 border-t border-slate-100">
-                 {/* MOBİL DİL SEÇENEKLERİ */}
                  <div className="flex gap-3 justify-center mb-2">
                     <button onClick={()=>setLang('TR')} className={`px-6 py-2 rounded-full font-black text-xs transition-colors cursor-pointer border ${lang==='TR' ? 'bg-[#2D1B4E] text-white border-[#2D1B4E]' : 'bg-white text-slate-500 border-slate-200 hover:border-[#2D1B4E]'}`}>TR</button>
                     <button onClick={()=>setLang('EN')} className={`px-6 py-2 rounded-full font-black text-xs transition-colors cursor-pointer border ${lang==='EN' ? 'bg-[#2D1B4E] text-white border-[#2D1B4E]' : 'bg-white text-slate-500 border-slate-200 hover:border-[#2D1B4E]'}`}>EN</button>
@@ -128,7 +130,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* ÜST MENÜ (MASAÜSTÜ & MOBİL BAR) */}
+      {/* ÜST MENÜ */}
       <nav>
         <Link href="/" className="nav-logo-box text-decoration-none">
           <img src="/logo.png" alt="Bookcy Logo" />
@@ -142,7 +144,6 @@ export default function Navbar() {
                   <Link href="/ozellikler" className={`nav-main-btn flex items-center gap-1 transition-colors h-full text-decoration-none ${pathname?.includes('/ozellikler') ? 'active' : ''}`}>
                       {text.nav?.features || "Özellikler"} <ChevronDown size={14} className={`transition-transform duration-200 ${showFeaturesMenu ? 'rotate-180' : ''}`} />
                   </Link>
-                  {/* Masaüstü Açılır Menü */}
                   {showFeaturesMenu && (
                       <div className="absolute top-[76px] left-1/2 -translate-x-1/2 w-screen bg-white text-[#2D1B4E] shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-t border-slate-200 cursor-default animate-in slide-in-from-top-2 duration-200 z-50">
                           <div className="max-w-[1100px] mx-auto py-12 px-8">
@@ -185,7 +186,7 @@ export default function Navbar() {
           <li><Link href="/iletisim" className={`nav-main-btn ${pathname === '/iletisim' ? 'active' : ''}`}>{text.nav?.contact || "İletişim"}</Link></li>
         </ul>
 
-        {/* Sağ Taraf (Dil, Butonlar ve Hamburger) */}
+        {/* Sağ Taraf */}
         <div className="nav-right flex items-center">
           <div className="lang-pills hidden lg:flex mr-4">
              <button onClick={()=>setLang('TR')} className={`lang-pill ${lang==='TR' ? 'active' : ''}`}>TR</button>
@@ -197,14 +198,12 @@ export default function Navbar() {
                <div className="flex gap-2 items-center">
                    <button onClick={handleLogout} className="btn-outline hidden md:block">{text.nav?.logout || "Çıkış"}</button>
                    <Link href="/dashboard" className="btn-primary text-decoration-none hidden md:flex"><UserCircle size={18}/> <span>{text.nav?.panel || "Panel"}</span></Link>
-                   {/* Mobil için Hamburger Menü İkonu */}
                    <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-[#2D1B4E] bg-transparent border-none cursor-pointer"><Menu size={32}/></button>
                </div>
           ) : (
               <div className="flex items-center gap-3">
                   <button onClick={() => setShowRegister(true)} className="btn-outline hidden md:block">{text.nav?.addShop || "İşletme Ekle"}</button>
                   <button onClick={() => setShowLogin(true)} className="btn-primary hidden md:flex"><UserCircle size={18}/> <span>{text.nav?.login || "Giriş"}</span></button>
-                  {/* Mobil için Hamburger Menü İkonu */}
                   <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-[#2D1B4E] bg-transparent border-none cursor-pointer ml-2"><Menu size={32}/></button>
               </div>
           )}
@@ -215,7 +214,7 @@ export default function Navbar() {
       {showRegister && (
           <div className="fixed inset-0 w-screen h-screen bg-[#2D1B4E]/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto py-20">
             <div className="bg-white border border-slate-200 w-full max-w-[800px] rounded-[32px] p-8 md:p-10 relative shadow-2xl my-auto animate-in zoom-in-95 duration-300">
-              <button onClick={() => {setShowRegister(false); setRegisterSuccess(false);}} className="absolute top-6 right-6 md:right-8 text-slate-400 hover:text-[#2D1B4E] p-2 font-bold bg-transparent border-none cursor-pointer"><X size={24}/></button>
+              <button onClick={() => {setShowRegister(false); setRegisterSuccess(false); setIsTermsAccepted(false);}} className="absolute top-6 right-6 md:right-8 text-slate-400 hover:text-[#2D1B4E] p-2 font-bold bg-transparent border-none cursor-pointer"><X size={24}/></button>
               {registerSuccess ? (
                   <div className="text-center py-10">
                       <CheckCircle2 size={64} className="mx-auto text-[#00c48c] mb-6" />
@@ -274,7 +273,29 @@ export default function Navbar() {
                               <input required placeholder={text.modal?.user || "Kullanıcı Adı"} className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.username} onChange={e => setNewShop({...newShop, username: e.target.value})} />
                               <input required placeholder={text.modal?.pass || "Şifre"} className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.password} onChange={e => setNewShop({...newShop, password: e.target.value})} />
                           </div>
-                          <button type="submit" disabled={isUploading || emailValid === false || phoneValid === false || adminEmailValid === false} className="w-full btn-primary justify-center py-5 rounded-xl mt-2 shadow-lg border-none cursor-pointer tracking-widest text-xs uppercase">{isUploading ? (text.modal?.loading || "Yükleniyor") : (text.modal?.btnReg || "TAMAMLA")}</button>
+
+                          {/* YENİ EKLENEN KISIM: YASAL ONAY KUTUSU - İŞLETME İÇİN */}
+                          <div className="flex items-start gap-3 mt-4 mb-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <input
+                              type="checkbox"
+                              id="business-terms"
+                              checked={isTermsAccepted}
+                              onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                              className="mt-0.5 w-5 h-5 text-[#E8622A] border-slate-300 rounded focus:ring-[#E8622A] cursor-pointer shrink-0"
+                            />
+                            <label htmlFor="business-terms" className="text-[11px] text-slate-500 leading-relaxed cursor-pointer text-left">
+                              Bookcy <a href="/yasal/sartlar" target="_blank" className="text-[#E8622A] font-bold hover:underline">Hizmet ve Aracı Platform Sözleşmesi</a>'ni okudum. Bookcy'nin yalnızca bir "Yer Sağlayıcı" olduğunu, hizmetin ifasından, vergisel yükümlülüklerden ve müşteri ile yaşanacak olası uyuşmazlıklardan tamamen işletmemin sorumlu olduğunu kabul ve beyan ederim.
+                            </label>
+                          </div>
+
+                          {/* GÜNCELLENEN BUTON: Sadece onaylanırsa aktif olur */}
+                          <button 
+                            type="submit" 
+                            disabled={!isTermsAccepted || isUploading || emailValid === false || phoneValid === false || adminEmailValid === false} 
+                            className={`w-full flex items-center justify-center py-5 rounded-xl mt-2 shadow-lg border-none tracking-widest text-xs uppercase font-bold transition-all ${(!isTermsAccepted || isUploading || emailValid === false || phoneValid === false || adminEmailValid === false) ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#E8622A] text-white hover:bg-[#d5521b] cursor-pointer'}`}
+                          >
+                            {isUploading ? (text.modal?.loading || "Yükleniyor") : (text.modal?.btnReg || "TAMAMLA")}
+                          </button>
                       </form>
                   </>
               )}
