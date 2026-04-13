@@ -6,12 +6,10 @@ import { useAppContext } from '@/app/providers';
 import { cyprusRegions } from '@/lib/constants';
 import { usePathname } from 'next/navigation';
 
-// Özel Instagram İkonu
 const InstagramIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
 );
 
-// Özel Facebook İkonu
 const FacebookIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
 );
@@ -30,7 +28,6 @@ export default function Footer() {
     setCookieConsent(true);
   };
 
-  // Panel ve Admin sayfalarında Footer'ı gizle
   if (pathname && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/panel'))) {
     return null;
   }
@@ -42,7 +39,7 @@ export default function Footer() {
     <>
       {!cookieConsent && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 md:p-6 z-[9998] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-bottom-10">
-          <div className="flex items-start gap-4 flex-1 max-w-4xl">
+          <div className="flex items-start gap-4 flex-1 max-4xl">
             <div className="bg-indigo-50 text-indigo-500 p-3 rounded-full shrink-0 hidden md:block"><Info size={24}/></div>
             <div>
               <h4 className="font-black text-[#2D1B4E] mb-1">{text.cookie?.title}</h4>
@@ -62,7 +59,6 @@ export default function Footer() {
       <footer className="w-full bg-[#2D1B4E] pt-12 md:pt-20 pb-8 md:pb-10 px-6 text-white/60 text-sm border-t border-[#3E296A] z-10 relative">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12 mb-8 md:mb-12 border-b border-white/10 pb-8 md:pb-12">
           
-          {/* SÜTUN 1: Logo & Marka İsmi */}
           <div>
             <div className="flex items-center gap-3 mb-6 group cursor-default">
               <div className="h-14 w-14 md:h-16 md:w-16 bg-white p-2 rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border border-white/10 transition-transform group-hover:scale-105">
@@ -80,24 +76,21 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* SÜTUN 2: Platform Menüsü */}
           <div>
             <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{text.footer?.col1}</h4>
             <Link href="/" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Ana Sayfa</Link>
             <Link href="/isletmeler" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.places || "İşletmeler"}</Link>
             <Link href="/ozellikler" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.features || "Özellikler"}</Link>
-            <Link href="/neden-bookcy" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.why || "Neden Bookcy"}</Link>
+            <Link href="/neden-bookcy" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.why || "Neden Bookcy?"}</Link>
             <Link href="/hakkimizda" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.about || "Hakkımızda"}</Link>
             <Link href="/iletisim" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.contact || "İletişim"}</Link>
           </div>
 
-          {/* SÜTUN 3: Bölgeler */}
           <div>
             <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{text.footer?.col2}</h4>
             {cyprusRegions.map(r => <Link href={`/isletmeler?r=${r}`} key={r} className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{r}</Link>)}
           </div>
 
-          {/* SÜTUN 4: Yasal */}
           <div>
             <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{text.footer?.col3}</h4>
             <Link href="/yasal/gizlilik" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Gizlilik Politikası</Link>
@@ -106,7 +99,6 @@ export default function Footer() {
             <Link href="/yasal/cerez" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Çerez Politikası</Link>
           </div>
 
-          {/* SÜTUN 5: BLOG */}
           <div>
             <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">BLOG</h4>
             <Link href="/kibris-rezervasyon-ve-yasam-rehberi" className="block mb-4 text-[#E8622A] hover:text-[#ff7a40] font-bold transition-colors text-decoration-none">Kıbrıs Yaşam Rehberi</Link>

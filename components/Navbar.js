@@ -91,7 +91,6 @@ export default function Navbar() {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[9999] bg-white flex flex-col animate-in slide-in-from-right-full duration-300">
             <div className="flex justify-between items-center p-6 border-b border-slate-100">
-                {/* MOBİL LOGO VE İSİM */}
                 <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 text-decoration-none">
                   <div className="h-10 w-10 bg-white p-1 rounded-lg flex items-center justify-center overflow-hidden border border-slate-100">
                     <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
@@ -104,7 +103,7 @@ export default function Navbar() {
             <div className="flex flex-col gap-2 p-6 overflow-y-auto">
                 <Link href="/isletmeler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.places || "İşletmeler"}</Link>
                 <Link href="/ozellikler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.features || "Özellikler"}</Link>
-                <Link href="/neden-bookcy" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.why || "Neden Bookcy"}</Link>
+                <Link href="/neden-bookcy" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.why || "Neden Bookcy?"}</Link>
                 <Link href="/hakkimizda" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.about || "Hakkımızda"}</Link>
                 <Link href="/iletisim" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.contact || "İletişim"}</Link>
             </div>
@@ -132,7 +131,6 @@ export default function Navbar() {
       )}
 
       <nav>
-        {/* ÜST MASAÜSTÜ LOGO VE İSİM */}
         <Link href="/" className="flex items-center gap-3 text-decoration-none group">
           <div className="h-12 w-12 md:h-14 md:w-14 bg-white p-1.5 rounded-xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
             <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
@@ -186,7 +184,7 @@ export default function Navbar() {
                   )}
               </div>
           </li>
-          <li><Link href="/neden-bookcy" className={`nav-main-btn ${pathname === '/neden-bookcy' ? 'active' : ''}`}>{text.nav?.why || "Neden Bookcy"}</Link></li>
+          <li><Link href="/neden-bookcy" className={`nav-main-btn ${pathname === '/neden-bookcy' ? 'active' : ''}`}>{text.nav?.why || "Neden Bookcy?"}</Link></li>
           <li><Link href="/hakkimizda" className={`nav-main-btn ${pathname === '/hakkimizda' ? 'active' : ''}`}>{text.nav?.about || "Hakkımızda"}</Link></li>
           <li><Link href="/iletisim" className={`nav-main-btn ${pathname === '/iletisim' ? 'active' : ''}`}>{text.nav?.contact || "İletişim"}</Link></li>
         </ul>
@@ -214,7 +212,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* KAYIT MODALI */}
       {showRegister && (
           <div className="fixed inset-0 w-screen h-screen bg-[#2D1B4E]/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto py-20">
             <div className="bg-white border border-slate-200 w-full max-w-[800px] rounded-[32px] p-8 md:p-10 relative shadow-2xl my-auto animate-in zoom-in-95 duration-300">
@@ -224,7 +221,6 @@ export default function Navbar() {
                       <CheckCircle2 size={64} className="mx-auto text-[#00c48c] mb-6" />
                       <h2 className="text-2xl md:text-3xl font-black text-[#E8622A] uppercase italic mb-4">{text.modal?.success || "BAŞVURUNUZ ALINDI!"}</h2>
                       
-                      {/* ÜCRETSİZ DENEME BAŞARI EKRANI */}
                       {newShop.package === 'Ücretsiz Deneme' ? (
                           <div className="bg-green-50 p-6 md:p-8 rounded-2xl border border-green-200 inline-block text-center mt-4 w-full max-w-md shadow-sm">
                               <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><Gift size={24}/></div>
@@ -235,7 +231,6 @@ export default function Navbar() {
                               </div>
                           </div>
                       ) : (
-                          /* ÜCRETLİ PAKET BAŞARI EKRANI (DEKONT) */
                           <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 inline-block text-left mt-4 text-[#2D1B4E] w-full max-w-sm">
                               <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">{text.modal?.bank || "Banka Bilgileri:"}</p>
                               <p className="font-bold text-sm">Banka: <span className="font-normal">İş Bankası</span></p>
@@ -329,7 +324,6 @@ export default function Navbar() {
           </div>
       )}
 
-      {/* GİRİŞ MODALI */}
       {showLogin && (
         <div className="fixed inset-0 bg-[#2D1B4E]/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-[400px] rounded-[32px] p-8 relative shadow-2xl border border-slate-200">
