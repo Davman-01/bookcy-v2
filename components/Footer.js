@@ -60,13 +60,17 @@ export default function Footer() {
       )}
 
       <footer className="w-full bg-[#2D1B4E] pt-12 md:pt-20 pb-8 md:pb-10 px-6 text-white/60 text-sm border-t border-[#3E296A] z-10 relative">
-        {/* 5 Sütunlu Grid Yapısı (lg:grid-cols-5) */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12 mb-8 md:mb-12 border-b border-white/10 pb-8 md:pb-12">
           
-          {/* SÜTUN 1: Logo & Sosyal Medya */}
+          {/* SÜTUN 1: Logo & Marka İsmi */}
           <div>
-            <div className="mb-6 md:mb-8 h-16 w-fit bg-white p-3 rounded-2xl overflow-hidden flex items-center justify-center border border-white/10 shadow-lg">
-              <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
+            <div className="flex items-center gap-3 mb-6 group cursor-default">
+              <div className="h-14 w-14 md:h-16 md:w-16 bg-white p-2 rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border border-white/10 transition-transform group-hover:scale-105">
+                <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-2xl md:text-3xl font-black tracking-tighter text-white font-['Plus_Jakarta_Sans']">
+                Bookcy<span className="text-[#E8622A]">.</span>
+              </span>
             </div>
             <p className="mb-6 md:mb-8 leading-relaxed font-medium text-white/70">{text.footer?.desc}</p>
             <div className="flex gap-4">
@@ -102,7 +106,7 @@ export default function Footer() {
             <Link href="/yasal/cerez" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Çerez Politikası</Link>
           </div>
 
-          {/* SÜTUN 5: BLOG (YENİ EKLENEN KISIM) */}
+          {/* SÜTUN 5: BLOG */}
           <div>
             <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">BLOG</h4>
             <Link href="/kibris-rezervasyon-ve-yasam-rehberi" className="block mb-4 text-[#E8622A] hover:text-[#ff7a40] font-bold transition-colors text-decoration-none">Kıbrıs Yaşam Rehberi</Link>

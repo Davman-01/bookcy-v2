@@ -91,9 +91,13 @@ export default function Navbar() {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[9999] bg-white flex flex-col animate-in slide-in-from-right-full duration-300">
             <div className="flex justify-between items-center p-6 border-b border-slate-100">
-                <div className="nav-logo-box flex items-center h-10">
-                  <img src="/logo.png" alt="Bookcy Logo" className="h-full w-auto object-contain mix-blend-multiply transform scale-125 origin-left" />
-                </div>
+                {/* MOBİL LOGO VE İSİM */}
+                <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2 text-decoration-none">
+                  <div className="h-10 w-10 bg-white p-1 rounded-lg flex items-center justify-center overflow-hidden border border-slate-100">
+                    <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
+                  </div>
+                  <span className="text-xl font-black tracking-tighter text-[#2D1B4E] font-['Plus_Jakarta_Sans']">Bookcy<span className="text-[#E8622A]">.</span></span>
+                </Link>
                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-500 bg-slate-50 rounded-full border-none cursor-pointer"><X size={24}/></button>
             </div>
             
@@ -128,8 +132,14 @@ export default function Navbar() {
       )}
 
       <nav>
-        <Link href="/" className="nav-logo-box text-decoration-none">
-          <img src="/logo.png" alt="Bookcy Logo" />
+        {/* ÜST MASAÜSTÜ LOGO VE İSİM */}
+        <Link href="/" className="flex items-center gap-3 text-decoration-none group">
+          <div className="h-12 w-12 md:h-14 md:w-14 bg-white p-1.5 rounded-xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
+            <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
+          </div>
+          <span className="text-2xl md:text-3xl font-black tracking-tighter text-[#2D1B4E] font-['Plus_Jakarta_Sans']">
+            Bookcy<span className="text-[#E8622A]">.</span>
+          </span>
         </Link>
 
         <ul className="nav-links hidden md:flex">
@@ -270,9 +280,7 @@ export default function Navbar() {
                               {newShop.logoFile ? <span className="text-[10px] font-bold text-[#00c48c] flex items-center justify-center gap-2"><CheckCircle2 size={16}/> {newShop.logoFile.name}</span> : <div className="flex flex-col items-center justify-center text-center text-[10px] font-bold text-slate-500 uppercase"><Upload size={20} className="mb-2"/> {text.modal?.logo || "Logo Yükle"}</div>}
                           </div>
                           
-                          {/* PAKET SEÇİM ALANI (ÜCRETSİZ DENEME EKLENDİ) */}
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
-                              {/* Ücretsiz Deneme Kutusu */}
                               <div onClick={() => setNewShop({...newShop, package: 'Ücretsiz Deneme'})} className={`cursor-pointer p-4 rounded-xl border transition-all ${newShop.package === 'Ücretsiz Deneme' ? 'bg-[#2D1B4E] border-[#2D1B4E] shadow-lg' : 'bg-white border-slate-200 hover:border-[#2D1B4E]'}`}>
                                   <div className="flex items-center gap-2 mb-1">
                                     <Gift size={16} className={newShop.package === 'Ücretsiz Deneme' ? 'text-white' : 'text-[#E8622A]'}/>
