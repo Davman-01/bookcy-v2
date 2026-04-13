@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ChevronDown, ChevronRight, Menu, X, UserCircle, CheckCircle2, XCircle, Lock, Upload, MessageCircle } from 'lucide-react';
+import { ChevronDown, ChevronRight, Menu, X, UserCircle, CheckCircle2, XCircle, Lock, Upload, MessageCircle, Gift } from 'lucide-react';
 import { useAppContext } from '@/app/providers';
 import { supabase } from '@/lib/supabase';
 import { getRegistrationTemplate } from '@/lib/emailTemplates';
@@ -13,7 +13,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const { lang = 'TR', setLang, t, shops = [], loggedInShop, handleLogout } = useAppContext();
   
-  // Panel ve Admin sayfalarında Navbar'ı gizle
   if (pathname && (pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/panel'))) {
     return null;
   }
@@ -22,8 +21,6 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-
-  // YENİ EKLENEN KISIM: Sözleşme Onay Hafızası
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
 
   const [loginType, setLoginType] = useState('owner'); 
@@ -32,7 +29,7 @@ export default function Navbar() {
   const [loginStaffName, setLoginStaffName] = useState(''); 
   const [isLoginLoading, setIsLoginLoading] = useState(false);
   
-  const [newShop, setNewShop] = useState({ name: '', category: 'Berber', location: 'Girne', address: '', maps_link: '', phoneCode: '+90', contactPhone: '', contactInsta: '', contactEmail: '', username: '', password: '', email: '', description: '', logoFile: null, package: 'Standart Paket' });
+  const [newShop, setNewShop] = useState({ name: '', category: 'Berber', location: 'Girne', address: '', maps_link: '', phoneCode: '+90', contactPhone: '', contactInsta: '', contactEmail: '', username: '', password: '', email: '', description: '', logoFile: null, package: 'Ücretsiz Deneme' });
   const [isUploading, setIsUploading] = useState(false); 
   const [registerSuccess, setRegisterSuccess] = useState(false);
   const [emailValid, setEmailValid] = useState(null); 
@@ -75,7 +72,8 @@ export default function Navbar() {
       const { error } = await supabase.from('shops').insert([{ name: newShop.name, category: newShop.category, location: newShop.location, address: newShop.address, maps_link: newShop.maps_link, admin_email: newShop.email, admin_username: newShop.username, admin_password: newShop.password, description: newShop.description, logo_url: uploadedLogoUrl, package: newShop.package, status: 'pending', contact_phone: fullPhone, contact_insta: newShop.contactInsta, contact_email: newShop.contactEmail, services: [], staff: [], gallery: [], closed_dates: [], events: [] }]);
       if (!error) {
         try {
-          await fetch('/api/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: newShop.email, subject: 'Bookcy Kayıt Talebiniz Alındı', html: getRegistrationTemplate({ shopName: newShop.name, date: new Date().toLocaleDateString('tr-TR'), packageName: newShop.package.toUpperCase(), price: newShop.package === 'Premium Paket' ? '100 STG' : '60 STG' }) })});
+          const finalPrice = newShop.package === 'Ücretsiz Deneme' ? '0 STG (22 Mayıs\'a Kadar)' : (newShop.package === 'Premium Paket' ? '100 STG' : '60 STG');
+          await fetch('/api/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: newShop.email, subject: 'Bookcy Kayıt Talebiniz Alındı', html: getRegistrationTemplate({ shopName: newShop.name, date: new Date().toLocaleDateString('tr-TR'), packageName: newShop.package.toUpperCase(), price: finalPrice }) })});
         } catch (mailErr) { console.error(mailErr); }
         setRegisterSuccess(true); 
       } else { alert("Veritabanı Hatası: " + error.message); }
@@ -90,7 +88,6 @@ export default function Navbar() {
 
   return (
     <>
-      {/* MOBİL MENÜ OVERLAY */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[9999] bg-white flex flex-col animate-in slide-in-from-right-full duration-300">
             <div className="flex justify-between items-center p-6 border-b border-slate-100">
@@ -130,13 +127,11 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* ÜST MENÜ */}
       <nav>
         <Link href="/" className="nav-logo-box text-decoration-none">
           <img src="/logo.png" alt="Bookcy Logo" />
         </Link>
 
-        {/* Masaüstü Menü Linkleri */}
         <ul className="nav-links hidden md:flex">
           <li><Link href="/isletmeler" className={`nav-main-btn ${pathname === '/isletmeler' ? 'active' : ''}`}>{text.nav?.places || "İşletmeler"}</Link></li>
           <li style={{height:'100%', display:'flex', alignItems:'center'}}>
@@ -186,7 +181,6 @@ export default function Navbar() {
           <li><Link href="/iletisim" className={`nav-main-btn ${pathname === '/iletisim' ? 'active' : ''}`}>{text.nav?.contact || "İletişim"}</Link></li>
         </ul>
 
-        {/* Sağ Taraf */}
         <div className="nav-right flex items-center">
           <div className="lang-pills hidden lg:flex mr-4">
              <button onClick={()=>setLang('TR')} className={`lang-pill ${lang==='TR' ? 'active' : ''}`}>TR</button>
@@ -219,14 +213,28 @@ export default function Navbar() {
                   <div className="text-center py-10">
                       <CheckCircle2 size={64} className="mx-auto text-[#00c48c] mb-6" />
                       <h2 className="text-2xl md:text-3xl font-black text-[#E8622A] uppercase italic mb-4">{text.modal?.success || "BAŞVURUNUZ ALINDI!"}</h2>
-                      <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 inline-block text-left mt-4 text-[#2D1B4E] w-full max-w-sm">
-                          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">{text.modal?.bank || "Banka Bilgileri:"}</p>
-                          <p className="font-bold text-sm">Banka: <span className="font-normal">İş Bankası</span></p>
-                          <p className="font-bold text-sm">Alıcı: <span className="font-normal">BOOKCY LTD.</span></p>
-                          <p className="font-bold text-sm">IBAN: <span className="text-[#E8622A]">TR99 0006 4000 0012 3456 7890 12</span></p>
-                          <p className="text-sm font-bold text-slate-500 mt-6 mb-4 text-center">{text.modal?.bankDesc || "Lütfen dekontunuzu iletin."}</p>
-                          <a href="https://wa.me/905555555555" target="_blank" rel="noreferrer" className="w-full bg-[#25D366] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg flex justify-center items-center gap-2 text-decoration-none text-xs border-none cursor-pointer mt-4"><MessageCircle size={18}/> {text.modal?.btnBank || "DEKONTU İLET"}</a>
-                      </div>
+                      
+                      {/* ÜCRETSİZ DENEME BAŞARI EKRANI */}
+                      {newShop.package === 'Ücretsiz Deneme' ? (
+                          <div className="bg-green-50 p-6 md:p-8 rounded-2xl border border-green-200 inline-block text-center mt-4 w-full max-w-md shadow-sm">
+                              <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><Gift size={24}/></div>
+                              <p className="font-black text-lg text-green-700 mb-2 uppercase">Hoş Geldiniz!</p>
+                              <p className="text-sm font-bold text-slate-600 leading-relaxed">Ücretsiz deneme başvurunuz başarıyla alınmıştır. Ekibimiz bilgilerinizi inceledikten sonra işletmenizi en kısa sürede onaylayacaktır.</p>
+                              <div className="mt-6 pt-6 border-t border-green-200">
+                                <p className="text-xs font-black text-[#E8622A] uppercase tracking-widest bg-orange-50 px-4 py-2 rounded-lg inline-block border border-orange-100">💳 ŞİMDİLİK ÖDEME GEREKMİYOR</p>
+                              </div>
+                          </div>
+                      ) : (
+                          /* ÜCRETLİ PAKET BAŞARI EKRANI (DEKONT) */
+                          <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 inline-block text-left mt-4 text-[#2D1B4E] w-full max-w-sm">
+                              <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-4">{text.modal?.bank || "Banka Bilgileri:"}</p>
+                              <p className="font-bold text-sm">Banka: <span className="font-normal">İş Bankası</span></p>
+                              <p className="font-bold text-sm">Alıcı: <span className="font-normal">BOOKCY LTD.</span></p>
+                              <p className="font-bold text-sm">IBAN: <span className="text-[#E8622A]">TR99 0006 4000 0012 3456 7890 12</span></p>
+                              <p className="text-sm font-bold text-slate-500 mt-6 mb-4 text-center">{text.modal?.bankDesc || "Lütfen dekontunuzu iletin."}</p>
+                              <a href="https://wa.me/905555555555" target="_blank" rel="noreferrer" className="w-full bg-[#25D366] text-white font-black py-4 rounded-xl uppercase tracking-widest hover:bg-green-600 transition-colors shadow-lg flex justify-center items-center gap-2 text-decoration-none text-xs border-none cursor-pointer mt-4"><MessageCircle size={18}/> {text.modal?.btnBank || "DEKONTU İLET"}</a>
+                          </div>
+                      )}
                   </div>
               ) : (
                   <>
@@ -261,20 +269,31 @@ export default function Navbar() {
                               <input type="file" accept=".png, .jpg, .jpeg" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={e => setNewShop({...newShop, logoFile: e.target.files[0]})} />
                               {newShop.logoFile ? <span className="text-[10px] font-bold text-[#00c48c] flex items-center justify-center gap-2"><CheckCircle2 size={16}/> {newShop.logoFile.name}</span> : <div className="flex flex-col items-center justify-center text-center text-[10px] font-bold text-slate-500 uppercase"><Upload size={20} className="mb-2"/> {text.modal?.logo || "Logo Yükle"}</div>}
                           </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                          
+                          {/* PAKET SEÇİM ALANI (ÜCRETSİZ DENEME EKLENDİ) */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                              {/* Ücretsiz Deneme Kutusu */}
+                              <div onClick={() => setNewShop({...newShop, package: 'Ücretsiz Deneme'})} className={`cursor-pointer p-4 rounded-xl border transition-all ${newShop.package === 'Ücretsiz Deneme' ? 'bg-[#2D1B4E] border-[#2D1B4E] shadow-lg' : 'bg-white border-slate-200 hover:border-[#2D1B4E]'}`}>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Gift size={16} className={newShop.package === 'Ücretsiz Deneme' ? 'text-white' : 'text-[#E8622A]'}/>
+                                    <h4 className={`text-[11px] font-black uppercase tracking-widest ${newShop.package === 'Ücretsiz Deneme' ? 'text-white' : 'text-[#2D1B4E]'}`}>Ücretsiz Deneme</h4>
+                                  </div>
+                                  <p className={`text-[10px] font-bold mt-2 px-2 py-1 inline-block rounded-md ${newShop.package === 'Ücretsiz Deneme' ? 'bg-white/20 text-white' : 'bg-orange-50 text-[#E8622A]'}`}>22 Mayıs'a Kadar</p>
+                              </div>
+
                               {packages.map(p => (
-                                  <div key={p.name} onClick={() => setNewShop({...newShop, package: p.name})} className={`cursor-pointer p-4 rounded-xl border transition-all ${newShop.package === p.name ? 'bg-orange-50 border-[#E8622A]' : 'bg-white border-slate-200'}`}>
-                                      <h4 className={`text-sm font-black uppercase ${newShop.package === p.name ? 'text-[#E8622A]' : 'text-[#2D1B4E]'}`}>{p.name === 'Standart Paket' ? text.aboutPage?.std : text.aboutPage?.pr}</h4>
+                                  <div key={p.name} onClick={() => setNewShop({...newShop, package: p.name})} className={`cursor-pointer p-4 rounded-xl border transition-all ${newShop.package === p.name ? 'bg-orange-50 border-[#E8622A] shadow-md' : 'bg-white border-slate-200 hover:border-[#E8622A]'}`}>
+                                      <h4 className={`text-[11px] font-black uppercase tracking-widest mb-1 ${newShop.package === p.name ? 'text-[#E8622A]' : 'text-[#2D1B4E]'}`}>{p.name === 'Standart Paket' ? text.aboutPage?.std : text.aboutPage?.pr}</h4>
                                       <p className="text-xs font-bold text-slate-500">{p.price.split('/')[0]} {text.aboutPage?.mo}</p>
                                   </div>
                               ))}
                           </div>
+
                           <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
                               <input required placeholder={text.modal?.user || "Kullanıcı Adı"} className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.username} onChange={e => setNewShop({...newShop, username: e.target.value})} />
                               <input required placeholder={text.modal?.pass || "Şifre"} className="bg-slate-50 border border-slate-200 rounded-xl py-4 px-4 text-xs font-bold outline-none text-[#2D1B4E]" value={newShop.password} onChange={e => setNewShop({...newShop, password: e.target.value})} />
                           </div>
 
-                          {/* YENİ EKLENEN KISIM: YASAL ONAY KUTUSU - İŞLETME İÇİN */}
                           <div className="flex items-start gap-3 mt-4 mb-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
                             <input
                               type="checkbox"
@@ -288,7 +307,6 @@ export default function Navbar() {
                             </label>
                           </div>
 
-                          {/* GÜNCELLENEN BUTON: Sadece onaylanırsa aktif olur */}
                           <button 
                             type="submit" 
                             disabled={!isTermsAccepted || isUploading || emailValid === false || phoneValid === false || adminEmailValid === false} 
