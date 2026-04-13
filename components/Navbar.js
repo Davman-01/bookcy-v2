@@ -103,7 +103,7 @@ export default function Navbar() {
             <div className="flex flex-col gap-2 p-6 overflow-y-auto">
                 <Link href="/isletmeler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.places || "İşletmeler"}</Link>
                 <Link href="/ozellikler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.features || "Özellikler"}</Link>
-                <Link href="/neden-bookcy" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.why || "Neden Bookcy?"}</Link>
+                <Link href="/neden-bookcy?" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.why || "Neden Bookcy?"}</Link>
                 <Link href="/hakkimizda" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.about || "Hakkımızda"}</Link>
                 <Link href="/iletisim" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] text-left border-b border-slate-50 py-4 text-decoration-none block">{text.nav?.contact || "İletişim"}</Link>
             </div>

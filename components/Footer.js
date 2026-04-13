@@ -81,7 +81,7 @@ export default function Footer() {
             <Link href="/" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Ana Sayfa</Link>
             <Link href="/isletmeler" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.places || "İşletmeler"}</Link>
             <Link href="/ozellikler" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.features || "Özellikler"}</Link>
-            <Link href="/neden-bookcy" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.why || "Neden Bookcy?"}</Link>
+            <Link href="/neden-bookcy?" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.why || "Neden Bookcy?"}</Link>
             <Link href="/hakkimizda" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.about || "Hakkımızda"}</Link>
             <Link href="/iletisim" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.contact || "İletişim"}</Link>
           </div>
