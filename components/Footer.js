@@ -102,11 +102,11 @@ export default function Footer() {
             <Link href="/yasal/cerez" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Çerez Politikası</Link>
           </div>
 
-          {/* SÜTUN 5: BLOG (YENİ) */}
+          {/* SÜTUN 5: BLOG (YENİ EKLENEN KISIM) */}
           <div>
             <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">BLOG</h4>
             <Link href="/kibris-rezervasyon-ve-yasam-rehberi" className="block mb-4 text-[#E8622A] hover:text-[#ff7a40] font-bold transition-colors text-decoration-none">Kıbrıs Yaşam Rehberi</Link>
-            <Link href="/sss" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Sıkça Sorulan Sorular</Link>
+            <Link href="/kibris-rezervasyon-ve-yasam-rehberi#sss" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Sıkça Sorulan Sorular</Link>
           </div>
 
         </div>

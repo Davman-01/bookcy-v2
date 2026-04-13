@@ -109,8 +109,8 @@ export default function SeoGuidePage() {
           </div>
 
           {/* FAQ Section */}
-          <hr className="my-16 border-slate-200" />
-          <h3 className="text-2xl mb-8">Sıkça Sorulan Sorular</h3>
+<hr className="my-16 border-slate-200" />
+<h3 id="sss" className="text-2xl font-black mb-8 scroll-mt-32">Sıkça Sorulan Sorular</h3>
           <div className="space-y-6">
             <div>
               <h4 className="font-bold text-lg">Kıbrıs'ta online randevu sistemi kullanmak ücretli mi?</h4>
