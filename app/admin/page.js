@@ -8,7 +8,7 @@ import {
   Activity, CalendarCheck, Check, Lock, Phone, Star, MessageSquare, BarChart3,
   CreditCard, Send, Eye, EyeOff
 } from 'lucide-react';
-
+import AdminTrialControl from '@/components/AdminTrialControl';
 import { supabase } from '@/lib/supabase';
 import { getActivationTemplate, getRegistrationTemplate } from '@/lib/emailTemplates';
 
@@ -44,7 +44,7 @@ export default function SuperAdmin() {
   const [reviews, setReviews] = useState([]);
   
   const [activeTab, setActiveTab] = useState('overview');
-  const [loading, setLoading] = useState(true); // Sayfa ilk açıldığında loading ile başlasın
+  const [loading, setLoading] = useState(true); 
   const [searchQuery, setSearchQuery] = useState('');
   const [customerSearch, setCustomerSearch] = useState('');
 
@@ -59,10 +59,10 @@ export default function SuperAdmin() {
       // Eğer sistemde senin mailinle bir oturum açıksa içeri al
       if (session && session.user.email === 'dogukandavman01@gmail.com') {
         setIsAuthenticated(true);
-        fetchData(); // Sadece yetkiliyse verileri çek
+        fetchData(); 
       } else {
         setIsAuthenticated(false);
-        setLoading(false); // Yetkisizse login ekranını göster
+        setLoading(false); 
       }
     };
     
@@ -92,7 +92,7 @@ export default function SuperAdmin() {
         alert("Giriş Başarısız: Şifre veya E-posta hatalı.");
       } else if (data.session) {
         setIsAuthenticated(true);
-        fetchData(); // Giriş başarılıysa verileri çek
+        fetchData(); 
       }
     } catch (err) {
       alert("Sistemsel bir hata oluştu.");
@@ -105,7 +105,6 @@ export default function SuperAdmin() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsAuthenticated(false);
-    // Verileri temizle ki arkada kalmasın
     setShops([]);
     setAppointments([]);
     setReviews([]);
@@ -131,7 +130,6 @@ export default function SuperAdmin() {
     }
   }
 
-  // İşletme Onaylama
   const approveShop = async (shop) => {
     const isConfirmed = window.confirm(`${shop.name} işletmesini ONAYLAMAK istediğinize emin misiniz?`);
     if (!isConfirmed) return;
@@ -163,7 +161,6 @@ export default function SuperAdmin() {
     setLoading(false);
   };
 
-  // İşletme Silme
   const deleteShop = async (id) => {
     const isConfirmed = window.confirm("DİKKAT: Bu işletmeyi sistemden TAMAMEN SİLMEK istediğinize emin misiniz?");
     if (isConfirmed) {
@@ -299,7 +296,6 @@ export default function SuperAdmin() {
     );
   }
 
-  // --- AŞAĞISI STANDART ADMİN PANELİ (DEĞİŞİKLİK YOK) ---
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex text-[#2D1B4E] font-['DM_Sans']">
       <aside className="w-64 bg-[#2D1B4E] text-white h-screen sticky top-0 flex flex-col shrink-0 shadow-2xl z-40 hidden md:flex">
@@ -325,6 +321,7 @@ export default function SuperAdmin() {
           <div className="max-w-[1400px] mx-auto">
             {activeTab === 'overview' && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
                   <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
                     <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Toplam İşletme</p>
@@ -343,6 +340,12 @@ export default function SuperAdmin() {
                     <p className="text-4xl font-black text-yellow-500">{avgTotal}</p>
                   </div>
                 </div>
+
+                {/* YENİ EKLENEN KAMPANYA KONTROL PANELİ BURADA! */}
+                <div className="mb-10">
+                  <AdminTrialControl />
+                </div>
+
                 <div className="bg-white rounded-[32px] p-8 border border-slate-100 mb-10 shadow-sm">
                   <h3 className="text-xl font-black uppercase mb-8 flex items-center gap-2"><BarChart3 className="text-[#E8622A]"/> Sektörel Dağılım</h3>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
