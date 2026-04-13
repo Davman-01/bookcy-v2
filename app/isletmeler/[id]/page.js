@@ -26,6 +26,9 @@ export default function ShopDetail() {
   const [formData, setFormData] = useState({ name: '', surname: '', phoneCode: '+90', phone: '', email: '' }); 
   const [bookingData, setBookingData] = useState({ date: new Date().toISOString().split('T')[0], time: '', selectedShopService: null, selectedStaff: null, selectedEvent: null });
 
+  // YENİ EKLENEN KISIM: Müşteri Sözleşme Onay Hafızası
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+
   // İlgili işletmeyi bul ve ayarla
   useEffect(() => {
     if (shops && shops.length > 0) {
@@ -223,8 +226,42 @@ export default function ShopDetail() {
                       <div className="flex-1 flex flex-col gap-6 animate-in fade-in duration-300"><input type="date" min={new Date().toISOString().split('T')[0]} value={bookingData.date} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] shadow-sm cursor-pointer" onChange={(e) => setBookingData({...bookingData, date: e.target.value, time: ''})} />{bookingData.date && ( isShopClosedToday ? (<div className="py-12 text-center text-red-500 font-bold uppercase text-xs bg-red-50 rounded-3xl border border-red-100 flex flex-col items-center justify-center gap-3"><CalendarOff size={32}/> {text.booking.closed}</div>) : (<div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">{currentAvailableSlots.map((slot, idx) => { const needed = getRequiredSlots(bookingData.selectedShopService.duration); const check = currentAvailableSlots.slice(idx, idx + needed); let isUnavail = check.length < needed || check.some(s => closedSlots.includes(s)); return (<button key={slot} disabled={isUnavail} onClick={() => { setBookingData({...bookingData, time: slot}); setBookingPhase(4); }} className={`py-4 rounded-2xl text-xs font-bold border cursor-pointer transition-all ${isUnavail ? 'bg-slate-50 border-transparent text-slate-300 line-through' : bookingData.time === slot ? 'bg-[#E8622A] text-white border-[#E8622A] shadow-md scale-105' : 'bg-white border-slate-200 text-[#2D1B4E] hover:border-[#E8622A] hover:text-[#E8622A] shadow-sm'}`}>{slot}</button>); })}</div>) )}</div>
                   )}
 
+                  {/* SON AŞAMA: İLETİŞİM BİLGİLERİ VE YASAL ONAY */}
                   {(bookingPhase === 4 || (selectedShop.category === 'Bar & Club' && bookingPhase === 3)) && (
-                      <form onSubmit={handleBooking} className="flex flex-col gap-4 flex-1 mt-auto animate-in fade-in duration-300"><div className="flex flex-col sm:flex-row gap-4 w-full"><input required placeholder={text.booking.name} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setFormData({...formData, name: e.target.value})} /><input required placeholder={text.booking.surname} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setFormData({...formData, surname: e.target.value})} /></div><div className="flex gap-3 w-full"><select className="bg-white border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm w-24 cursor-pointer" value={formData.phoneCode} onChange={e => setFormData({...formData, phoneCode: e.target.value})}><option value="+90">TR</option></select><input required type="tel" placeholder={text.booking.phone} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setFormData({...formData, phone: e.target.value})} /></div><input required type="email" placeholder={text.booking.email} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={handleBookingEmailChange} /><button type="submit" className="w-full bg-[#E8622A] text-white py-5 rounded-2xl mt-4 uppercase font-black text-sm tracking-[0.2em] border-none cursor-pointer hover:bg-orange-600 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">{text.booking.confirm}</button></form>
+                      <form onSubmit={handleBooking} className="flex flex-col gap-4 flex-1 mt-auto animate-in fade-in duration-300">
+                        <div className="flex flex-col sm:flex-row gap-4 w-full">
+                          <input required placeholder={text.booking.name} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                          <input required placeholder={text.booking.surname} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setFormData({...formData, surname: e.target.value})} />
+                        </div>
+                        <div className="flex gap-3 w-full">
+                          <select className="bg-white border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm w-24 cursor-pointer" value={formData.phoneCode} onChange={e => setFormData({...formData, phoneCode: e.target.value})}><option value="+90">TR</option></select>
+                          <input required type="tel" placeholder={text.booking.phone} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+                        </div>
+                        <input required type="email" placeholder={text.booking.email} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={handleBookingEmailChange} />
+
+                        {/* YENİ EKLENEN KISIM: YASAL ONAY KUTUSU - MÜŞTERİ İÇİN */}
+                        <div className="flex items-start gap-3 mt-4 mb-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                          <input
+                            type="checkbox"
+                            id="customer-terms"
+                            checked={isTermsAccepted}
+                            onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                            className="mt-0.5 w-5 h-5 text-[#E8622A] border-slate-300 rounded focus:ring-[#E8622A] cursor-pointer shrink-0"
+                          />
+                          <label htmlFor="customer-terms" className="text-[11px] text-slate-500 leading-relaxed cursor-pointer text-left">
+                            Bookcy <a href="/yasal/sartlar" target="_blank" className="text-[#E8622A] font-bold hover:underline">Kullanıcı Hizmet Sözleşmesi</a>'ni okudum. Bookcy'nin yalnızca bir aracı platform olduğunu; hizmet kalitesi, ücretlendirme, iptal işlemleri veya işletmede yaşanacak her türlü uyuşmazlıkta tek muhatabımın randevu aldığım işletme olduğunu kabul ediyorum.
+                          </label>
+                        </div>
+
+                        {/* GÜNCELLENEN BUTON: Sadece onaylanırsa aktif olur */}
+                        <button 
+                          type="submit" 
+                          disabled={!isTermsAccepted} 
+                          className={`w-full py-5 rounded-2xl mt-2 uppercase font-black text-sm tracking-[0.2em] border-none transition-all shadow-lg hover:shadow-xl ${!isTermsAccepted ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#E8622A] text-white hover:bg-orange-600 hover:-translate-y-1 cursor-pointer'}`}
+                        >
+                          {text.booking.confirm}
+                        </button>
+                      </form>
                   )}
               </div>
           </div>
