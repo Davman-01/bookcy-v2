@@ -3,7 +3,8 @@ import './globals.css';
 import { AppProvider } from './providers';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { usePathname } from 'next/navigation'; // EKLENDİ
+import BetaPopup from '@/components/BetaPopup'; // YENİ EKLENDİ: Pop-up'ı içeri aktarıyoruz
+import { usePathname } from 'next/navigation'; 
 
 // EKLENDİ: SEO Metadata tanımlamalarını layout içinden kaldırdık çünkü "use client" ile metadata kullanılamaz.
 // Eğer SEO ayarlarını eklemek istersen, "app/layout.js" yerine "app/page.js" (Ana sayfa) içine metadata export etmelisin.
@@ -64,6 +65,10 @@ export default function RootLayout({ children }) {
       <body>
         <AppProvider>
           <Navbar />
+          
+          {/* YENİ EKLENDİ: Kurumsal Beta Bilgilendirme Pop-up'ı */}
+          <BetaPopup /> 
+
           {/* DİNAMİK MARGIN: mainMarginClass buraya eklendi */}
           <main className={`flex-1 w-full relative z-10 min-h-[80vh] ${mainMarginClass}`}>
             {children}
