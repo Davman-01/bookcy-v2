@@ -77,7 +77,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Platform Menüsü (Eksik Linkler Eklendi) */}
+          {/* Platform Menüsü (Eksik Linkler ve SEO Rehberi Eklendi) */}
           <div>
             <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{text.footer?.col1}</h4>
             <Link href="/" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Ana Sayfa</Link>
@@ -86,6 +86,8 @@ export default function Footer() {
             <Link href="/neden-bookcy" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.why || "Neden Bookcy"}</Link>
             <Link href="/hakkimizda" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.about || "Hakkımızda"}</Link>
             <Link href="/iletisim" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.contact || "İletişim"}</Link>
+            {/* YENİ EKLENEN SEO LİNKİ */}
+            <Link href="/kibris-rezervasyon-ve-yasam-rehberi" className="block mb-4 text-[#E8622A] hover:text-white font-bold transition-colors text-decoration-none">Kıbrıs Yaşam Rehberi</Link>
           </div>
 
           {/* Bölgeler */}
