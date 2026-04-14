@@ -1,16 +1,23 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { X, Rocket, Store, Instagram } from 'lucide-react';
+import { X, Rocket, Store } from 'lucide-react'; // Instagram'ı buradan sildik!
+
+// Özel Instagram İkonu (Hatasız SVG)
+const InstagramIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+  </svg>
+);
 
 export default function WelcomePopup() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Pop-up'ı kullanıcıyı bunaltmamak için oturum (session) başına bir kez gösteriyoruz.
-    // İstersen 'sessionStorage' yerine 'localStorage' yapıp hayatında sadece 1 kez görmesini sağlayabilirsin.
+    // Pop-up'ı oturum başına bir kez göstermek için
     const hasSeenPopup = sessionStorage.getItem('bookcy_beta_popup');
     if (!hasSeenPopup) {
-      // Sayfa yüklendikten 1 saniye sonra şık bir şekilde ekrana gelsin
       const timer = setTimeout(() => setIsOpen(true), 1000);
       return () => clearTimeout(timer);
     }
@@ -87,7 +94,7 @@ export default function WelcomePopup() {
               rel="noopener noreferrer" 
               className="w-full bg-white text-[#2D1B4E] border border-slate-200 font-black py-4 rounded-xl uppercase tracking-widest text-xs hover:bg-slate-50 transition-all flex items-center justify-center gap-2 text-decoration-none cursor-pointer"
             >
-              <Instagram size={18} /> Gelişmeler İçin Takip Et
+              <InstagramIcon size={18} /> Gelişmeler İçin Takip Et
             </a>
           </div>
 
