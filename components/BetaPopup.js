@@ -1,76 +1,104 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { X, Rocket, Sparkles } from 'lucide-react';
+import { X, Rocket, Store, Instagram } from 'lucide-react';
 
-export default function BetaPopup() {
+export default function WelcomePopup() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Kullanıcı bu pop-up'ı daha önce kapattıysa tekrar gösterme
-    const isDismissed = sessionStorage.getItem('bookcy_beta_popup_dismissed');
-    
-    if (!isDismissed) {
-      // Sayfa yüklendikten 1 saniye sonra estetik bir şekilde açılsın
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 1000);
+    // Pop-up'ı kullanıcıyı bunaltmamak için oturum (session) başına bir kez gösteriyoruz.
+    // İstersen 'sessionStorage' yerine 'localStorage' yapıp hayatında sadece 1 kez görmesini sağlayabilirsin.
+    const hasSeenPopup = sessionStorage.getItem('bookcy_beta_popup');
+    if (!hasSeenPopup) {
+      // Sayfa yüklendikten 1 saniye sonra şık bir şekilde ekrana gelsin
+      const timer = setTimeout(() => setIsOpen(true), 1000);
       return () => clearTimeout(timer);
     }
   }, []);
 
-  const handleClose = () => {
+  const closePopup = () => {
     setIsOpen(false);
-    // Kapatıldığını session storage'a kaydet (Tarayıcı kapanana kadar bir daha çıkmaz)
-    sessionStorage.setItem('bookcy_beta_popup_dismissed', 'true');
+    sessionStorage.setItem('bookcy_beta_popup', 'true');
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#0B0710]/60 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="bg-white rounded-[32px] w-full max-w-lg relative shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
+    <div className="fixed inset-0 z-[10000] bg-[#2D1B4E]/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="bg-white w-full max-w-lg rounded-[32px] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-500">
+        
+        {/* Üst İnce Şerit (Turuncu Marka Rengi) */}
+        <div className="h-2 w-full bg-gradient-to-r from-[#E8622A] to-orange-500"></div>
         
         {/* Kapat Butonu */}
         <button 
-          onClick={handleClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors z-10"
+          onClick={closePopup} 
+          className="absolute top-5 right-5 text-slate-400 hover:text-[#2D1B4E] transition-colors z-10 bg-slate-50 hover:bg-slate-100 rounded-full p-1.5 border-none cursor-pointer"
         >
           <X size={20} />
         </button>
 
-        {/* Üst Kısım - İllüstrasyon/İkon Alanı */}
-        <div className="bg-[#2D1B4E] p-8 text-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent"></div>
-          <div className="w-16 h-16 bg-[#E8622A] rounded-2xl mx-auto flex items-center justify-center shadow-lg relative z-10 mb-4 transform -rotate-3 hover:rotate-0 transition-transform">
-            <Rocket className="text-white" size={32} />
+        <div className="p-8 md:p-10">
+          
+          {/* İkon */}
+          <div className="w-16 h-16 bg-orange-50 text-[#E8622A] rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-orange-100">
+            <Rocket size={32} />
           </div>
-          <h2 className="text-2xl font-black text-white relative z-10 tracking-tight font-['Plus_Jakarta_Sans']">
-            Bookcy'ye Hoş Geldiniz!
+
+          {/* Ana Başlık */}
+          <h2 className="text-2xl md:text-3xl font-black text-[#2D1B4E] tracking-tight mb-4 leading-tight">
+            Sizin için durmaksızın gelişiyoruz.
           </h2>
-        </div>
-
-        {/* İçerik Kısmı */}
-        <div className="p-8 text-center">
-          <div className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-4 border border-orange-100">
-            <Sparkles size={14} /> Beta Sürümü
+          
+          {/* Metin İçeriği */}
+          <div className="space-y-4 text-sm text-slate-600 font-medium leading-relaxed mb-8">
+            <p>
+              Kıbrıs’ın ilk kapsamlı çevrim içi randevu platformu <strong className="text-[#2D1B4E] font-black">Bookcy</strong>, şu anda <span className="bg-orange-100 text-[#E8622A] px-2 py-0.5 rounded-md font-bold uppercase text-[10px] tracking-widest inline-block border border-orange-200">Beta Test</span> sürecindedir. 
+              Kullanıcılarımıza en yüksek güvenlik standartlarında, hızlı ve kusursuz bir deneyim sunabilmek adına altyapı çalışmalarımız titizlikle devam etmektedir.
+            </p>
+            <p>
+              Bu süreçte nadiren yaşanabilecek gecikme veya aksaklıklar için anlayışınıza teşekkür ederiz. Çok yakında, çok daha güçlü bir deneyimle karşınızda olacağız.
+            </p>
+            
+            {/* İşletmeler İçin Özel Kutu */}
+            <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 mt-6">
+              <div className="flex items-center gap-3 mb-2">
+                <Store size={18} className="text-[#E8622A]" />
+                <h3 className="font-black text-[#2D1B4E] text-xs uppercase tracking-widest">İşletmeler İçin Ön Kayıtlar Başladı</h3>
+              </div>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Hemen başvurunuzu yaparak bekleme listesine katılabilir, Bookcy’nin sunduğu ayrıcalıklardan ilk faydalananlar arasında yer alabilirsiniz.
+              </p>
+            </div>
           </div>
-          
-          <h3 className="text-xl font-bold text-[#2D1B4E] mb-3">
-            Sizler İçin Mükemmelleşiyoruz
-          </h3>
-          
-          <p className="text-slate-500 leading-relaxed text-sm mb-8">
-            Kıbrıs'ın ilk ve tek kapsamlı online randevu platformu olan Bookcy, şu anda <strong>aktif test (Beta)</strong> aşamasındadır. Sizlere en kusursuz ve güvenli deneyimi sunabilmek için altyapı çalışmalarımıza devam ediyoruz. Bu kısa süreçte karşılaşabileceğiniz olası sistemsel gecikmeler veya aksaklıklar için anlayışınızı rica ederiz.
-          </p>
-          
-          <button 
-            onClick={handleClose}
-            className="w-full bg-[#E8622A] hover:bg-[#d5521b] text-white py-4 rounded-xl font-black uppercase tracking-widest text-sm transition-colors shadow-md hover:shadow-lg"
-          >
-            Anladım, Keşfetmeye Başla
-          </button>
-        </div>
 
+          {/* Aksiyon Butonları */}
+          <div className="flex flex-col gap-3">
+            <button 
+              onClick={closePopup} 
+              className="w-full bg-[#E8622A] text-white font-black py-4 rounded-xl uppercase tracking-widest text-xs hover:bg-[#d5521b] transition-all shadow-lg shadow-orange-500/30 border-none cursor-pointer"
+            >
+              ANLADIM, SİTEYE GİRİŞ YAP
+            </button>
+            
+            <a 
+              href="https://instagram.com/bookcy" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="w-full bg-white text-[#2D1B4E] border border-slate-200 font-black py-4 rounded-xl uppercase tracking-widest text-xs hover:bg-slate-50 transition-all flex items-center justify-center gap-2 text-decoration-none cursor-pointer"
+            >
+              <Instagram size={18} /> Gelişmeler İçin Takip Et
+            </a>
+          </div>
+
+          {/* Footer İmza */}
+          <div className="mt-8 text-center border-t border-slate-100 pt-6">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+              Bookcy <span className="text-[#E8622A] mx-1">—</span> Randevu deneyiminde yeni standart.
+            </p>
+          </div>
+
+        </div>
       </div>
     </div>
   );
