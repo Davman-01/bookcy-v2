@@ -39,7 +39,7 @@ export default function Footer() {
     <>
       {!cookieConsent && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 md:p-6 z-[9998] shadow-[0_-10px_40px_rgba(0,0,0,0.05)] flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-bottom-10">
-          <div className="flex items-start gap-4 flex-1 max-4xl">
+          <div className="flex items-start gap-4 flex-1 max-w-4xl">
             <div className="bg-indigo-50 text-indigo-500 p-3 rounded-full shrink-0 hidden md:block"><Info size={24}/></div>
             <div>
               <h4 className="font-black text-[#2D1B4E] mb-1">{text.cookie?.title}</h4>
@@ -64,7 +64,7 @@ export default function Footer() {
               <div className="h-14 w-14 md:h-16 md:w-16 bg-white p-2 rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border border-white/10 transition-transform group-hover:scale-105">
                 <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
               </div>
-              <span className="text-2xl md:text-3xl font-black tracking-tighter text-white font-['Plus_Jakarta_Sans']">
+              <span className="text-2xl md:text-3xl font-black tracking-tighter text-white font-['Plus_Jakarta_Sans'] uppercase">
                 Bookcy<span className="text-[#E8622A]">.</span>
               </span>
             </div>
@@ -79,11 +79,11 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{text.footer?.col1}</h4>
             <Link href="/" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Ana Sayfa</Link>
-            <Link href="/isletmeler" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.places || "İşletmeler"}</Link>
-            <Link href="/ozellikler" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.features || "Özellikler"}</Link>
-            <Link href="/neden-bookcy?" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.why || "Neden Bookcy?"}</Link>
-            <Link href="/hakkimizda" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.about || "Hakkımızda"}</Link>
-            <Link href="/iletisim" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.contact || "İletişim"}</Link>
+            <Link href="/isletmeler" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.places}</Link>
+            <Link href="/ozellikler" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.features}</Link>
+            <Link href="/neden-bookcy" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.why}?</Link>
+            <Link href="/hakkimizda" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.about}</Link>
+            <Link href="/iletisim" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.contact}</Link>
           </div>
 
           <div>
@@ -93,16 +93,15 @@ export default function Footer() {
 
           <div>
             <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{text.footer?.col3}</h4>
-            <Link href="/yasal/gizlilik" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Gizlilik Politikası</Link>
-            <Link href="/yasal/kvkk" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">KVKK Aydınlatma Metni</Link>
+            <Link href="/yasal/gizlilik" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.cookie?.l1 || "Gizlilik Politikası"}</Link>
             <Link href="/yasal/sartlar" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Kullanım Şartları</Link>
-            <Link href="/yasal/cerez" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Çerez Politikası</Link>
           </div>
 
           <div>
-            <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">BLOG</h4>
-            <Link href="/kibris-rezervasyon-ve-yasam-rehberi" className="block mb-4 text-[#E8622A] hover:text-[#ff7a40] font-bold transition-colors text-decoration-none">Kıbrıs Yaşam Rehberi</Link>
-            <Link href="/kibris-rezervasyon-ve-yasam-rehberi#sss" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">Sıkça Sorulan Sorular</Link>
+            <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{text.footer?.blog || "BLOG"}</h4>
+            <Link href="/kibris-rezervasyon-ve-yasam-rehberi" className="block mb-4 text-[#E8622A] hover:text-[#ff7a40] font-bold transition-colors text-decoration-none">{text.footer?.guide || "Kıbrıs Yaşam Rehberi"}</Link>
+            <Link href="/kibris-rezervasyon-ve-yasam-rehberi#sss" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.footer?.sss || "Sıkça Sorulan Sorular"}</Link>
+            <Link href="/istek-sikayet" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.footer?.complaints || "İstek & Şikayet Formu"}</Link>
           </div>
 
         </div>
