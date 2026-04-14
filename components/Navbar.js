@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { ChevronDown, ChevronRight, Menu, X, UserCircle, CheckCircle2, XCircle, Lock, Upload, MessageCircle, Gift } from 'lucide-react';
+import { ChevronDown, ChevronRight, Menu, X, UserCircle, CheckCircle2, Lock, Upload, MessageCircle, Gift } from 'lucide-react';
 import { useAppContext } from '@/app/providers';
 import { supabase } from '@/lib/supabase';
 import { getRegistrationTemplate } from '@/lib/emailTemplates';
@@ -29,7 +29,7 @@ export default function Navbar() {
   const [loginStaffName, setLoginStaffName] = useState(''); 
   const [isLoginLoading, setIsLoginLoading] = useState(false);
   
-  const [newShop, setNewShop] = useState({ name: '', category: 'Berber', location: 'Girne', address: '', maps_link: '', phoneCode: '+90', contactPhone: '', contactInsta: '', contactEmail: '', username: '', password: '', email: '', description: '', logoFile: null, package: 'Ücretsiz Deneme' });
+  const [newShop, setNewShop] = useState({ name: '', category: 'Kişisel Bakım', location: 'Girne', address: '', maps_link: '', phoneCode: '+90', contactPhone: '', contactInsta: '', contactEmail: '', username: '', password: '', email: '', description: '', logoFile: null, package: 'Ücretsiz Deneme' });
   const [isUploading, setIsUploading] = useState(false); 
   const [registerSuccess, setRegisterSuccess] = useState(false);
   const [emailValid, setEmailValid] = useState(null); 
@@ -96,7 +96,7 @@ export default function Navbar() {
                   <div className="h-10 w-10 bg-white p-1 rounded-lg border border-slate-100 flex items-center justify-center overflow-hidden">
                     <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
                   </div>
-                  <span className="text-xl font-black tracking-tighter text-[#2D1B4E] font-['Plus_Jakarta_Sans']">BOOKCY<span className="text-[#E8622A]">.</span></span>
+                  <span className="text-xl font-black tracking-tighter text-[#2D1B4E] font-['Plus_Jakarta_Sans'] uppercase">BOOKCY<span className="text-[#E8622A]">.</span></span>
                 </Link>
                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-500 bg-slate-50 rounded-full border-none cursor-pointer"><X size={24}/></button>
             </div>
@@ -104,9 +104,10 @@ export default function Navbar() {
             <div className="flex flex-col gap-2 p-6 overflow-y-auto">
                 <Link href="/isletmeler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.places}</Link>
                 <Link href="/ozellikler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.features}</Link>
-                <Link href="/neden-bookcy" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.why}?</Link>
+                <Link href="/neden-bookcy" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.why}</Link>
                 <Link href="/hakkimizda" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.about}</Link>
                 <Link href="/iletisim" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.contact}</Link>
+                <Link href="/randevu-sorgula" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#E8622A] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.myAppts}</Link>
             </div>
             
             <div className="mt-auto p-6 flex flex-col gap-4 bg-slate-50 border-t border-slate-100">
@@ -184,9 +185,10 @@ export default function Navbar() {
               </div>
           </li>
 
-          <li><Link href="/neden-bookcy" className={`nav-main-btn text-decoration-none uppercase ${pathname === '/neden-bookcy' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.why}?</Link></li>
+          <li><Link href="/neden-bookcy" className={`nav-main-btn text-decoration-none uppercase ${pathname === '/neden-bookcy' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.why}</Link></li>
           <li><Link href="/hakkimizda" className={`nav-main-btn text-decoration-none uppercase ${pathname === '/hakkimizda' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.about}</Link></li>
           <li><Link href="/iletisim" className={`nav-main-btn text-decoration-none uppercase ${pathname === '/iletisim' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.contact}</Link></li>
+          <li><Link href="/randevu-sorgula" className={`nav-main-btn text-decoration-none uppercase text-[#E8622A] font-black ${pathname === '/randevu-sorgula' ? 'active' : ''}`}>{text.nav?.myAppts}</Link></li>
         </ul>
 
         <div className="flex items-center gap-4">
