@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, MapPin, Map, CheckCircle2, Calendar, Scissors } from 'lucide-react';
+import { Search, MapPin, CheckCircle2, Calendar, Scissors } from 'lucide-react';
 import { useAppContext } from './providers';
 import { categories, cyprusRegions } from '@/lib/constants';
 
@@ -28,6 +28,7 @@ export default function Home() {
 
   return (
     <div className="w-full">
+      {/* HERO BÖLÜMÜ */}
       <section className="relative min-h-[90vh] bg-[#2D1B4E] overflow-hidden flex flex-col items-center justify-center pt-24 pb-20">
         <div 
           className="absolute inset-0 pointer-events-none opacity-40" 
@@ -64,16 +65,24 @@ export default function Home() {
               </button>
           </form>
           
-          <div className="flex items-center justify-center flex-wrap gap-2 text-white/60 text-xs font-bold uppercase tracking-widest">
+          {/* GÜNCELLENEN POPÜLER ARAMALAR BÖLÜMÜ */}
+          <div className="flex items-center justify-center flex-wrap gap-3 text-white/60 text-xs font-bold uppercase tracking-widest mt-6">
              <span className="mr-2">{text.hero?.pop}</span>
              {(categories || []).slice(0,4).map(c => (
-               <button key={c.key} type="button" onClick={() => router.push(`/isletmeler?c=${c.dbName}`)} className="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full border border-white/20 transition-colors cursor-pointer text-white">
-                 {c.emoji} {c.dbName}
+               <button 
+                 key={c.key} 
+                 type="button" 
+                 onClick={() => router.push(`/isletmeler?c=${c.dbName}`)} 
+                 className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full border border-white/20 transition-colors cursor-pointer text-white font-bold"
+               >
+                 <span className="text-base">{c.emoji}</span> 
+                 <span>{c.dbName}</span>
                </button>
              ))}
           </div>
         </div>
         
+        {/* İSTATİSTİKLER */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-16 border-t border-white/10 pt-10 w-full max-w-[900px] mx-auto relative z-10 px-6">
             <div className="text-center md:border-r border-white/10 last:border-0 pb-4 md:pb-0">
               <div className="font-['Plus_Jakarta_Sans'] text-3xl md:text-4xl font-black text-white mb-2">{approvedShops.length}</div>
@@ -94,35 +103,81 @@ export default function Home() {
         </div>
       </section>
 
+      {/* YENİ KATEGORİLER BÖLÜMÜ */}
       <section className="bg-white py-16 md:py-24 px-6 md:px-8 border-b border-slate-200">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
-          <div><div className="text-[11px] font-black text-[#E8622A] uppercase tracking-[0.3em] mb-2">{text.cats?.title}</div><div className="text-3xl md:text-4xl font-black text-[#2D1B4E] tracking-tight">{text.cats?.sub}</div></div>
-          <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer" onClick={() => router.push('/isletmeler')}>{text.cats?.seeAll}</button>
+          <div>
+            <div className="text-[11px] font-black text-[#E8622A] uppercase tracking-[0.3em] mb-2">{text.cats?.title}</div>
+            <div className="text-3xl md:text-4xl font-black text-[#2D1B4E] tracking-tight">{text.cats?.sub}</div>
+          </div>
+          <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer hover:underline" onClick={() => router.push('/isletmeler')}>
+            {text.cats?.seeAll}
+          </button>
         </div>
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6">
+
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 md:gap-6">
           {(categories || []).map((c) => (
-            <button key={c.key} type="button" onClick={() => router.push(`/isletmeler?c=${c.dbName}`)} className="flex flex-col items-center gap-4 transition-transform hover:-translate-y-2 cursor-pointer bg-transparent border-none outline-none">
-              <div className="w-full aspect-square rounded-[32px] overflow-hidden shadow-lg border border-slate-100 flex items-center justify-center text-5xl" style={{background: c.bg}}>
+            <button 
+              key={c.key} 
+              type="button" 
+              onClick={() => router.push(`/isletmeler?c=${c.dbName}`)} 
+              className="flex flex-col items-center gap-3 transition-transform hover:-translate-y-2 cursor-pointer bg-transparent border-none outline-none group"
+            >
+              <div 
+                className="w-full aspect-square rounded-[32px] overflow-hidden shadow-md group-hover:shadow-xl border border-slate-100 flex items-center justify-center text-4xl md:text-5xl transition-all" 
+                style={{background: c.bg}}
+              >
                 {c.emoji}
               </div>
-              <div className="text-xs font-black uppercase tracking-widest text-[#2D1B4E]">{c.dbName}</div>
+              {/* Uzun isimlerin taşmaması için text-center ve leading-tight eklendi */}
+              <div className="text-[10px] md:text-[11px] font-black uppercase tracking-wider text-[#2D1B4E] text-center leading-tight px-1">
+                {c.dbName}
+              </div>
             </button>
           ))}
         </div>
       </section>
 
-      {/* ÖNE ÇIKANLAR */}
+      {/* ÖNE ÇIKANLAR BÖLÜMÜ */}
       {recommendedShops.length > 0 && (
           <section className="bg-slate-50 py-16 md:py-24 px-6 md:px-8 border-t border-slate-200">
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
-              <div><div className="text-[11px] font-black text-[#E8622A] uppercase tracking-[0.3em] mb-2">{text.featured?.title}</div><div className="text-3xl md:text-4xl font-black text-[#2D1B4E] tracking-tight">{text.featured?.sub}</div></div>
-              <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer" onClick={()=>router.push('/isletmeler')}>{text.cats?.seeAll}</button>
+              <div>
+                <div className="text-[11px] font-black text-[#E8622A] uppercase tracking-[0.3em] mb-2">{text.featured?.title}</div>
+                <div className="text-3xl md:text-4xl font-black text-[#2D1B4E] tracking-tight">{text.featured?.sub}</div>
+              </div>
+              <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer hover:underline" onClick={()=>router.push('/isletmeler')}>
+                {text.cats?.seeAll}
+              </button>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
               {recommendedShops.map((shop, idx) => (
-                <div key={shop.id} onClick={() => router.push(`/isletmeler/${shop.id}`)} className={`flex flex-col bg-white rounded-[32px] overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer ${idx === 0 ? 'md:row-span-2' : ''}`}>
-                  <div className={`w-full bg-slate-100 flex items-center justify-center text-6xl relative ${idx === 0 ? 'h-[300px]' : 'h-[200px]'}`}>{shop.cover_url || shop.logo_url ? <img loading="lazy" src={shop.cover_url || shop.logo_url} className="w-full h-full object-cover"/> : (categories.find(c=>c.dbName===shop.category)?.emoji || '💈')}{idx === 0 && <div className="absolute top-4 left-4 bg-gradient-to-r from-[#E8622A] to-orange-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full">🔥 VIP</div>}</div>
-                  <div className="p-6 flex flex-col flex-1"><div className="text-[10px] font-black text-[#E8622A] tracking-widest uppercase mb-2">{shop.category}</div><div className="text-xl font-black text-[#2D1B4E] mb-3">{shop.name}</div><div className="text-sm font-bold text-slate-500 mb-6 flex items-center gap-1"><MapPin size={14}/> {shop.location}</div><button className="mt-auto w-full bg-[#2D1B4E] text-white font-black py-4 rounded-xl uppercase text-xs hover:bg-[#E8622A] transition-colors border-none cursor-pointer">Randevu Al →</button></div>
+                <div 
+                  key={shop.id} 
+                  onClick={() => router.push(`/isletmeler/${shop.id}`)} 
+                  className={`flex flex-col bg-white rounded-[32px] overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer ${idx === 0 ? 'md:row-span-2' : ''}`}
+                >
+                  <div className={`w-full bg-slate-100 flex items-center justify-center text-6xl relative ${idx === 0 ? 'h-[300px]' : 'h-[200px]'}`}>
+                    {shop.cover_url || shop.logo_url ? (
+                      <img loading="lazy" src={shop.cover_url || shop.logo_url} className="w-full h-full object-cover"/>
+                    ) : (
+                      (categories.find(c => c.dbName === shop.category)?.emoji || '✨')
+                    )}
+                    {idx === 0 && (
+                      <div className="absolute top-4 left-4 bg-gradient-to-r from-[#E8622A] to-orange-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-md">
+                        🔥 VIP
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-6 flex flex-col flex-1">
+                    <div className="text-[10px] font-black text-[#E8622A] tracking-widest uppercase mb-2">{shop.category}</div>
+                    <div className="text-xl font-black text-[#2D1B4E] mb-3">{shop.name}</div>
+                    <div className="text-sm font-bold text-slate-500 mb-6 flex items-center gap-1"><MapPin size={14}/> {shop.location}</div>
+                    <button className="mt-auto w-full bg-[#2D1B4E] text-white font-black py-4 rounded-xl uppercase text-xs hover:bg-[#E8622A] transition-colors border-none cursor-pointer">
+                      Randevu Al →
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -136,10 +191,38 @@ export default function Home() {
           <div className="text-3xl md:text-5xl font-black text-[#2D1B4E] mb-12 md:mb-16 tracking-tight">{text.how?.sub}</div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 md:gap-8 relative">
             <div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-[2px] bg-slate-100 z-0"></div>
-            <div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">🔍<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">1</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{text.how?.s1}</div><div className="text-sm text-slate-500 font-medium px-4">{text.how?.d1}</div></div>
-            <div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">📅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">2</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{text.how?.s2}</div><div className="text-sm text-slate-500 font-medium px-4">{text.how?.d2}</div></div>
-            <div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">✅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">3</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{text.how?.s3}</div><div className="text-sm text-slate-500 font-medium px-4">{text.how?.d3}</div></div>
-            <div className="relative z-10 flex flex-col items-center"><div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">✨<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">4</div></div><div className="text-lg font-black text-[#2D1B4E] mb-2">{text.how?.s4}</div><div className="text-sm text-slate-500 font-medium px-4">{text.how?.d4}</div></div>
+            
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">
+                🔍<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">1</div>
+              </div>
+              <div className="text-lg font-black text-[#2D1B4E] mb-2">{text.how?.s1}</div>
+              <div className="text-sm text-slate-500 font-medium px-4">{text.how?.d1}</div>
+            </div>
+            
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">
+                📅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">2</div>
+              </div>
+              <div className="text-lg font-black text-[#2D1B4E] mb-2">{text.how?.s2}</div>
+              <div className="text-sm text-slate-500 font-medium px-4">{text.how?.d2}</div>
+            </div>
+            
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">
+                ✅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">3</div>
+              </div>
+              <div className="text-lg font-black text-[#2D1B4E] mb-2">{text.how?.s3}</div>
+              <div className="text-sm text-slate-500 font-medium px-4">{text.how?.d3}</div>
+            </div>
+            
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">
+                ✨<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">4</div>
+              </div>
+              <div className="text-lg font-black text-[#2D1B4E] mb-2">{text.how?.s4}</div>
+              <div className="text-sm text-slate-500 font-medium px-4">{text.how?.d4}</div>
+            </div>
           </div>
         </div>
       </section>
