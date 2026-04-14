@@ -84,6 +84,8 @@ export default function Footer() {
             <Link href="/neden-bookcy" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.why}?</Link>
             <Link href="/hakkimizda" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.about}</Link>
             <Link href="/iletisim" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.contact}</Link>
+            {/* YENİ EKLENEN RANDEVULARIM LİNKİ */}
+            <Link href="/randevu-sorgula" className="block mb-4 text-[#E8622A] font-bold hover:text-[#ff7a40] transition-colors text-decoration-none">{text.nav?.myAppts || "Randevularım"}</Link>
           </div>
 
           <div>
@@ -99,7 +101,7 @@ export default function Footer() {
 
           <div>
             <h4 className="text-white font-black mb-6 md:mb-8 tracking-[0.2em] uppercase text-xs border-l-2 border-[#E8622A] pl-3">{text.footer?.blog || "BLOG"}</h4>
-            <Link href="/kibris-rezervasyon-ve-yasam-rehberi" className="block mb-4 text-[#E8622A] hover:text-[#ff7a40] font-bold transition-colors text-decoration-none">{text.footer?.guide || "Kıbrıs Yaşam Rehberi"}</Link>
+            <Link href="/kibris-rezervasyon-ve-yasam-rehberi" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.footer?.guide || "Kıbrıs Yaşam Rehberi"}</Link>
             <Link href="/kibris-rezervasyon-ve-yasam-rehberi#sss" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.footer?.sss || "Sıkça Sorulan Sorular"}</Link>
             <Link href="/istek-sikayet" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.footer?.complaints || "İstek & Şikayet Formu"}</Link>
           </div>
