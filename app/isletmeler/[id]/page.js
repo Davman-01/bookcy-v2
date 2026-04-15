@@ -36,7 +36,7 @@ export default function ShopDetail() {
 
   useEffect(() => {
     if (shops && shops.length > 0) {
-      const shop = shops.find(s => s.id === params.id || s.id === Number(params.id));
+      const shop = shops.find(s => String(s.id) === String(params.id));
       if (shop) {
         setSelectedShop(shop);
         setProfileTab(shop.category === 'Bar & Club' ? 'events' : 'services');
@@ -62,7 +62,7 @@ export default function ShopDetail() {
 
   if (!selectedShop || !t?.[lang]) return <div className="p-20 text-center font-bold text-slate-400">Yükleniyor...</div>;
 
-  const isClub = selectedShop.category === 'Bar & Club';
+  const isClub = selectedShop?.category === 'Bar & Club';
   const text = t[lang];
 
   const handleBookingEmailChange = (e) => setFormData(prev => ({...prev, email: e.target.value}));
@@ -70,9 +70,9 @@ export default function ShopDetail() {
 
   const getCurrentAvailableSlots = () => {
     if (!bookingData.date || isClub) return allTimeSlots;
-    if (selectedShop.closed_dates && selectedShop.closed_dates.includes(bookingData.date)) return [];
+    if (selectedShop?.closed_dates && selectedShop.closed_dates.includes(bookingData.date)) return [];
     const dayName = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'][new Date(bookingData.date).getDay()];
-    const workingHours = Array.isArray(selectedShop.working_hours) ? selectedShop.working_hours : defaultWorkingHours;
+    const workingHours = Array.isArray(selectedShop?.working_hours) ? selectedShop.working_hours : defaultWorkingHours;
     const todayHours = workingHours.find(h => h.day === dayName);
     if (todayHours && todayHours.isClosed) return []; 
     else if (todayHours) return allTimeSlots.filter(slot => slot >= todayHours.open && slot < todayHours.close);
@@ -89,7 +89,7 @@ export default function ShopDetail() {
     
     const { error } = await supabase.from('waitlist').insert([{
       shop_id: selectedShop.id,
-      service_name: bookingData.selectedShopService?.name || 'Genel',
+      service_name: bookingData?.selectedShopService?.name || 'Genel',
       wait_date: bookingData.date,
       wait_time: waitlistTime,
       customer_name: waitlistForm.name,
@@ -108,7 +108,7 @@ export default function ShopDetail() {
         setShowWaitlistModal(false);
         setWaitlistStatus('idle');
         setWaitlistTime('');
-      }, 3000); // 3 saniye sonra pop-up'ı otomatik kapat
+      }, 3000); 
     }
   }
 
@@ -124,9 +124,9 @@ export default function ShopDetail() {
 
     const availableSlotsForBooking = getCurrentAvailableSlots();
     const startIndex = availableSlotsForBooking.indexOf(bookingData.time);
-    const neededSlots = getRequiredSlots(bookingData.selectedShopService.duration);
+    const neededSlots = getRequiredSlots(bookingData.selectedShopService?.duration || '30');
     const occupied_slots = isClub ? [] : availableSlotsForBooking.slice(startIndex, startIndex + neededSlots);
-    let assignedStaffName = isClub ? 'Rezervasyon' : bookingData.selectedStaff.name;
+    let assignedStaffName = isClub ? 'Rezervasyon' : bookingData.selectedStaff?.name || 'Genel';
     
     if (!isClub && (assignedStaffName === "Fark Etmez" || assignedStaffName === 'Any Staff' || assignedStaffName === 'Любой')) {
         if (selectedShop.staff && selectedShop.staff.length > 0) {
@@ -141,15 +141,15 @@ export default function ShopDetail() {
     }
 
     const fullPhone = formData.phoneCode + " " + formData.phone;
-    const finalDate = isClub ? bookingData.selectedEvent.date : bookingData.date;
-    const finalTime = isClub ? bookingData.selectedEvent.time : bookingData.time;
+    const finalDate = isClub ? bookingData.selectedEvent?.date : bookingData.date;
+    const finalTime = isClub ? bookingData.selectedEvent?.time : bookingData.time;
 
-    const { error } = await supabase.from('appointments').insert([{ shop_id: selectedShop.id, customer_name: formData.name, customer_surname: formData.surname, customer_phone: fullPhone, customer_email: formData.email, appointment_date: finalDate, appointment_time: finalTime, service_name: bookingData.selectedShopService.name, staff_name: assignedStaffName, occupied_slots: occupied_slots, status: 'Bekliyor' }]);
+    const { error } = await supabase.from('appointments').insert([{ shop_id: selectedShop.id, customer_name: formData.name, customer_surname: formData.surname, customer_phone: fullPhone, customer_email: formData.email, appointment_date: finalDate, appointment_time: finalTime, service_name: bookingData.selectedShopService?.name || 'Genel', staff_name: assignedStaffName, occupied_slots: occupied_slots, status: 'Bekliyor' }]);
     
     if (!error) {
        try {
-          await fetch('/api/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: selectedShop.admin_email, subject: 'Yeni Randevu Bildirimi - Bookcy', html: getNewBookingShopTemplate({ shopName: selectedShop.name, date: finalDate, time: finalTime, service: bookingData.selectedShopService.name, staff: assignedStaffName, customerName: formData.name + " " + formData.surname, customerPhone: fullPhone, customerEmail: formData.email })})});
-          await fetch('/api/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: formData.email, subject: 'Randevunuz Alındı - Bookcy', html: getBookingConfirmationTemplate({ customerName: formData.name, shopName: selectedShop.name, date: finalDate, time: finalTime, service: bookingData.selectedShopService.name, staff: assignedStaffName, address: selectedShop.address || selectedShop.location })})});
+          await fetch('/api/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: selectedShop.admin_email, subject: 'Yeni Randevu Bildirimi - Bookcy', html: getNewBookingShopTemplate({ shopName: selectedShop.name, date: finalDate, time: finalTime, service: bookingData.selectedShopService?.name || 'Genel', staff: assignedStaffName, customerName: formData.name + " " + formData.surname, customerPhone: fullPhone, customerEmail: formData.email })})});
+          await fetch('/api/email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: formData.email, subject: 'Randevunuz Alındı - Bookcy', html: getBookingConfirmationTemplate({ customerName: formData.name, shopName: selectedShop.name, date: finalDate, time: finalTime, service: bookingData.selectedShopService?.name || 'Genel', staff: assignedStaffName, address: selectedShop.address || selectedShop.location })})});
        } catch (mErr) { console.error(mErr); }
        setBookingPhase('success'); window.scrollTo(0,0); 
     } else { alert("Rezervasyon alınırken bir hata oluştu!"); }
@@ -254,9 +254,8 @@ export default function ShopDetail() {
                       <div className="flex-1 animate-in fade-in duration-300"><p className="text-[11px] font-black uppercase text-[#2D1B4E] mb-6 tracking-widest border-l-4 border-[#E8622A] pl-3">{text.booking.selectStaff}</p><div className="grid grid-cols-2 sm:grid-cols-3 gap-4"><div onClick={() => { setBookingData({...bookingData, selectedStaff: { name: text.booking.any }}); setBookingPhase(3); }} className="flex flex-col items-center gap-3 cursor-pointer p-4 md:p-6 rounded-3xl border border-slate-200 hover:border-[#E8622A] bg-white transition-all hover:shadow-md group"><div className="w-14 h-14 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-orange-50 group-hover:text-[#E8622A] transition-colors"><Users size={24}/></div><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">{text.booking.any}</span></div>{selectedShop.staff?.map(person => (<div key={person.id} onClick={() => { setBookingData({...bookingData, selectedStaff: person}); setBookingPhase(3); }} className="flex flex-col items-center gap-3 cursor-pointer p-4 md:p-6 rounded-3xl border border-slate-200 hover:border-[#E8622A] bg-white transition-all hover:shadow-md group"><div className="w-14 h-14 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center font-black text-lg group-hover:bg-[#E8622A] group-hover:text-white transition-colors">{person.name.charAt(0)}</div><span className="text-[10px] font-black text-[#2D1B4E] uppercase truncate w-full text-center px-1 tracking-widest">{person.name}</span></div>))}</div></div>
                   )}
 
-                  {/* YENİ EKLENEN KISIM: SAATLER ALANI (Dolu saatler tıklanabilir yapıldı) */}
                   {bookingPhase === 3 && selectedShop.category !== 'Bar & Club' && (
-                      <div className="flex-1 flex flex-col gap-6 animate-in fade-in duration-300"><input type="date" min={new Date().toISOString().split('T')[0]} value={bookingData.date} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] shadow-sm cursor-pointer" onChange={(e) => setBookingData({...bookingData, date: e.target.value, time: ''})} />{bookingData.date && ( isShopClosedToday ? (<div className="py-12 text-center text-red-500 font-bold uppercase text-xs bg-red-50 rounded-3xl border border-red-100 flex flex-col items-center justify-center gap-3"><CalendarOff size={32}/> {text.booking.closed}</div>) : (<div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">{currentAvailableSlots.map((slot, idx) => { const needed = getRequiredSlots(bookingData.selectedShopService.duration); const check = currentAvailableSlots.slice(idx, idx + needed); let isUnavail = check.length < needed || check.some(s => closedSlots.includes(s)); return (<button key={slot} onClick={() => { if(isUnavail) { setWaitlistTime(slot); setShowWaitlistModal(true); } else { setBookingData({...bookingData, time: slot}); setBookingPhase(4); } }} className={`py-4 rounded-2xl flex flex-col items-center justify-center text-xs font-bold border cursor-pointer transition-all ${isUnavail ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60 hover:border-[#E8622A] hover:text-[#E8622A]' : bookingData.time === slot ? 'bg-[#E8622A] text-white border-[#E8622A] shadow-md scale-105' : 'bg-white border-slate-200 text-[#2D1B4E] hover:border-[#E8622A] hover:text-[#E8622A] shadow-sm'}`}><span>{slot}</span> {isUnavail && <span className="text-[8px] font-black uppercase mt-1 tracking-widest text-[#E8622A]">Dolu</span>}</button>); })}</div>) )}</div>
+                      <div className="flex-1 flex flex-col gap-6 animate-in fade-in duration-300"><input type="date" min={new Date().toISOString().split('T')[0]} value={bookingData.date} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] shadow-sm cursor-pointer" onChange={(e) => setBookingData({...bookingData, date: e.target.value, time: ''})} />{bookingData.date && ( isShopClosedToday ? (<div className="py-12 text-center text-red-500 font-bold uppercase text-xs bg-red-50 rounded-3xl border border-red-100 flex flex-col items-center justify-center gap-3"><CalendarOff size={32}/> {text.booking.closed}</div>) : (<div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">{currentAvailableSlots.map((slot, idx) => { const needed = getRequiredSlots(bookingData.selectedShopService?.duration || '30'); const check = currentAvailableSlots.slice(idx, idx + needed); let isUnavail = check.length < needed || check.some(s => closedSlots.includes(s)); return (<button key={slot} onClick={() => { if(isUnavail) { setWaitlistTime(slot); setShowWaitlistModal(true); } else { setBookingData({...bookingData, time: slot}); setBookingPhase(4); } }} className={`py-4 rounded-2xl flex flex-col items-center justify-center text-xs font-bold border cursor-pointer transition-all ${isUnavail ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60 hover:border-[#E8622A] hover:text-[#E8622A]' : bookingData.time === slot ? 'bg-[#E8622A] text-white border-[#E8622A] shadow-md scale-105' : 'bg-white border-slate-200 text-[#2D1B4E] hover:border-[#E8622A] hover:text-[#E8622A] shadow-sm'}`}><span>{slot}</span> {isUnavail && <span className="text-[8px] font-black uppercase mt-1 tracking-widest text-[#E8622A]">Dolu</span>}</button>); })}</div>) )}</div>
                   )}
 
                   {(bookingPhase === 4 || (selectedShop.category === 'Bar & Club' && bookingPhase === 3)) && (
