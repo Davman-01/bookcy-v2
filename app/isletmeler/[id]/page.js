@@ -25,11 +25,15 @@ export default function ShopDetail() {
   const [feedbackData, setFeedbackData] = useState({ q1: null, q2: null, q3: null, q4: null });
   const [formData, setFormData] = useState({ name: '', surname: '', phoneCode: '+90', phone: '', email: '' }); 
   const [bookingData, setBookingData] = useState({ date: new Date().toISOString().split('T')[0], time: '', selectedShopService: null, selectedStaff: null, selectedEvent: null });
-
-  // YENİ EKLENEN KISIM: Müşteri Sözleşme Onay Hafızası
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
 
-  // İlgili işletmeyi bul ve ayarla
+  // --- BEKLEME LİSTESİ (WAITLIST) STATELERİ BAŞLANGICI ---
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [waitlistTime, setWaitlistTime] = useState('');
+  const [waitlistForm, setWaitlistForm] = useState({ name: '', phone: '', email: '' });
+  const [waitlistStatus, setWaitlistStatus] = useState('idle'); // 'idle', 'loading', 'success'
+  // --- BEKLEME LİSTESİ BİTİŞİ ---
+
   useEffect(() => {
     if (shops && shops.length > 0) {
       const shop = shops.find(s => s.id === params.id || s.id === Number(params.id));
@@ -77,6 +81,36 @@ export default function ShopDetail() {
 
   const currentAvailableSlots = getCurrentAvailableSlots();
   const isShopClosedToday = currentAvailableSlots.length === 0;
+
+  // --- BEKLEME LİSTESİ GÖNDERME FONKSİYONU ---
+  async function handleWaitlistSubmit(e) {
+    e.preventDefault();
+    setWaitlistStatus('loading');
+    
+    const { error } = await supabase.from('waitlist').insert([{
+      shop_id: selectedShop.id,
+      service_name: bookingData.selectedShopService?.name || 'Genel',
+      wait_date: bookingData.date,
+      wait_time: waitlistTime,
+      customer_name: waitlistForm.name,
+      customer_phone: waitlistForm.phone,
+      customer_email: waitlistForm.email,
+      status: 'waiting'
+    }]);
+
+    if (error) {
+      console.error(error);
+      alert("Sıraya girerken bir hata oluştu.");
+      setWaitlistStatus('idle');
+    } else {
+      setWaitlistStatus('success');
+      setTimeout(() => {
+        setShowWaitlistModal(false);
+        setWaitlistStatus('idle');
+        setWaitlistTime('');
+      }, 3000); // 3 saniye sonra pop-up'ı otomatik kapat
+    }
+  }
 
   async function handleBooking(e) {
     e.preventDefault();
@@ -135,7 +169,6 @@ export default function ShopDetail() {
     </div>
   );
 
-  // Başarılı Ekranı Render
   if (bookingPhase === 'success') {
     return (
       <div className="w-full bg-[#FAF7F2] min-h-screen pt-10">
@@ -166,7 +199,7 @@ export default function ShopDetail() {
   }
 
   return (
-    <div className="w-full bg-[#FAF7F2] max-w-6xl mx-auto pt-10 md:pt-24 px-6 pb-20 min-h-screen">
+    <div className="w-full bg-[#FAF7F2] max-w-6xl mx-auto pt-10 md:pt-24 px-6 pb-20 min-h-screen relative">
       <button onClick={() => router.push('/isletmeler')} className="flex items-center text-slate-400 hover:text-[#E8622A] mb-6 text-[10px] font-black uppercase tracking-[0.2em] bg-transparent border-none cursor-pointer transition-colors"><ChevronLeft size={16} className="mr-2"/> {text.shops.back}</button>
       <div className="w-full h-[200px] md:h-[300px] rounded-[32px] overflow-hidden relative mb-20 border border-slate-200 bg-slate-50 shadow-sm">
           {selectedShop.cover_url && <img loading="lazy" src={selectedShop.cover_url} className="w-full h-full object-cover" />}
@@ -202,7 +235,6 @@ export default function ShopDetail() {
               {profileTab === 'about' && (<div className="bg-white border border-slate-200 p-8 md:p-10 rounded-[32px] shadow-sm"><h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-6">{text.profile.about}</h3><p className="text-slate-600 text-sm md:text-base font-medium whitespace-pre-wrap leading-relaxed">{selectedShop.description || text.profile.emptyDesc}</p></div>)}
           </div>
 
-          {/* SAĞ REZERVASYON PANELİ */}
           <div className="lg:col-span-5 relative mt-10 lg:mt-0">
               <div className="lg:sticky lg:top-28 bg-white border border-slate-200 rounded-[40px] p-6 md:p-10 flex flex-col min-h-[450px] shadow-xl mb-10 lg:mb-0">
                   <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-6"><h3 className="text-xl font-black uppercase text-[#2D1B4E] tracking-tight">{text.booking.title}</h3>{bookingPhase > 1 && (<button onClick={() => { if(selectedShop.category === 'Bar & Club' && bookingPhase === 2){setBookingPhase(1); setBookingData({...bookingData, selectedEvent:null});} else {setBookingPhase(bookingPhase - 1);} }} className="text-[10px] font-black uppercase text-slate-500 hover:text-[#E8622A] bg-slate-100 hover:bg-orange-50 px-4 py-2 rounded-xl flex items-center border-none cursor-pointer transition-colors tracking-widest"><ChevronLeft size={14} className="mr-1"/> {text.booking.back}</button>)}</div>
@@ -222,11 +254,11 @@ export default function ShopDetail() {
                       <div className="flex-1 animate-in fade-in duration-300"><p className="text-[11px] font-black uppercase text-[#2D1B4E] mb-6 tracking-widest border-l-4 border-[#E8622A] pl-3">{text.booking.selectStaff}</p><div className="grid grid-cols-2 sm:grid-cols-3 gap-4"><div onClick={() => { setBookingData({...bookingData, selectedStaff: { name: text.booking.any }}); setBookingPhase(3); }} className="flex flex-col items-center gap-3 cursor-pointer p-4 md:p-6 rounded-3xl border border-slate-200 hover:border-[#E8622A] bg-white transition-all hover:shadow-md group"><div className="w-14 h-14 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-orange-50 group-hover:text-[#E8622A] transition-colors"><Users size={24}/></div><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">{text.booking.any}</span></div>{selectedShop.staff?.map(person => (<div key={person.id} onClick={() => { setBookingData({...bookingData, selectedStaff: person}); setBookingPhase(3); }} className="flex flex-col items-center gap-3 cursor-pointer p-4 md:p-6 rounded-3xl border border-slate-200 hover:border-[#E8622A] bg-white transition-all hover:shadow-md group"><div className="w-14 h-14 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center font-black text-lg group-hover:bg-[#E8622A] group-hover:text-white transition-colors">{person.name.charAt(0)}</div><span className="text-[10px] font-black text-[#2D1B4E] uppercase truncate w-full text-center px-1 tracking-widest">{person.name}</span></div>))}</div></div>
                   )}
 
+                  {/* YENİ EKLENEN KISIM: SAATLER ALANI (Dolu saatler tıklanabilir yapıldı) */}
                   {bookingPhase === 3 && selectedShop.category !== 'Bar & Club' && (
-                      <div className="flex-1 flex flex-col gap-6 animate-in fade-in duration-300"><input type="date" min={new Date().toISOString().split('T')[0]} value={bookingData.date} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] shadow-sm cursor-pointer" onChange={(e) => setBookingData({...bookingData, date: e.target.value, time: ''})} />{bookingData.date && ( isShopClosedToday ? (<div className="py-12 text-center text-red-500 font-bold uppercase text-xs bg-red-50 rounded-3xl border border-red-100 flex flex-col items-center justify-center gap-3"><CalendarOff size={32}/> {text.booking.closed}</div>) : (<div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">{currentAvailableSlots.map((slot, idx) => { const needed = getRequiredSlots(bookingData.selectedShopService.duration); const check = currentAvailableSlots.slice(idx, idx + needed); let isUnavail = check.length < needed || check.some(s => closedSlots.includes(s)); return (<button key={slot} disabled={isUnavail} onClick={() => { setBookingData({...bookingData, time: slot}); setBookingPhase(4); }} className={`py-4 rounded-2xl text-xs font-bold border cursor-pointer transition-all ${isUnavail ? 'bg-slate-50 border-transparent text-slate-300 line-through' : bookingData.time === slot ? 'bg-[#E8622A] text-white border-[#E8622A] shadow-md scale-105' : 'bg-white border-slate-200 text-[#2D1B4E] hover:border-[#E8622A] hover:text-[#E8622A] shadow-sm'}`}>{slot}</button>); })}</div>) )}</div>
+                      <div className="flex-1 flex flex-col gap-6 animate-in fade-in duration-300"><input type="date" min={new Date().toISOString().split('T')[0]} value={bookingData.date} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] shadow-sm cursor-pointer" onChange={(e) => setBookingData({...bookingData, date: e.target.value, time: ''})} />{bookingData.date && ( isShopClosedToday ? (<div className="py-12 text-center text-red-500 font-bold uppercase text-xs bg-red-50 rounded-3xl border border-red-100 flex flex-col items-center justify-center gap-3"><CalendarOff size={32}/> {text.booking.closed}</div>) : (<div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">{currentAvailableSlots.map((slot, idx) => { const needed = getRequiredSlots(bookingData.selectedShopService.duration); const check = currentAvailableSlots.slice(idx, idx + needed); let isUnavail = check.length < needed || check.some(s => closedSlots.includes(s)); return (<button key={slot} onClick={() => { if(isUnavail) { setWaitlistTime(slot); setShowWaitlistModal(true); } else { setBookingData({...bookingData, time: slot}); setBookingPhase(4); } }} className={`py-4 rounded-2xl flex flex-col items-center justify-center text-xs font-bold border cursor-pointer transition-all ${isUnavail ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60 hover:border-[#E8622A] hover:text-[#E8622A]' : bookingData.time === slot ? 'bg-[#E8622A] text-white border-[#E8622A] shadow-md scale-105' : 'bg-white border-slate-200 text-[#2D1B4E] hover:border-[#E8622A] hover:text-[#E8622A] shadow-sm'}`}><span>{slot}</span> {isUnavail && <span className="text-[8px] font-black uppercase mt-1 tracking-widest text-[#E8622A]">Dolu</span>}</button>); })}</div>) )}</div>
                   )}
 
-                  {/* SON AŞAMA: İLETİŞİM BİLGİLERİ VE YASAL ONAY */}
                   {(bookingPhase === 4 || (selectedShop.category === 'Bar & Club' && bookingPhase === 3)) && (
                       <form onSubmit={handleBooking} className="flex flex-col gap-4 flex-1 mt-auto animate-in fade-in duration-300">
                         <div className="flex flex-col sm:flex-row gap-4 w-full">
@@ -239,7 +271,6 @@ export default function ShopDetail() {
                         </div>
                         <input required type="email" placeholder={text.booking.email} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={handleBookingEmailChange} />
 
-                        {/* YENİ EKLENEN KISIM: YASAL ONAY KUTUSU - MÜŞTERİ İÇİN */}
                         <div className="flex items-start gap-3 mt-4 mb-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
                           <input
                             type="checkbox"
@@ -253,7 +284,6 @@ export default function ShopDetail() {
                           </label>
                         </div>
 
-                        {/* GÜNCELLENEN BUTON: Sadece onaylanırsa aktif olur */}
                         <button 
                           type="submit" 
                           disabled={!isTermsAccepted} 
@@ -266,6 +296,43 @@ export default function ShopDetail() {
               </div>
           </div>
       </div>
+
+      {/* --- BEKLEME LİSTESİ POP-UP (MODAL) EKRANI BAŞLANGICI --- */}
+      {showWaitlistModal && (
+        <div className="fixed inset-0 bg-[#2D1B4E]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[40px] p-8 md:p-10 max-w-md w-full shadow-2xl relative animate-in zoom-in-95 duration-300 border border-slate-200">
+            <button onClick={() => setShowWaitlistModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-red-500 bg-transparent border-none cursor-pointer text-xl font-bold">✕</button>
+            
+            {waitlistStatus === 'success' ? (
+                <div className="text-center py-6">
+                    <div className="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><CheckCircle2 size={40}/></div>
+                    <h3 className="text-2xl font-black text-[#2D1B4E] mb-3 uppercase tracking-tight">Listeye Eklendiniz!</h3>
+                    <p className="text-slate-500 text-sm font-medium leading-relaxed">Bu saat için sıraya girdiniz. Randevuda yer açıldığı an size hemen bir e-posta göndereceğiz.</p>
+                </div>
+            ) : (
+                <>
+                    <div className="text-center mb-8">
+                      <div className="inline-block bg-orange-50 text-[#E8622A] px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest mb-4">Akıllı Bekleme Listesi</div>
+                      <h3 className="text-2xl font-black text-[#2D1B4E] mb-2 uppercase tracking-tight">Bu Saat Dolu 😔</h3>
+                      <p className="text-slate-500 text-sm font-medium leading-relaxed"><strong>{bookingData.date} | {waitlistTime}</strong> saati için sıraya girin. İptal olursa ilk siz kapın!</p>
+                    </div>
+                    
+                    <form onSubmit={handleWaitlistSubmit} className="flex flex-col gap-4">
+                        <input required placeholder="Adınız Soyadınız" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setWaitlistForm({...waitlistForm, name: e.target.value})} />
+                        <input required type="tel" placeholder="Telefon Numaranız" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setWaitlistForm({...waitlistForm, phone: e.target.value})} />
+                        <input required type="email" placeholder="E-posta Adresiniz" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setWaitlistForm({...waitlistForm, email: e.target.value})} />
+                        
+                        <button type="submit" disabled={waitlistStatus === 'loading'} className="w-full bg-[#E8622A] text-white py-5 rounded-2xl mt-4 font-black uppercase text-sm tracking-[0.2em] border-none cursor-pointer shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                            {waitlistStatus === 'loading' ? 'İşleniyor...' : 'Bana Haber Ver 🔔'}
+                        </button>
+                    </form>
+                </>
+            )}
+          </div>
+        </div>
+      )}
+      {/* --- BEKLEME LİSTESİ BİTİŞİ --- */}
+
     </div>
   );
 }
