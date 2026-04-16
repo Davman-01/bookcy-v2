@@ -1,162 +1,331 @@
 "use client";
-import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { CalendarX, Clock, Phone, AlertCircle, Mail } from 'lucide-react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Search, LogIn, UserPlus, Phone, Mail, Lock, Calendar, Clock, MapPin, XCircle, ChevronRight, User, Scissors, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useAppContext } from '@/app/providers';
-import { getBookingCancellationTemplate } from '@/lib/emailTemplates';
 
-function AppointmentCheckContent() {
-  const { lang = 'TR', t } = useAppContext();
-  const searchParams = useSearchParams();
-  const [phone, setPhone] = useState(searchParams.get('phone') || '');
-  const [email, setEmail] = useState(searchParams.get('email') || '');
-  const [appointments, setAppointments] = useState([]);
+export default function CustomerPortal() {
+  const router = useRouter();
+  
+  // Sekme Yönetimi: 'search' (Sorgula), 'login' (Giriş), 'register' (Kayıt)
+  const [activeTab, setActiveTab] = useState('search');
+  
+  // Form Stateleri
+  const [searchPhone, setSearchPhone] = useState('+90');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [registerName, setRegisterName] = useState('');
+  const [registerPhone, setRegisterPhone] = useState('+90');
+  
+  // Sonuç ve Yükleme Stateleri
   const [loading, setLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState(null);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
-  useEffect(() => {
-    if (searchParams.get('phone') && searchParams.get('email')) { 
-      handleSearch(null, searchParams.get('phone'), searchParams.get('email')); 
-    }
-  }, [searchParams]);
-
-  const handleSearch = async (e, directPhone = null, directEmail = null) => {
-    if (e) e.preventDefault();
-    const searchNumber = directPhone || phone;
-    const searchEmail = directEmail || email;
-    if (!searchNumber || !searchEmail) return;
-
+  // 1. MİSAFİR RANDEVU SORGULAMA
+  const handleSearch = async (e) => {
+    e.preventDefault();
     setLoading(true);
-    const { data, error } = await supabase
-      .from('appointments')
-      .select('*, shops(name, admin_email)')
-      .eq('customer_phone', searchNumber)
-      .eq('customer_email', searchEmail)
-      .order('appointment_date', { ascending: false });
+    setErrorMsg('');
+    setSearchResults(null);
 
-    if (!error) setAppointments(data);
-    setLoading(false);
+    try {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          shops ( name, address, category )
+        `)
+        .eq('customer_phone', searchPhone)
+        .order('appointment_date', { ascending: false });
+
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setSearchResults(data);
+      } else {
+        setErrorMsg('Bu telefon numarasına ait aktif randevu bulunamadı.');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Sorgulama sırasında bir hata oluştu.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const cancelAppointment = async (appt) => {
-    const apptDateTime = new Date(`${appt.appointment_date}T${appt.appointment_time}`);
-    const now = new Date();
-    const diffInMs = apptDateTime - now;
-    const diffInHours = diffInMs / (1000 * 60 * 60);
+  // 2. RANDEVU İPTAL ET (Bekleme Listesi Radarını Tetikler)
+  const handleCancelAppointment = async (appointment) => {
+    if (!window.confirm("Bu randevuyu iptal etmek istediğinize emin misiniz?")) return;
+    
+    setLoading(true);
+    try {
+      // 1. Randevu durumunu İptal yap
+      const { error: updateError } = await supabase
+        .from('appointments')
+        .update({ status: 'İptal' })
+        .eq('id', appointment.id);
 
-    if (diffInHours < 1) {
-      alert("Randevuya 1 saatten az kaldığı için sistem üzerinden iptal edilemez. Lütfen işletme ile iletişime geçiniz.");
-      return;
-    }
+      if (updateError) throw updateError;
 
-    if (!window.confirm(`Geri alınamaz! ${appt.shops?.name} randevusunu iptal etmek istediğinize emin misiniz?`)) return;
-
-    // Veritabanını Güncelle
-    const { error } = await supabase
-      .from('appointments')
-      .update({ status: 'cancelled' })
-      .eq('id', appt.id);
-
-    if (!error) {
-      alert("Randevunuz başarıyla iptal edildi.");
-      handleSearch();
-
-      // İŞLETMEYE BİLDİRİM MAİLİ AT (Opsiyonel ama çok profesyonel)
-      if (appt.shops?.admin_email) {
-        try {
-          await fetch('/api/email', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              to: appt.shops.admin_email,
-              subject: 'DİKKAT: Randevu İptal Edildi',
-              html: getBookingCancellationTemplate({
-                shopName: appt.shops.name,
-                customerName: appt.customer_name,
-                date: appt.appointment_date,
-                time: appt.appointment_time,
-                service: appt.service_name
-              })
-            })
-          });
-        } catch (mailErr) {
-          console.error("İşletmeye iptal maili gönderilemedi:", mailErr);
-        }
+      // 2. Arka plandaki Akıllı Bekleme Listesi API'mizi tetikle (Dün yazdığımız kod)
+      try {
+        await fetch('/api/email/cancel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            shop_id: appointment.shop_id,
+            date: appointment.appointment_date,
+            time: appointment.appointment_time
+          })
+        });
+      } catch (apiErr) {
+        console.log("Bekleme listesi radarı tetiklenirken hata oldu ama iptal başarılı.");
       }
+
+      // 3. Ekrandaki listeyi güncelle
+      setSearchResults(searchResults.map(a => a.id === appointment.id ? { ...a, status: 'İptal' } : a));
+      alert("Randevunuz başarıyla iptal edildi.");
+      
+    } catch (err) {
+      console.error(err);
+      alert("İptal işlemi başarısız oldu.");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // 3. MÜŞTERİ GİRİŞİ (Hazırlık)
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    // Not: Gerçek Auth altyapısı bir sonraki adımda kurulacak
+    setTimeout(() => {
+      setLoading(false);
+      setErrorMsg('Müşteri üyelik sistemi şu an bakımda. Lütfen Misafir Sorgulama kısmını kullanın.');
+    }, 1000);
+  };
+
+  // 4. MÜŞTERİ KAYIT (Hazırlık)
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setSuccessMsg('Kaydınız başarıyla alındı! (Test Aşaması)');
+      setActiveTab('login');
+    }, 1000);
   };
 
   return (
-    <div className="max-w-4xl mx-auto w-full">
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-black text-[#2D1B4E] uppercase tracking-tight mb-4">Randevularım & İptal</h1>
-        <p className="text-slate-500 font-medium">Telefon ve E-Posta adresiniz ile aktif randevularınızı yönetebilirsiniz.</p>
-      </div>
+    <div className="min-h-screen bg-[#FAF7F2] font-['DM Sans'] pt-10 pb-20 px-4 flex items-center justify-center relative overflow-hidden">
+      
+      {/* Arka Plan Süslemeleri */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#E8622A]/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[#2D1B4E]/5 rounded-full blur-3xl pointer-events-none"></div>
 
-      <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3 mb-12 max-w-2xl mx-auto bg-white p-4 rounded-[32px] shadow-lg border border-slate-200">
-        <div className="relative flex-1">
-          <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input required type="tel" placeholder="Telefon Numaranız" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 font-bold outline-none focus:border-[#E8622A] transition-colors" value={phone} onChange={(e) => setPhone(e.target.value)} />
+      <div className="w-full max-w-[550px] relative z-10 animate-in fade-in zoom-in-95 duration-500">
+        
+        {/* Başlık Bölümü */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-200 mb-4 text-[#E8622A]">
+            <User size={32} />
+          </div>
+          <h1 className="text-3xl md:text-4xl font-black text-[#2D1B4E] uppercase tracking-tight">Müşteri Portalı</h1>
+          <p className="text-slate-500 font-bold text-sm mt-2">Randevularını yönet, favori mekanlarını kaydet.</p>
         </div>
-        <div className="relative flex-1">
-          <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input required type="email" placeholder="E-Posta Adresiniz" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 font-bold outline-none focus:border-[#E8622A] transition-colors" value={email} onChange={(e) => setEmail(e.target.value)} />
-        </div>
-        <button className="bg-[#E8622A] text-white px-8 py-4 md:py-0 rounded-2xl font-black text-xs uppercase cursor-pointer hover:bg-[#d5521b] transition-all border-none shadow-md">
-          SORGULA
-        </button>
-      </form>
 
-      <div className="space-y-4">
-        {loading ? (
-          <div className="text-center py-10 font-bold text-slate-400 animate-pulse">RANDEVULAR YÜKLENİYOR...</div>
-        ) : appointments.length > 0 ? (
-          appointments.map(appt => (
-            <div key={appt.id} className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-5 text-left w-full">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${appt.status === 'cancelled' ? 'bg-red-50 text-red-500 border border-red-100' : 'bg-indigo-50 text-[#2D1B4E] border border-indigo-100'}`}>
-                  {appt.status === 'cancelled' ? <CalendarX size={28}/> : <Clock size={28}/>}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-black text-[#2D1B4E] text-lg uppercase tracking-tight">{appt.shops?.name}</h3>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mt-1">
-                    <span className="text-sm font-bold text-[#E8622A]">{appt.service_name}</span>
-                    <span className="hidden sm:inline text-slate-300">•</span>
-                    <span className="text-sm font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md inline-block w-max">{appt.appointment_date} / {appt.appointment_time}</span>
-                  </div>
-                  {appt.status === 'cancelled' && <span className="text-[10px] font-black text-white bg-red-500 px-3 py-1 rounded-full uppercase tracking-widest mt-3 inline-block">İPTAL EDİLDİ</span>}
-                </div>
-              </div>
-              {appt.status !== 'cancelled' && (
-                <button 
-                  onClick={() => cancelAppointment(appt)}
-                  className="w-full md:w-auto bg-white text-red-500 px-8 py-4 rounded-xl font-black text-[10px] uppercase border-2 border-red-100 hover:bg-red-500 hover:text-white transition-all cursor-pointer shrink-0 shadow-sm"
-                >
-                  İPTAL ET
-                </button>
-              )}
-            </div>
-          ))
-        ) : (phone && email) && (
-          <div className="text-center py-16 bg-white rounded-[32px] border border-slate-200 shadow-sm">
-             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
-               <AlertCircle size={32} className="text-slate-400" />
-             </div>
-             <p className="text-slate-600 font-black text-lg">Bu bilgilere ait randevu bulunamadı.</p>
-             <p className="text-slate-400 font-medium text-sm mt-2">Lütfen telefon ve e-posta adresinizi kontrol edin.</p>
+        {/* Tab Menüsü */}
+        <div className="bg-white p-1.5 rounded-2xl flex gap-1 shadow-sm border border-slate-200 mb-8">
+          <button 
+            onClick={() => {setActiveTab('search'); setErrorMsg(''); setSuccessMsg('');}} 
+            className={`flex-1 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${activeTab === 'search' ? 'bg-[#2D1B4E] text-white shadow-md' : 'bg-transparent text-slate-400 hover:text-[#2D1B4E]'}`}
+          >
+            Misafir Sorgulama
+          </button>
+          <button 
+            onClick={() => {setActiveTab('login'); setErrorMsg(''); setSuccessMsg('');}} 
+            className={`flex-1 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${(activeTab === 'login' || activeTab === 'register') ? 'bg-[#2D1B4E] text-white shadow-md' : 'bg-transparent text-slate-400 hover:text-[#2D1B4E]'}`}
+          >
+            Üye Girişi
+          </button>
+        </div>
+
+        {/* Uyarı Mesajları */}
+        {errorMsg && (
+          <div className="bg-red-50 border border-red-100 text-red-500 p-4 rounded-2xl mb-6 flex items-start gap-3 text-sm font-bold shadow-sm animate-in slide-in-from-top-2">
+            <AlertCircle size={18} className="shrink-0 mt-0.5"/>
+            <p>{errorMsg}</p>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
+        {successMsg && (
+          <div className="bg-green-50 border border-green-100 text-green-600 p-4 rounded-2xl mb-6 flex items-start gap-3 text-sm font-bold shadow-sm animate-in slide-in-from-top-2">
+            <CheckCircle2 size={18} className="shrink-0 mt-0.5"/>
+            <p>{successMsg}</p>
+          </div>
+        )}
 
-export default function AppointmentCheckPage() {
-  return (
-    <div className="min-h-screen bg-[#F8FAFC] pt-32 pb-20 px-6 flex flex-col">
-      <Suspense fallback={<div className="text-center mt-20 font-bold text-slate-400 animate-pulse">Sayfa Yükleniyor...</div>}>
-        <AppointmentCheckContent />
-      </Suspense>
+        {/* İÇERİK 1: MİSAFİR SORGULAMA */}
+        {activeTab === 'search' && (
+          <div className="animate-in fade-in duration-300">
+            {!searchResults ? (
+              <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200">
+                <h3 className="font-black text-[#2D1B4E] text-lg mb-6 flex items-center gap-2">
+                  <Search className="text-[#E8622A]"/> Randevunu Bul
+                </h3>
+                <form onSubmit={handleSearch} className="space-y-5">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 pl-2">Telefon Numaranız</label>
+                    <div className="relative">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Phone size={18}/></div>
+                      <input 
+                        type="tel" 
+                        required 
+                        value={searchPhone}
+                        onChange={(e) => setSearchPhone(e.target.value)}
+                        placeholder="+90 5XX XXX XX XX" 
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] focus:bg-white transition-colors"
+                      />
+                    </div>
+                  </div>
+                  <button type="submit" disabled={loading} className="w-full bg-[#E8622A] hover:bg-orange-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 disabled:opacity-70 flex items-center justify-center gap-2 border-none cursor-pointer">
+                    {loading ? <Loader2 className="animate-spin" size={18}/> : 'Randevularımı Getir'}
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="space-y-6 animate-in slide-in-from-bottom-4">
+                <div className="flex justify-between items-center mb-2 px-2">
+                  <h3 className="font-black text-[#2D1B4E] text-lg">Bulunan İşlemler</h3>
+                  <button onClick={() => setSearchResults(null)} className="text-[10px] font-black text-slate-400 hover:text-[#E8622A] uppercase tracking-widest border-none bg-transparent cursor-pointer">Yeni Sorgu</button>
+                </div>
+                
+                {searchResults.map((appt) => (
+                  <div key={appt.id} className={`bg-white p-6 rounded-[32px] shadow-sm border relative overflow-hidden transition-all ${appt.status === 'İptal' ? 'border-red-100 opacity-70' : 'border-slate-200 hover:border-[#E8622A]'}`}>
+                    {appt.status === 'İptal' && <div className="absolute top-0 right-0 bg-red-500 text-white text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-bl-xl">İptal Edildi</div>}
+                    {appt.status === 'Tamamlandı' && <div className="absolute top-0 right-0 bg-green-500 text-white text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-bl-xl">Tamamlandı</div>}
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-orange-50 text-[#E8622A] rounded-xl flex items-center justify-center shrink-0 border border-orange-100">
+                        {appt.shops?.category === 'Bar & Club' ? <Music size={20}/> : <Scissors size={20}/>}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-black text-lg text-[#2D1B4E] uppercase leading-none mb-1">{appt.shops?.name || 'İşletme'}</h4>
+                        <p className="text-xs font-bold text-slate-400 flex items-center gap-1 mb-3"><MapPin size={12}/> {appt.shops?.address || 'Konum belirtilmemiş'}</p>
+                        
+                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 grid grid-cols-2 gap-2 mb-4">
+                          <div>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Tarih</span>
+                            <span className="font-bold text-sm text-[#2D1B4E]">{appt.appointment_date}</span>
+                          </div>
+                          <div>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Saat</span>
+                            <span className="font-black text-sm text-[#E8622A]">{appt.appointment_time}</span>
+                          </div>
+                          <div className="col-span-2 pt-2 border-t border-slate-200 mt-1">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 block">Hizmet / Uzman</span>
+                            <span className="font-bold text-sm text-[#2D1B4E]">{appt.service_name} {appt.staff_name && appt.staff_name !== 'Genel' ? `• ${appt.staff_name}` : ''}</span>
+                          </div>
+                        </div>
+
+                        {(!appt.status || appt.status === 'Bekliyor') && (
+                          <button onClick={() => handleCancelAppointment(appt)} className="w-full bg-white border border-red-200 text-red-500 hover:bg-red-50 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-colors cursor-pointer flex items-center justify-center gap-2">
+                            <XCircle size={16}/> İşlemi İptal Et
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* İÇERİK 2: ÜYE GİRİŞİ */}
+        {activeTab === 'login' && (
+          <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 animate-in slide-in-from-right-8 duration-300">
+            <h3 className="font-black text-[#2D1B4E] text-lg mb-6 flex items-center gap-2">
+              <LogIn className="text-[#E8622A]"/> Hesabınıza Giriş Yapın
+            </h3>
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 pl-2">E-Posta Adresi</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Mail size={18}/></div>
+                  <input type="email" required value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} placeholder="mail@ornek.com" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] focus:bg-white transition-colors" />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 pl-2 flex justify-between">
+                  <span>Şifre</span>
+                  <span className="text-[#E8622A] cursor-pointer hover:underline">Şifremi Unuttum</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Lock size={18}/></div>
+                  <input type="password" required value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] focus:bg-white transition-colors" />
+                </div>
+              </div>
+              <button type="submit" disabled={loading} className="w-full bg-[#2D1B4E] hover:bg-[#1a0f2e] text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 disabled:opacity-70 flex items-center justify-center gap-2 border-none cursor-pointer">
+                {loading ? <Loader2 className="animate-spin" size={18}/> : 'Giriş Yap'}
+              </button>
+            </form>
+            
+            <div className="mt-8 pt-6 border-t border-slate-100 text-center">
+              <p className="text-sm font-bold text-slate-500">
+                Hesabınız yok mu? <button onClick={() => setActiveTab('register')} className="text-[#E8622A] border-none bg-transparent font-black cursor-pointer hover:underline">Ücretsiz Kayıt Ol</button>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* İÇERİK 3: YENİ KAYIT */}
+        {activeTab === 'register' && (
+          <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200 animate-in slide-in-from-right-8 duration-300">
+            <h3 className="font-black text-[#2D1B4E] text-lg mb-6 flex items-center gap-2">
+              <UserPlus className="text-[#E8622A]"/> Yeni Hesap Oluştur
+            </h3>
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><User size={18}/></div>
+                  <input type="text" required value={registerName} onChange={(e) => setRegisterName(e.target.value)} placeholder="Adınız Soyadınız" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] focus:bg-white transition-colors" />
+                </div>
+              </div>
+              <div>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Phone size={18}/></div>
+                  <input type="tel" required value={registerPhone} onChange={(e) => setRegisterPhone(e.target.value)} placeholder="Telefon Numaranız" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] focus:bg-white transition-colors" />
+                </div>
+              </div>
+              <div>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Mail size={18}/></div>
+                  <input type="email" required placeholder="E-Posta Adresiniz" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] focus:bg-white transition-colors" />
+                </div>
+              </div>
+              <div>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Lock size={18}/></div>
+                  <input type="password" required placeholder="Bir Şifre Belirleyin" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] focus:bg-white transition-colors" />
+                </div>
+              </div>
+              
+              <button type="submit" disabled={loading} className="w-full bg-[#E8622A] hover:bg-orange-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 mt-2 disabled:opacity-70 flex items-center justify-center gap-2 border-none cursor-pointer">
+                {loading ? <Loader2 className="animate-spin" size={18}/> : 'Aramıza Katıl'} <ChevronRight size={18}/>
+              </button>
+            </form>
+            
+            <div className="mt-6 pt-6 border-t border-slate-100 text-center">
+              <button onClick={() => setActiveTab('login')} className="text-slate-400 hover:text-[#2D1B4E] text-xs font-black uppercase tracking-widest border-none bg-transparent cursor-pointer transition-colors">
+                Zaten hesabım var, Giriş Yap
+              </button>
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }
