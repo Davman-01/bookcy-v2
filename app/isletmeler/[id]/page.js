@@ -74,7 +74,6 @@ export default function ShopDetail() {
     
     const dayName = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'][new Date(bookingData.date).getDay()];
     
-    // Zırhlı çalışma saatleri kontrolü
     let workingHours = defaultWorkingHours;
     if (Array.isArray(selectedShop?.working_hours)) {
         workingHours = selectedShop.working_hours;
@@ -91,7 +90,6 @@ export default function ShopDetail() {
   const currentAvailableSlots = getCurrentAvailableSlots();
   const isShopClosedToday = currentAvailableSlots.length === 0;
 
-  // --- BEKLEME LİSTESİ GÖNDERME FONKSİYONU ---
   async function handleWaitlistSubmit(e) {
     e.preventDefault();
     setWaitlistStatus('loading');
@@ -263,8 +261,52 @@ export default function ShopDetail() {
                       <div className="flex-1 animate-in fade-in duration-300"><p className="text-[11px] font-black uppercase text-[#2D1B4E] mb-6 tracking-widest border-l-4 border-[#E8622A] pl-3">{text?.booking?.selectStaff || 'Uzman Seçin'}</p><div className="grid grid-cols-2 sm:grid-cols-3 gap-4"><div onClick={() => { setBookingData({...bookingData, selectedStaff: { name: text?.booking?.any || 'Fark Etmez' }}); setBookingPhase(3); }} className="flex flex-col items-center gap-3 cursor-pointer p-4 md:p-6 rounded-3xl border border-slate-200 hover:border-[#E8622A] bg-white transition-all hover:shadow-md group"><div className="w-14 h-14 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-orange-50 group-hover:text-[#E8622A] transition-colors"><Users size={24}/></div><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">{text?.booking?.any || 'Fark Etmez'}</span></div>{Array.isArray(selectedShop?.staff) && selectedShop.staff.map(person => (<div key={person?.id || Math.random()} onClick={() => { setBookingData({...bookingData, selectedStaff: person}); setBookingPhase(3); }} className="flex flex-col items-center gap-3 cursor-pointer p-4 md:p-6 rounded-3xl border border-slate-200 hover:border-[#E8622A] bg-white transition-all hover:shadow-md group"><div className="w-14 h-14 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center font-black text-lg group-hover:bg-[#E8622A] group-hover:text-white transition-colors">{(person?.name || 'U').charAt(0)}</div><span className="text-[10px] font-black text-[#2D1B4E] uppercase truncate w-full text-center px-1 tracking-widest">{person?.name || 'Uzman'}</span></div>))}</div></div>
                   )}
 
+                  {/* !!! SAATLERİN LİSTELENDİĞİ YER (RANDEVU RADARI EKLENDİ) !!! */}
                   {bookingPhase === 3 && selectedShop?.category !== 'Bar & Club' && (
-                      <div className="flex-1 flex flex-col gap-6 animate-in fade-in duration-300"><input type="date" min={new Date().toISOString().split('T')[0]} value={bookingData?.date} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] shadow-sm cursor-pointer" onChange={(e) => setBookingData({...bookingData, date: e.target.value, time: ''})} />{bookingData?.date && ( isShopClosedToday ? (<div className="py-12 text-center text-red-500 font-bold uppercase text-xs bg-red-50 rounded-3xl border border-red-100 flex flex-col items-center justify-center gap-3"><CalendarOff size={32}/> {text?.booking?.closed || 'Kapalı'}</div>) : (<div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">{currentAvailableSlots.map((slot, idx) => { const needed = getRequiredSlots(bookingData?.selectedShopService?.duration || '30'); const check = currentAvailableSlots.slice(idx, idx + needed); let isUnavail = check.length < needed || check.some(s => closedSlots.includes(s)); return (<button key={slot} onClick={() => { if(isUnavail) { setWaitlistTime(slot); setShowWaitlistModal(true); } else { setBookingData({...bookingData, time: slot}); setBookingPhase(4); } }} className={`py-4 rounded-2xl flex flex-col items-center justify-center text-xs font-bold border cursor-pointer transition-all ${isUnavail ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60 hover:border-[#E8622A] hover:text-[#E8622A]' : bookingData?.time === slot ? 'bg-[#E8622A] text-white border-[#E8622A] shadow-md scale-105' : 'bg-white border-slate-200 text-[#2D1B4E] hover:border-[#E8622A] hover:text-[#E8622A] shadow-sm'}`}><span>{slot}</span> {isUnavail && <span className="text-[8px] font-black uppercase mt-1 tracking-widest text-[#E8622A]">Dolu</span>}</button>); })}</div>) )}</div>
+                      <div className="flex-1 flex flex-col gap-6 animate-in fade-in duration-300">
+                        <input type="date" min={new Date().toISOString().split('T')[0]} value={bookingData?.date} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] shadow-sm cursor-pointer" onChange={(e) => setBookingData({...bookingData, date: e.target.value, time: ''})} />
+                        {bookingData?.date && ( isShopClosedToday ? (
+                          <div className="py-12 text-center text-red-500 font-bold uppercase text-xs bg-red-50 rounded-3xl border border-red-100 flex flex-col items-center justify-center gap-3"><CalendarOff size={32}/> {text?.booking?.closed || 'Kapalı'}</div>
+                        ) : (
+                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                            {currentAvailableSlots.map((slot, idx) => { 
+                              const needed = getRequiredSlots(bookingData?.selectedShopService?.duration || '30'); 
+                              const check = currentAvailableSlots.slice(idx, idx + needed); 
+                              
+                              // 1. KONTROL: Saat dilimi eksik mi veya dükkan molada/kapalı mı?
+                              let isUnavail = check.length < needed || check.some(s => closedSlots.includes(s)); 
+                              
+                              // 2. KONTROL: Bu saate randevu alınmış mı? (RANDEVU RADARI)
+                              if (!isUnavail && !isClub) {
+                                  const staffName = bookingData?.selectedStaff?.name;
+                                  const staffList = Array.isArray(selectedShop?.staff) ? selectedShop.staff : [];
+                                  
+                                  const isSlotBusy = check.some(checkSlot => {
+                                      if (staffName && staffName !== 'Fark Etmez' && staffName !== 'Any Staff') {
+                                          // Sadece seçili personelin randevusuna bak
+                                          return appointments.some(a => a.status !== 'İptal' && a.staff_name === staffName && (a.occupied_slots?.includes(checkSlot) || a.appointment_time === checkSlot));
+                                      } else {
+                                          // 'Fark Etmez' seçildiyse: Bütün personeller doluysa kapat
+                                          if (staffList.length === 0) {
+                                              return appointments.some(a => a.status !== 'İptal' && (a.occupied_slots?.includes(checkSlot) || a.appointment_time === checkSlot));
+                                          }
+                                          const busyStaffs = appointments.filter(a => a.status !== 'İptal' && (a.occupied_slots?.includes(checkSlot) || a.appointment_time === checkSlot)).map(a => a.staff_name);
+                                          const uniqueBusyStaffs = [...new Set(busyStaffs)];
+                                          return uniqueBusyStaffs.length >= staffList.length;
+                                      }
+                                  });
+                                  isUnavail = isUnavail || isSlotBusy;
+                              }
+
+                              return (
+                                <button key={slot} onClick={() => { if(isUnavail) { setWaitlistTime(slot); setShowWaitlistModal(true); } else { setBookingData({...bookingData, time: slot}); setBookingPhase(4); } }} className={`py-4 rounded-2xl flex flex-col items-center justify-center text-xs font-bold border cursor-pointer transition-all ${isUnavail ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60 hover:border-[#E8622A] hover:text-[#E8622A]' : bookingData?.time === slot ? 'bg-[#E8622A] text-white border-[#E8622A] shadow-md scale-105' : 'bg-white border-slate-200 text-[#2D1B4E] hover:border-[#E8622A] hover:text-[#E8622A] shadow-sm'}`}>
+                                  <span>{slot}</span> {isUnavail && <span className="text-[8px] font-black uppercase mt-1 tracking-widest text-[#E8622A]">Dolu</span>}
+                                </button>
+                              ); 
+                            })}
+                          </div>
+                        ) )}
+                      </div>
                   )}
 
                   {(bookingPhase === 4 || (selectedShop?.category === 'Bar & Club' && bookingPhase === 3)) && (
