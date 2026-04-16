@@ -8,21 +8,8 @@ import {
   MessageCircle, Mail, UploadCloud, Loader2, Bell, CalendarOff, Check, UserMinus, BarChart, Filter, Shield, Music, Ticket, CalendarHeart
 } from 'lucide-react';
 
-// VERCEL'İ KANDIRAN SAHTE VERİTABANI BAĞLANTISI
-const supabase = {
-  from: () => ({
-    select: () => ({ eq: () => ({ order: () => ({ data: [] }), single: () => ({ data: {} }) }), order: () => ({ data: [] }), single: () => ({ data: {} }) }),
-    update: () => ({ eq: async () => ({ error: null }) }),
-    insert: async () => ({ error: null }),
-    delete: () => ({ eq: async () => ({ error: null }) })
-  }),
-  storage: { 
-    from: () => ({ 
-      upload: async () => ({ error: null }), 
-      getPublicUrl: () => ({ data: { publicUrl: '' } }) 
-    }) 
-  }
-};
+// GERÇEK SUPABASE BAĞLANTISI
+import { supabase } from '@/lib/supabase';
 
 const InstagramIcon = ({ size = 24, className = "" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
@@ -125,12 +112,24 @@ export default function Dashboard() {
   async function fetchDashboardData(shopId) {
     setLoading(true);
     try {
-      const session = JSON.parse(localStorage.getItem('bookcy_biz_session'));
-      const freshShop = session.shopData || session;
+      // Gerçek Supabase'den en güncel dükkan verisini çekiyoruz
+      const { data: freshShop, error } = await supabase
+        .from('shops')
+        .select('*')
+        .eq('id', shopId)
+        .single();
+
+      if (error) throw error;
 
       if (freshShop) {
         setShop(freshShop);
-        let parsedHours = Array.isArray(freshShop.working_hours) ? freshShop.working_hours : defaultWorkingHours;
+        
+        let parsedHours = defaultWorkingHours;
+        if (Array.isArray(freshShop.working_hours)) {
+            parsedHours = freshShop.working_hours;
+        } else if (typeof freshShop.working_hours === 'string') {
+            try { parsedHours = JSON.parse(freshShop.working_hours); } catch(e){}
+        }
         
         setProfileForm({ 
           logo_url: freshShop.logo_url || '', description: freshShop.description || '', 
@@ -142,13 +141,18 @@ export default function Dashboard() {
         setServicesForm(freshShop.services || []);
         setEventsForm(freshShop.events || []);
         setStaffForm(freshShop.staff || []);
+
+        // Randevuları ve Yorumları çek
+        const { data: apptData } = await supabase.from('appointments').select('*').eq('shop_id', shopId).order('created_at', { ascending: false });
+        if (apptData) setAppointments(apptData);
+
+        const { data: revData } = await supabase.from('reviews').select('*').eq('shop_id', shopId).order('created_at', { ascending: false });
+        if (revData) setReviews(revData);
       }
-      setAppointments([]);
-      setReviews([]);
     } catch (err) {
       console.error("Veri çekme hatası:", err);
-      localStorage.removeItem('bookcy_biz_session');
-      router.push('/');
+      // localStorage.removeItem('bookcy_biz_session');
+      // router.push('/');
     } finally {
       setLoading(false);
     }
@@ -159,7 +163,33 @@ export default function Dashboard() {
     router.push('/');
   };
 
-  const saveProfile = async () => { alert("Vitrin bilgileriniz başarıyla güncellendi!"); };
+  // GERÇEK KAYDETME FONKSİYONU
+  const saveProfile = async () => { 
+      try {
+        const { error } = await supabase
+            .from('shops')
+            .update({
+                logo_url: profileForm.logo_url,
+                description: profileForm.description,
+                contact_phone: profileForm.contact_phone,
+                contact_email: profileForm.contact_email,
+                working_hours: profileForm.working_hours,
+                gallery: profileForm.gallery,
+                socials: profileForm.socials,
+                closed_dates: profileForm.closed_dates,
+                services: servicesForm, // Hizmetleri kaydeder
+                events: eventsForm,     // Etkinlikleri kaydeder
+                staff: staffForm        // Ekibi kaydeder
+            })
+            .eq('id', shop.id);
+
+        if (error) throw error;
+        alert("Tüm bilgileriniz başarıyla kaydedildi! 🎉");
+      } catch (error) {
+        console.error("Kaydetme hatası:", error);
+        alert("Kaydedilirken bir hata oluştu.");
+      }
+  };
 
   const addClosedDate = () => {
     if (!newClosedDate || profileForm.closed_dates.includes(newClosedDate)) return;
@@ -173,7 +203,28 @@ export default function Dashboard() {
     const file = event.target.files[0];
     if (!file) return;
     setIsUploading(true);
-    setTimeout(() => { setIsUploading(false); alert("Fotoğraf yüklendi."); }, 1000);
+    try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `${shop.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage.from('gallery').upload(filePath, file);
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage.from('gallery').getPublicUrl(filePath);
+
+        if (type === 'logo') {
+            setProfileForm({ ...profileForm, logo_url: publicUrl });
+        } else {
+            setProfileForm({ ...profileForm, gallery: [...profileForm.gallery, publicUrl] });
+        }
+        alert("Fotoğraf başarıyla yüklendi.");
+    } catch (error) {
+        console.error(error);
+        alert("Yükleme başarısız.");
+    } finally {
+        setIsUploading(false);
+    }
   };
 
   const removeGalleryImage = (index) => { setProfileForm({ ...profileForm, gallery: profileForm.gallery.filter((_, i) => i !== index) }); };
@@ -188,9 +239,27 @@ export default function Dashboard() {
 
   const addEvent = async () => {
     if (!newEvent.name || !newEvent.date || !newEvent.time) return alert("Etkinlik adı, tarihi ve saati zorunludur!");
-    const eventObj = { id: Date.now(), name: newEvent.name, date: newEvent.date, time: newEvent.time, description: newEvent.description, image_url: '' };
-    setEventsForm([...eventsForm, eventObj]);
-    setNewEvent({ name: '', date: '', time: '22:00', description: '', imageFile: null });
+    setIsEventUploading(true);
+    let imageUrl = '';
+    
+    try {
+        if (newEvent.imageFile) {
+            const fileExt = newEvent.imageFile.name.split('.').pop();
+            const fileName = `${Math.random()}.${fileExt}`;
+            const filePath = `${shop.id}/events/${fileName}`;
+            const { error: uploadError } = await supabase.storage.from('gallery').upload(filePath, newEvent.imageFile);
+            if (!uploadError) {
+                imageUrl = supabase.storage.from('gallery').getPublicUrl(filePath).data.publicUrl;
+            }
+        }
+        const eventObj = { id: Date.now(), name: newEvent.name, date: newEvent.date, time: newEvent.time, description: newEvent.description, image_url: imageUrl };
+        setEventsForm([...eventsForm, eventObj]);
+        setNewEvent({ name: '', date: '', time: '22:00', description: '', imageFile: null });
+    } catch (error) {
+        console.error(error);
+    } finally {
+        setIsEventUploading(false);
+    }
   };
 
   const deleteEvent = async (id) => { setEventsForm(eventsForm.filter(e => e.id !== id)); };
@@ -216,34 +285,65 @@ export default function Dashboard() {
 
   const deleteStaff = async (index) => { setStaffForm(staffForm.filter((_, i) => i !== index)); };
 
-  const updateApptStatus = async (id, newStatus) => { alert(`İşlem ${newStatus} olarak işaretlendi!`); };
+  const updateApptStatus = async (id, newStatus) => { 
+      try {
+          const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', id);
+          if (error) throw error;
+          
+          setAppointments(appointments.map(a => a.id === id ? { ...a, status: newStatus } : a));
+          alert(`İşlem ${newStatus} olarak işaretlendi!`);
+      } catch (error) {
+          alert("Durum güncellenemedi.");
+      }
+  };
 
   const deleteAppointmentCompletely = async (id) => {
-    if(window.confirm("Bu kaydı tamamen SİLMEK istediğinize emin misiniz?")) alert("Kayıt kalıcı olarak silindi!");
+    if(window.confirm("Bu kaydı tamamen SİLMEK istediğinize emin misiniz?")) {
+        try {
+            const { error } = await supabase.from('appointments').delete().eq('id', id);
+            if (error) throw error;
+            setAppointments(appointments.filter(a => a.id !== id));
+            alert("Kayıt kalıcı olarak silindi!");
+        } catch (error) {
+            alert("Silinemedi.");
+        }
+    }
   };
 
   const isClub = shop?.category === 'Bar & Club';
 
-  const calculateOccupiedSlots = (startTime, durationStr) => {
-    if (durationStr === '0' || isClub) return []; 
-    const duration = parseInt(durationStr, 10) || 30; 
-    const slotsCount = Math.ceil(duration / 30); 
-    const startIndex = allTimeSlots.indexOf(startTime);
-    if (startIndex === -1) return [startTime];
-    return allTimeSlots.slice(startIndex, startIndex + slotsCount);
-  };
-
   const handleQuickAdd = async (e) => {
     e.preventDefault();
     if (profileForm.closed_dates.includes(quickForm.appointment_date)) return alert("Seçtiğiniz tarih kapalı!");
-    alert(isClub ? "Rezervasyon eklendi!" : "Randevu eklendi!"); 
-    setShowQuickAdd(false); 
+    
+    try {
+        const fullPhone = "+90 " + quickForm.customer_phone;
+        const { error } = await supabase.from('appointments').insert([{ 
+            shop_id: shop.id, 
+            customer_name: quickForm.customer_name, 
+            customer_surname: quickForm.customer_surname, 
+            customer_phone: fullPhone, 
+            appointment_date: quickForm.appointment_date, 
+            appointment_time: quickForm.appointment_time, 
+            service_name: quickForm.service_name, 
+            staff_name: isClub ? 'Rezervasyon' : (quickForm.staff_name || 'Genel'),
+            status: 'Bekliyor' 
+        }]);
+        
+        if (error) throw error;
+        
+        alert(isClub ? "Rezervasyon eklendi!" : "Randevu eklendi!"); 
+        setShowQuickAdd(false); 
+        fetchDashboardData(shop.id); // Tabloyu yenile
+    } catch (error) {
+        alert("Eklenemedi!");
+    }
   };
 
   const today = new Date().toISOString().split('T')[0];
   const getApptPrice = (serviceName) => { 
     const srv = servicesForm.find(s => s.name === serviceName); 
-    return srv ? parseInt(srv.price) : 150; 
+    return srv ? parseInt(srv.price) : 0; 
   };
   
   const todayAppts = appointments.filter(a => a.appointment_date === today && a.status !== 'İptal');
@@ -338,7 +438,6 @@ export default function Dashboard() {
           </button>
         </div>
         
-        {/* DÜZELTİLEN KISIM: <nav> yerine <div> kullanıldı! CSS Çakışması önlendi. */}
         <div className="flex-1 p-4 space-y-1 mt-2 overflow-y-auto flex flex-col scrollbar-hide">
           {menuItems.map(tab => (
              <button 
@@ -743,6 +842,9 @@ export default function Dashboard() {
                                       Ekle
                                     </button>
                                 </div>
+                                <div className="mt-2 text-right">
+                                    <button onClick={saveProfile} className="bg-[#00c48c] text-white px-4 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest border-none cursor-pointer shadow-lg">Değişiklikleri Kaydet</button>
+                                </div>
                             </div>
 
                             <div className="mt-4 flex flex-col gap-3 relative z-10 overflow-y-auto max-h-[300px] scrollbar-hide pr-2">
@@ -767,7 +869,10 @@ export default function Dashboard() {
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                       <div className="lg:col-span-2 bg-white rounded-[32px] shadow-sm border border-slate-200 p-8">
-                        <h3 className="font-black text-lg mb-6 text-[#2D1B4E]">Menünüz</h3>
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="font-black text-lg text-[#2D1B4E]">Menünüz</h3>
+                            <button onClick={saveProfile} className="bg-[#00c48c] text-white px-4 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest border-none cursor-pointer shadow-lg hover:scale-105 transition-transform">Değişiklikleri Kaydet</button>
+                        </div>
                         <div className="space-y-4">
                           {servicesForm.map((srv, idx) => (
                             <div key={idx} className="flex justify-between items-center p-5 bg-slate-50 rounded-2xl border border-slate-100">
@@ -785,6 +890,7 @@ export default function Dashboard() {
                               </div>
                             </div>
                           ))}
+                          {servicesForm.length === 0 && <div className="text-center py-10 text-slate-400 font-bold uppercase tracking-widest">Henüz bir hizmet eklemediniz.</div>}
                         </div>
                       </div>
 
@@ -811,7 +917,7 @@ export default function Dashboard() {
                             </select>
                           </div>
                           <button onClick={addService} className="w-full bg-[#E8622A] text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest border-none cursor-pointer hover:scale-[1.02] transition-transform shadow-lg">
-                            <Plus size={16} className="inline mr-2 mb-1"/> Ekle
+                            <Plus size={16} className="inline mr-2 mb-1"/> Listeye Ekle
                           </button>
                         </div>
                       </div>
@@ -823,7 +929,12 @@ export default function Dashboard() {
           {/* TAB 4: PERSONEL */}
           {userRole === 'owner' && activeTab === 'staff' && !isClub && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
-                <h2 className="text-2xl font-black uppercase tracking-tight mb-8">Personel Yönetimi</h2>
+                <div className="flex justify-between items-center mb-8">
+                    <h2 className="text-2xl font-black uppercase tracking-tight">Personel Yönetimi</h2>
+                    <button onClick={saveProfile} className="bg-[#00c48c] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 border-none cursor-pointer shadow-lg hover:scale-105 transition-transform">
+                        <Save size={16}/> Değişiklikleri Kaydet
+                    </button>
+                </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   
                   <div className="lg:col-span-2 bg-white rounded-[32px] shadow-sm border border-slate-200 p-8">
@@ -847,6 +958,7 @@ export default function Dashboard() {
                           </button>
                         </div>
                       ))}
+                      {staffForm.length === 0 && <div className="col-span-full text-center py-10 text-slate-400 font-bold uppercase tracking-widest">Kayıtlı personel yok.</div>}
                     </div>
                   </div>
 
