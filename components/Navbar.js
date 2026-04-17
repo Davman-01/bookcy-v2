@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { ChevronDown, ChevronRight, Menu, X, UserCircle, CheckCircle2, Lock, Upload, MessageCircle, Gift } from 'lucide-react';
@@ -35,6 +35,30 @@ export default function Navbar() {
   const [emailValid, setEmailValid] = useState(null); 
   const [phoneValid, setPhoneValid] = useState(null); 
   const [adminEmailValid, setAdminEmailValid] = useState(null);
+
+  // --- MÜŞTERİ OTURUM (SESSION) RADARI EKLENDİ ---
+  const [customerSession, setCustomerSession] = useState(null);
+
+  useEffect(() => {
+    // Sayfa yüklendiğinde Google/Supabase girişi var mı kontrol et
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCustomerSession(session);
+    });
+
+    // Giriş/Çıkış yapıldığı an sayfayı yenilemeden üst menüyü güncelle
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCustomerSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleCustomerLogout = async () => {
+    await supabase.auth.signOut();
+    setCustomerSession(null);
+    router.push('/');
+  };
+  // ------------------------------------------------
 
   const text = t?.[lang] || t?.['TR'] || {};
 
@@ -107,7 +131,11 @@ export default function Navbar() {
                 <Link href="/neden-bookcy" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.why}</Link>
                 <Link href="/hakkimizda" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.about}</Link>
                 <Link href="/iletisim" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.contact}</Link>
-                <Link href="/randevu-sorgula" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#E8622A] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.myAppts}</Link>
+                
+                {/* MÜŞTERİ GİRİŞ YAPTIYSA MOBİLDE PROFİLİM GÖZÜKSÜN */}
+                <Link href={customerSession ? "/profilim" : "/randevu-sorgula"} onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#E8622A] py-4 border-b border-slate-50 text-decoration-none block uppercase">
+                  {customerSession ? 'PROFİLİM' : text.nav?.myAppts}
+                </Link>
             </div>
             
             <div className="mt-auto p-6 flex flex-col gap-4 bg-slate-50 border-t border-slate-100">
@@ -118,6 +146,11 @@ export default function Navbar() {
                  </div>
                  {loggedInShop ? (
                     <Link href="/dashboard" className="w-full flex items-center justify-center py-5 rounded-2xl bg-[#E8622A] text-white font-black uppercase tracking-widest text-sm text-decoration-none shadow-lg">{text.nav?.panel}</Link>
+                 ) : customerSession ? (
+                    <>
+                      <button onClick={() => { handleCustomerLogout(); setIsMobileMenuOpen(false); }} className="w-full py-5 rounded-2xl border-2 border-slate-300 text-slate-500 font-black uppercase tracking-widest text-sm bg-transparent cursor-pointer hover:bg-slate-200">Çıkış Yap</button>
+                      <Link href="/profilim" onClick={() => setIsMobileMenuOpen(false)} className="w-full flex items-center justify-center py-5 rounded-2xl bg-[#E8622A] text-white font-black uppercase tracking-widest text-sm border-none cursor-pointer text-decoration-none shadow-lg">Profilime Git</Link>
+                    </>
                  ) : (
                     <>
                       <button onClick={() => {setShowRegister(true); setIsMobileMenuOpen(false);}} className="w-full py-5 rounded-2xl border-2 border-[#2D1B4E] text-[#2D1B4E] font-black uppercase tracking-widest text-sm bg-transparent cursor-pointer">{text.nav?.addShop}</button>
@@ -188,7 +221,13 @@ export default function Navbar() {
           <li><Link href="/neden-bookcy" className={`nav-main-btn text-decoration-none uppercase ${pathname === '/neden-bookcy' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.why}</Link></li>
           <li><Link href="/hakkimizda" className={`nav-main-btn text-decoration-none uppercase ${pathname === '/hakkimizda' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.about}</Link></li>
           <li><Link href="/iletisim" className={`nav-main-btn text-decoration-none uppercase ${pathname === '/iletisim' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.contact}</Link></li>
-          <li><Link href="/randevu-sorgula" className={`nav-main-btn text-decoration-none uppercase text-[#E8622A] font-black ${pathname === '/randevu-sorgula' ? 'active' : ''}`}>{text.nav?.myAppts}</Link></li>
+          
+          {/* MÜŞTERİ GİRİŞ YAPTIYSA MASAÜSTÜNDE PROFİLİM GÖZÜKSÜN */}
+          <li>
+            <Link href={customerSession ? "/profilim" : "/randevu-sorgula"} className={`nav-main-btn text-decoration-none uppercase text-[#E8622A] font-black ${pathname === '/randevu-sorgula' || pathname === '/profilim' ? 'active' : ''}`}>
+              {customerSession ? 'PROFİLİM' : text.nav?.myAppts}
+            </Link>
+          </li>
         </ul>
 
         <div className="flex items-center gap-4">
@@ -197,10 +236,16 @@ export default function Navbar() {
                <button key={l} onClick={()=>setLang(l)} className={`px-3 py-1 rounded-full text-[10px] font-black border transition-all cursor-pointer ${lang===l ? 'bg-[#2D1B4E] text-white border-[#2D1B4E]' : 'bg-transparent text-slate-400 border-slate-200 hover:border-slate-400'}`}>{l}</button>
              ))}
           </div>
+
           {loggedInShop ? (
              <div className="flex gap-2">
                 <button onClick={handleLogout} className="hidden md:block bg-slate-100 text-slate-600 px-5 py-2.5 rounded-full font-black text-xs uppercase border-none cursor-pointer hover:bg-slate-200">{text.nav?.logout}</button>
                 <Link href="/dashboard" className="flex items-center gap-2 bg-[#E8622A] text-white px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest text-decoration-none shadow-md hover:bg-[#d5521b] transition-all"><UserCircle size={18}/> {text.nav?.panel}</Link>
+             </div>
+          ) : customerSession ? (
+             <div className="flex gap-2">
+                <button onClick={handleCustomerLogout} className="hidden md:block bg-slate-100 text-slate-600 px-5 py-2.5 rounded-full font-black text-xs uppercase border-none cursor-pointer hover:bg-slate-200 hover:text-red-500 transition-colors">ÇIKIŞ</button>
+                <Link href="/profilim" className="flex items-center gap-2 bg-[#E8622A] text-white px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest text-decoration-none shadow-md hover:bg-[#d5521b] transition-all"><UserCircle size={18}/> PROFİLİM</Link>
              </div>
           ) : (
              <div className="flex gap-2">
@@ -208,6 +253,7 @@ export default function Navbar() {
                 <button onClick={() => setShowLogin(true)} className="hidden md:flex items-center gap-2 bg-[#E8622A] text-white px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest border-none cursor-pointer shadow-md hover:bg-[#d5521b] transition-all"><UserCircle size={18}/> {text.nav?.login}</button>
              </div>
           )}
+
           <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 text-[#2D1B4E] bg-transparent border-none cursor-pointer"><Menu size={30}/></button>
         </div>
       </nav>

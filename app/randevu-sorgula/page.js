@@ -16,6 +16,17 @@ const AppleIcon = () => (
 export default function CustomerPortal() {
   const router = useRouter();
   
+  // --- EKLENECEK KISIM BAŞLANGICI ---
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.push('/profilim'); // Zaten giriş yapmış, direkt profile yolla!
+      }
+    };
+    checkExistingSession();
+  }, [router]);
+  // --- EKLENECEK KISIM BİTİŞİ ---
   // Sekme Yönetimi: 'search' (Sorgula), 'login' (Giriş)
   const [activeTab, setActiveTab] = useState('search');
   
