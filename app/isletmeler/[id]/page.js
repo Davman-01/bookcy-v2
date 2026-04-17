@@ -27,12 +27,56 @@ export default function ShopDetail() {
   const [bookingData, setBookingData] = useState({ date: new Date().toISOString().split('T')[0], time: '', selectedShopService: null, selectedStaff: null, selectedEvent: null });
   const [isTermsAccepted, setIsTermsAccepted] = useState(false);
 
-  // --- BEKLEME LİSTESİ (WAITLIST) STATELERİ BAŞLANGICI ---
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [waitlistTime, setWaitlistTime] = useState('');
   const [waitlistForm, setWaitlistForm] = useState({ name: '', phone: '', email: '' });
   const [waitlistStatus, setWaitlistStatus] = useState('idle'); 
-  // --- BEKLEME LİSTESİ BİTİŞİ ---
+
+  // --- 🌟 YENİ: OTOMATİK KULLANICI BİLGİSİ ÇEKME RADARI ---
+  useEffect(() => {
+    const fetchLoggedUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { user } = session;
+        const { data: cust } = await supabase.from('customers').select('*').eq('id', user.id).single();
+        
+        const fullName = cust?.full_name || user.user_metadata?.full_name || '';
+        const userEmail = cust?.email || user.email || '';
+        const userPhone = cust?.phone || '';
+
+        // Ad ve Soyadı boşluktan ayır
+        let firstName = '';
+        let lastName = '';
+        if (fullName) {
+          const parts = fullName.split(' ');
+          if (parts.length > 1) {
+            lastName = parts.pop();
+            firstName = parts.join(' ');
+          } else {
+            firstName = fullName;
+          }
+        }
+
+        // Formu otomatik doldur
+        setFormData(prev => ({
+          ...prev,
+          name: firstName || prev.name,
+          surname: lastName || prev.surname,
+          email: userEmail || prev.email,
+          phone: userPhone ? userPhone.replace('+90 ', '').replace('+90', '') : prev.phone
+        }));
+
+        setWaitlistForm(prev => ({
+          ...prev,
+          name: fullName || prev.name,
+          email: userEmail || prev.email,
+          phone: userPhone ? userPhone.replace('+90 ', '').replace('+90', '') : prev.phone
+        }));
+      }
+    };
+    fetchLoggedUser();
+  }, []);
+  // ---------------------------------------------------------
 
   useEffect(() => {
     if (shops && shops.length > 0 && params?.id) {
@@ -261,7 +305,6 @@ export default function ShopDetail() {
                       <div className="flex-1 animate-in fade-in duration-300"><p className="text-[11px] font-black uppercase text-[#2D1B4E] mb-6 tracking-widest border-l-4 border-[#E8622A] pl-3">{text?.booking?.selectStaff || 'Uzman Seçin'}</p><div className="grid grid-cols-2 sm:grid-cols-3 gap-4"><div onClick={() => { setBookingData({...bookingData, selectedStaff: { name: text?.booking?.any || 'Fark Etmez' }}); setBookingPhase(3); }} className="flex flex-col items-center gap-3 cursor-pointer p-4 md:p-6 rounded-3xl border border-slate-200 hover:border-[#E8622A] bg-white transition-all hover:shadow-md group"><div className="w-14 h-14 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-orange-50 group-hover:text-[#E8622A] transition-colors"><Users size={24}/></div><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">{text?.booking?.any || 'Fark Etmez'}</span></div>{Array.isArray(selectedShop?.staff) && selectedShop.staff.map(person => (<div key={person?.id || Math.random()} onClick={() => { setBookingData({...bookingData, selectedStaff: person}); setBookingPhase(3); }} className="flex flex-col items-center gap-3 cursor-pointer p-4 md:p-6 rounded-3xl border border-slate-200 hover:border-[#E8622A] bg-white transition-all hover:shadow-md group"><div className="w-14 h-14 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center font-black text-lg group-hover:bg-[#E8622A] group-hover:text-white transition-colors">{(person?.name || 'U').charAt(0)}</div><span className="text-[10px] font-black text-[#2D1B4E] uppercase truncate w-full text-center px-1 tracking-widest">{person?.name || 'Uzman'}</span></div>))}</div></div>
                   )}
 
-                  {/* !!! SAATLERİN LİSTELENDİĞİ YER (RANDEVU RADARI EKLENDİ) !!! */}
                   {bookingPhase === 3 && selectedShop?.category !== 'Bar & Club' && (
                       <div className="flex-1 flex flex-col gap-6 animate-in fade-in duration-300">
                         <input type="date" min={new Date().toISOString().split('T')[0]} value={bookingData?.date} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] shadow-sm cursor-pointer" onChange={(e) => setBookingData({...bookingData, date: e.target.value, time: ''})} />
@@ -273,20 +316,16 @@ export default function ShopDetail() {
                               const needed = getRequiredSlots(bookingData?.selectedShopService?.duration || '30'); 
                               const check = currentAvailableSlots.slice(idx, idx + needed); 
                               
-                              // 1. KONTROL: Saat dilimi eksik mi veya dükkan molada/kapalı mı?
                               let isUnavail = check.length < needed || check.some(s => closedSlots.includes(s)); 
                               
-                              // 2. KONTROL: Bu saate randevu alınmış mı? (RANDEVU RADARI)
                               if (!isUnavail && !isClub) {
                                   const staffName = bookingData?.selectedStaff?.name;
                                   const staffList = Array.isArray(selectedShop?.staff) ? selectedShop.staff : [];
                                   
                                   const isSlotBusy = check.some(checkSlot => {
                                       if (staffName && staffName !== 'Fark Etmez' && staffName !== 'Any Staff') {
-                                          // Sadece seçili personelin randevusuna bak
                                           return appointments.some(a => a.status !== 'İptal' && a.staff_name === staffName && (a.occupied_slots?.includes(checkSlot) || a.appointment_time === checkSlot));
                                       } else {
-                                          // 'Fark Etmez' seçildiyse: Bütün personeller doluysa kapat
                                           if (staffList.length === 0) {
                                               return appointments.some(a => a.status !== 'İptal' && (a.occupied_slots?.includes(checkSlot) || a.appointment_time === checkSlot));
                                           }
@@ -312,14 +351,14 @@ export default function ShopDetail() {
                   {(bookingPhase === 4 || (selectedShop?.category === 'Bar & Club' && bookingPhase === 3)) && (
                       <form onSubmit={handleBooking} className="flex flex-col gap-4 flex-1 mt-auto animate-in fade-in duration-300">
                         <div className="flex flex-col sm:flex-row gap-4 w-full">
-                          <input required placeholder={text?.booking?.name || 'Adınız'} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                          <input required placeholder={text?.booking?.surname || 'Soyadınız'} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setFormData({...formData, surname: e.target.value})} />
+                          <input required placeholder={text?.booking?.name || 'Adınız'} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                          <input required placeholder={text?.booking?.surname || 'Soyadınız'} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm" value={formData.surname} onChange={(e) => setFormData({...formData, surname: e.target.value})} />
                         </div>
                         <div className="flex gap-3 w-full">
-                          <select className="bg-white border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm w-24 cursor-pointer" value={formData.phoneCode} onChange={e => setFormData({...formData, phoneCode: e.target.value})}><option value="+90">TR</option></select>
-                          <input required type="tel" placeholder={text?.booking?.phone || 'Telefon'} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+                          <select className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm w-24 cursor-pointer" value={formData.phoneCode} onChange={e => setFormData({...formData, phoneCode: e.target.value})}><option value="+90">TR</option></select>
+                          <input required type="tel" placeholder={text?.booking?.phone || 'Telefon'} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
                         </div>
-                        <input required type="email" placeholder={text?.booking?.email || 'E-posta'} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={handleBookingEmailChange} />
+                        <input required type="email" placeholder={text?.booking?.email || 'E-posta'} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm" value={formData.email} onChange={handleBookingEmailChange} />
 
                         <div className="flex items-start gap-3 mt-4 mb-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
                           <input
@@ -347,7 +386,7 @@ export default function ShopDetail() {
           </div>
       </div>
 
-      {/* --- BEKLEME LİSTESİ POP-UP (MODAL) EKRANI BAŞLANGICI --- */}
+      {/* --- BEKLEME LİSTESİ POP-UP (MODAL) EKRANI --- */}
       {showWaitlistModal && (
         <div className="fixed inset-0 bg-[#2D1B4E]/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[40px] p-8 md:p-10 max-w-md w-full shadow-2xl relative animate-in zoom-in-95 duration-300 border border-slate-200">
@@ -368,9 +407,9 @@ export default function ShopDetail() {
                     </div>
                     
                     <form onSubmit={handleWaitlistSubmit} className="flex flex-col gap-4">
-                        <input required placeholder="Adınız Soyadınız" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setWaitlistForm({...waitlistForm, name: e.target.value})} />
-                        <input required type="tel" placeholder="Telefon Numaranız" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setWaitlistForm({...waitlistForm, phone: e.target.value})} />
-                        <input required type="email" placeholder="E-posta Adresiniz" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" onChange={(e) => setWaitlistForm({...waitlistForm, email: e.target.value})} />
+                        <input required placeholder="Adınız Soyadınız" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" value={waitlistForm.name} onChange={(e) => setWaitlistForm({...waitlistForm, name: e.target.value})} />
+                        <input required type="tel" placeholder="Telefon Numaranız" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" value={waitlistForm.phone} onChange={(e) => setWaitlistForm({...waitlistForm, phone: e.target.value})} />
+                        <input required type="email" placeholder="E-posta Adresiniz" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm" value={waitlistForm.email} onChange={(e) => setWaitlistForm({...waitlistForm, email: e.target.value})} />
                         
                         <button type="submit" disabled={waitlistStatus === 'loading'} className="w-full bg-[#E8622A] text-white py-5 rounded-2xl mt-4 font-black uppercase text-sm tracking-[0.2em] border-none cursor-pointer shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                             {waitlistStatus === 'loading' ? 'İşleniyor...' : 'Bana Haber Ver 🔔'}
@@ -381,7 +420,6 @@ export default function ShopDetail() {
           </div>
         </div>
       )}
-      {/* --- BEKLEME LİSTESİ BİTİŞİ --- */}
 
     </div>
   );
