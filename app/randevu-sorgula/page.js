@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Search, LogIn, Phone, Mail, Lock, Calendar, Clock, MapPin, XCircle, ChevronRight, User, Scissors, CheckCircle2, AlertCircle, Loader2, Music } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-// Google ve Apple ikonları için basit SVG'ler
+// Google ve Apple ikonları
 const GoogleIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 6.13l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
 );
@@ -16,7 +16,6 @@ const AppleIcon = () => (
 export default function CustomerPortal() {
   const router = useRouter();
   
-  // MÜŞTERİ ZATEN GİRİŞ YAPMIŞSA DİREKT PROFİLE ATAN RADAR
   useEffect(() => {
     const checkExistingSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -28,7 +27,11 @@ export default function CustomerPortal() {
   }, [router]);
   
   const [activeTab, setActiveTab] = useState('search');
-  const [searchPhone, setSearchPhone] = useState('+90');
+  
+  // Arama Stateleri
+  const [searchType, setSearchType] = useState('phone'); // 'phone' veya 'email'
+  const [searchValue, setSearchValue] = useState('');
+  
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   
@@ -37,22 +40,36 @@ export default function CustomerPortal() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  // 1. ESNEK ARAMA (FUZZY SEARCH)
   const handleSearch = async (e) => {
     e.preventDefault();
+    if (!searchValue) return;
+    
     setLoading(true);
     setErrorMsg('');
     setSearchResults(null);
 
     try {
-      const { data, error } = await supabase
-        .from('appointments')
-        .select(`*, shops ( name, address, category )`)
-        .eq('customer_phone', searchPhone)
-        .order('appointment_date', { ascending: false });
+      let query = supabase.from('appointments').select(`*, shops ( name, address, category )`);
+
+      if (searchType === 'phone') {
+        // Boşlukları temizleyip içinde geçiyor mu diye bakıyoruz (Esnek Arama)
+        const cleanPhone = searchValue.trim().replace(/\s+/g, '');
+        query = query.ilike('customer_phone', `%${cleanPhone}%`);
+      } else {
+        // E-Posta araması
+        query = query.ilike('customer_email', `%${searchValue.trim()}%`);
+      }
+
+      const { data, error } = await query.order('appointment_date', { ascending: false });
 
       if (error) throw error;
-      if (data && data.length > 0) setSearchResults(data);
-      else setErrorMsg('Bu telefon numarasına ait aktif randevu bulunamadı.');
+      
+      if (data && data.length > 0) {
+        setSearchResults(data);
+      } else {
+        setErrorMsg(`Bu ${searchType === 'phone' ? 'telefon numarasına' : 'e-posta adresine'} ait aktif randevu bulunamadı.`);
+      }
     } catch (err) {
       console.error(err);
       setErrorMsg('Sorgulama sırasında bir hata oluştu.');
@@ -133,15 +150,35 @@ export default function CustomerPortal() {
             {!searchResults ? (
               <div className="bg-white p-8 rounded-[32px] shadow-xl border border-slate-200">
                 <h3 className="font-black text-[#2D1B4E] text-lg mb-6 flex items-center gap-2"><Search className="text-[#E8622A]"/> Randevunu Bul</h3>
+                
+                {/* Arama Tipi Seçici */}
+                <div className="flex gap-2 mb-6 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
+                  <button type="button" onClick={() => {setSearchType('phone'); setSearchValue('');}} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${searchType === 'phone' ? 'bg-white text-[#E8622A] shadow-sm' : 'bg-transparent text-slate-400 hover:text-[#2D1B4E]'}`}>Telefon</button>
+                  <button type="button" onClick={() => {setSearchType('email'); setSearchValue('');}} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${searchType === 'email' ? 'bg-white text-[#E8622A] shadow-sm' : 'bg-transparent text-slate-400 hover:text-[#2D1B4E]'}`}>E-Posta</button>
+                </div>
+
                 <form onSubmit={handleSearch} className="space-y-5">
                   <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 pl-2">Telefon Numaranız</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 pl-2">
+                      {searchType === 'phone' ? 'Telefon Numaranız' : 'E-Posta Adresiniz'}
+                    </label>
                     <div className="relative">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Phone size={18}/></div>
-                      <input type="tel" required value={searchPhone} onChange={(e) => setSearchPhone(e.target.value)} placeholder="+90 5XX XXX XX XX" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] focus:bg-white transition-colors" />
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        {searchType === 'phone' ? <Phone size={18}/> : <Mail size={18}/>}
+                      </div>
+                      <input 
+                        type={searchType === 'phone' ? 'tel' : 'email'} 
+                        required 
+                        value={searchValue} 
+                        onChange={(e) => setSearchValue(e.target.value)} 
+                        placeholder={searchType === 'phone' ? "5XX XXX XX XX" : "mail@ornek.com"} 
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] focus:bg-white transition-colors" 
+                      />
                     </div>
                   </div>
-                  <button type="submit" disabled={loading} className="w-full bg-[#E8622A] hover:bg-orange-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 disabled:opacity-70 flex items-center justify-center gap-2 border-none cursor-pointer">{loading ? <Loader2 className="animate-spin" size={18}/> : 'Randevularımı Getir'}</button>
+                  <button type="submit" disabled={loading || !searchValue} className="w-full bg-[#E8622A] hover:bg-orange-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 disabled:opacity-50 flex items-center justify-center gap-2 border-none cursor-pointer">
+                    {loading ? <Loader2 className="animate-spin" size={18}/> : 'Randevularımı Getir'}
+                  </button>
                 </form>
               </div>
             ) : (
