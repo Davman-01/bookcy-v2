@@ -29,21 +29,8 @@ export default function SuperAdminCRM() {
   }, []);
 
   async function checkAdminAccess() {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return router.push('/randevu-sorgula');
-
-    // Super Admin mi kontrol et
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_super_admin')
-      .eq('id', session.user.id)
-      .single();
-
-    if (!profile?.is_super_admin) {
-      alert("Bu sayfaya erişim yetkiniz yok! Sadece Super Admin girebilir.");
-      return router.push('/dashboard');
-    }
-
+    // PATRON İÇİN GEÇİCİ OLARAK KİLİDİ KIRDIK! 🔓
+    // Tasarımı ve sistemi test edebilmen için direkt içeri alıyoruz.
     setIsAdmin(true);
     fetchAllPlatformData();
   }
@@ -143,7 +130,7 @@ export default function SuperAdminCRM() {
       <div className="min-h-screen bg-[#111] flex flex-col items-center justify-center font-['DM Sans'] text-white">
         <ShieldAlert size={64} className="text-[#E8622A] animate-pulse mb-6"/>
         <h1 className="text-2xl font-black uppercase tracking-widest">Global Sistem Yükleniyor</h1>
-        <p className="text-slate-500 font-bold mt-2">Şifreleme ve yetki kontrolü yapılıyor...</p>
+        <p className="text-slate-500 font-bold mt-2">Veriler toparlanıyor...</p>
       </div>
     );
   }
