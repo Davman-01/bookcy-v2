@@ -6,7 +6,7 @@ import {
   ShieldCheck, XCircle, LogOut, Download, CheckCircle2, ChevronRight,
   TrendingUp, Trash2, AlertCircle, FileSpreadsheet, MapPin, Crown, 
   Activity, CalendarCheck, Check, Lock, Phone, Star, MessageSquare, BarChart3,
-  CreditCard, Send, Eye, EyeOff
+  CreditCard, Send, Eye, EyeOff, Filter, Scissors
 } from 'lucide-react';
 import AdminTrialControl from '@/components/AdminTrialControl';
 import { supabase } from '@/lib/supabase';
@@ -33,7 +33,7 @@ const timeAgo = (dateString) => {
 export default function SuperAdmin() {
   const router = useRouter();
   
-  // -- YENİ KİMLİK DOĞRULAMA STATELERİ --
+  // -- KİMLİK DOĞRULAMA STATELERİ --
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPass, setAdminPass] = useState('');
@@ -50,6 +50,12 @@ export default function SuperAdmin() {
 
   const [isSendingMail, setIsSendingMail] = useState(false);
   const [showPasswords, setShowPasswords] = useState({});
+
+  // -- GLOBAL CRM STATELERİ --
+  const [crmUsers, setCrmUsers] = useState([]);
+  const [crmSearchQuery, setCrmSearchQuery] = useState('');
+  const [filterRegion, setFilterRegion] = useState('Tümü');
+  const [filterService, setFilterService] = useState('');
 
   // 1. UYGULAMA AÇILDIĞINDA OTURUM KONTROLÜ
   useEffect(() => {
@@ -75,14 +81,12 @@ export default function SuperAdmin() {
     setLoginLoading(true);
 
     try {
-      // Sadece admin maili ile girişe izin ver
       if (adminEmail !== 'dogukandavman01@gmail.com') {
         alert("Yetkisiz Kullanıcı! Sadece sistem yöneticisi giriş yapabilir.");
         setLoginLoading(false);
         return;
       }
 
-      // Supabase'e giriş isteği at
       const { data, error } = await supabase.auth.signInWithPassword({
         email: adminEmail,
         password: adminPass,
@@ -101,7 +105,6 @@ export default function SuperAdmin() {
     }
   };
 
-  // 3. GÜVENLİ ÇIKIŞ İŞLEMİ
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsAuthenticated(false);
@@ -130,6 +133,49 @@ export default function SuperAdmin() {
     }
   }
 
+  // GLOBAL CRM VERİSİNİ HAZIRLA (Randevular veya İşletmeler Değiştiğinde Çalışır)
+  useEffect(() => {
+    if (!appointments.length || !shops.length) return;
+
+    const userMap = new Map();
+    appointments.forEach(a => {
+      const shop = shops.find(s => s.id === a.shop_id);
+      const key = a.customer_email || a.customer_phone || `${a.customer_name}_${a.customer_surname}`;
+      
+      if (!userMap.has(key)) {
+        userMap.set(key, {
+          name: `${a.customer_name} ${a.customer_surname}`.toUpperCase(),
+          phone: a.customer_phone,
+          email: a.customer_email || 'Belirtilmemiş',
+          total_bookings: 0,
+          shops_visited: new Set(),
+          regions_visited: new Set(),
+          services_received: new Set(),
+          last_visit: a.appointment_date,
+        });
+      }
+
+      const u = userMap.get(key);
+      u.total_bookings += 1;
+      if (shop?.name) u.shops_visited.add(shop.name);
+      if (shop?.region) u.regions_visited.add(shop.region);
+      if (a.service_name) u.services_received.add(a.service_name);
+      
+      if (new Date(a.appointment_date) > new Date(u.last_visit)) {
+        u.last_visit = a.appointment_date;
+      }
+    });
+
+    const processedUsers = Array.from(userMap.values()).map(u => ({
+      ...u,
+      shops_visited: Array.from(u.shops_visited),
+      regions_visited: Array.from(u.regions_visited),
+      services_received: Array.from(u.services_received),
+    }));
+
+    setCrmUsers(processedUsers);
+  }, [appointments, shops]);
+
   const approveShop = async (shop) => {
     const isConfirmed = window.confirm(`${shop.name} işletmesini ONAYLAMAK istediğinize emin misiniz?`);
     if (!isConfirmed) return;
@@ -156,7 +202,7 @@ export default function SuperAdmin() {
       alert("İşletme Başarıyla Onaylandı!");
       fetchData();
     } else {
-      alert("Kritik Hata (Silme İzini Yoksa RLS Ayarlarını Kontrol Edin): " + error.message);
+      alert("Kritik Hata: " + error.message);
     }
     setLoading(false);
   };
@@ -166,7 +212,7 @@ export default function SuperAdmin() {
     if (isConfirmed) {
       const { error } = await supabase.from('shops').delete().eq('id', id);
       if (!error) { alert("İşletme kalıcı olarak silindi."); fetchData(); } 
-      else { alert("Silme hatası (Yetki Hatası Olabilir): " + error.message); }
+      else { alert("Silme hatası: " + error.message); }
     }
   };
 
@@ -206,7 +252,7 @@ export default function SuperAdmin() {
   };
 
   const exportToExcel = () => {
-    if(appointments.length === 0) return alert("Dışa aktarılacak müşteri datası bulunmuyor.");
+    if(appointments.length === 0) return alert("Dışa aktarılacak veri bulunmuyor.");
     let csvContent = '\uFEFF';
     csvContent += "Musteri Ad Soyad,Telefon,E-Posta,Islem Yaptigi Mekan,Tarih,Saat,Hizmet,Atanan Uzman,Durum\n";
     appointments.forEach(a => {
@@ -239,6 +285,13 @@ export default function SuperAdmin() {
     (c.customer_phone && c.customer_phone.includes(customerSearch))
   );
 
+  const filteredCrmUsers = crmUsers.filter(u => {
+    const matchesSearch = u.name.includes(crmSearchQuery.toUpperCase()) || (u.phone && u.phone.includes(crmSearchQuery)) || u.email.toLowerCase().includes(crmSearchQuery.toLowerCase());
+    const matchesRegion = filterRegion === 'Tümü' || u.regions_visited.includes(filterRegion);
+    const matchesService = filterService === '' || u.services_received.some(s => s.toLowerCase().includes(filterService.toLowerCase()));
+    return matchesSearch && matchesRegion && matchesService;
+  });
+
   const totalRevs = reviews.length;
   const avgTotal = totalRevs > 0 ? (reviews.reduce((a, b) => a + Number(b.average_score || 0), 0) / totalRevs).toFixed(1) : 0;
   
@@ -258,10 +311,9 @@ export default function SuperAdmin() {
     return { end: end.toLocaleDateString('tr-TR'), remaining: diff };
   };
 
-  // 4. YENİ GÜVENLİ GİRİŞ EKRANI ARAYÜZÜ
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-[#0B0710] flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-[#0B0710] flex flex-col items-center justify-center p-4 font-['DM_Sans']">
         <div className="bg-[#150D1E] w-full max-w-[400px] rounded-[32px] p-10 relative shadow-2xl border border-[#382252] text-center">
           <ShieldCheck size={48} className="mx-auto text-[#E8622A] mb-6" />
           <h1 className="text-2xl font-black text-white uppercase tracking-tight mb-2">SİSTEM YÖNETİMİ</h1>
@@ -302,26 +354,33 @@ export default function SuperAdmin() {
         <div className="p-8 border-b border-white/10">
           <span className="font-black text-xl tracking-tighter font-['Plus_Jakarta_Sans']">admin<span className="text-[#E8622A]">.</span></span>
         </div>
-        <div className="flex-1 p-4 space-y-2 mt-4">
+        <div className="flex-1 p-4 space-y-2 mt-4 overflow-y-auto scrollbar-hide">
           <button onClick={() => setActiveTab('overview')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'overview' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><LayoutDashboard size={18}/> Özet Panel</button>
           <button onClick={() => setActiveTab('pending')} className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'pending' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><span className="flex items-center gap-3"><Clock size={18}/> Yeni Başvurular</span> {pendingShops.length > 0 && <span className="bg-white text-[#E8622A] text-xs px-2 rounded-full font-black">{pendingShops.length}</span>}</button>
           <button onClick={() => setActiveTab('active')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'active' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><Store size={18}/> Aktif İşletmeler</button>
+          
+          {/* YENİ EKLENEN GLOBAL CRM BUTONU */}
+          <button onClick={() => setActiveTab('crm')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'crm' ? 'bg-[#E8622A] text-white shadow-md' : 'bg-transparent text-slate-400 hover:text-white'}`}><ShieldCheck size={18}/> Global CRM</button>
+          
           <button onClick={() => setActiveTab('appointments')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'appointments' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><CalendarCheck size={18} /> Randevular</button>
-          <button onClick={() => setActiveTab('customers')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'customers' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><Users size={18}/> Müşteriler</button>
+          <button onClick={() => setActiveTab('customers')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'customers' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><Users size={18}/> Temel Müşteriler</button>
           <button onClick={() => setActiveTab('billing')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'billing' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><CreditCard size={18} /> Abonelik</button>
           <button onClick={() => setActiveTab('feedbacks')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'feedbacks' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><Star size={18}/> Değerlendirmeler</button>
         </div>
         <div className="p-4"><button onClick={handleLogout} className="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-bold text-xs uppercase border-none cursor-pointer hover:bg-red-500 hover:text-white transition-all">Çıkış Yap</button></div>
       </aside>
 
-      <main className="flex-1 p-8 overflow-x-hidden">
+      <main className="flex-1 p-8 overflow-y-auto h-screen">
         {loading ? (
-          <div className="text-center py-32 animate-pulse font-black text-[#2D1B4E]">SİSTEM YÜKLENİYOR...</div>
+          <div className="text-center py-32 animate-pulse font-black text-[#2D1B4E] flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-[#E8622A] border-t-transparent rounded-full animate-spin"></div>
+            SİSTEM YÜKLENİYOR...
+          </div>
         ) : (
-          <div className="max-w-[1400px] mx-auto">
+          <div className="max-w-[1400px] mx-auto pb-20">
+            
             {activeTab === 'overview' && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
                   <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
                     <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Toplam İşletme</p>
@@ -341,7 +400,6 @@ export default function SuperAdmin() {
                   </div>
                 </div>
 
-                {/* YENİ EKLENEN KAMPANYA KONTROL PANELİ BURADA! */}
                 <div className="mb-10">
                   <AdminTrialControl />
                 </div>
@@ -359,6 +417,93 @@ export default function SuperAdmin() {
                 </div>
               </div>
             )}
+
+            {/* --- YENİ GLOBAL CRM SEKMESİ --- */}
+            {activeTab === 'crm' && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex justify-between items-center mb-8 border-b border-slate-200 pb-6">
+                  <div>
+                    <h1 className="text-3xl font-black text-[#2D1B4E] uppercase tracking-tight">Global Müşteri Ağı (CRM)</h1>
+                    <p className="text-sm font-bold text-slate-500 mt-2">Platformdaki tüm işletmelerin ve müşterilerin birleşik veri tabanı.</p>
+                  </div>
+                  <button onClick={exportToExcel} className="bg-[#2D1B4E] hover:bg-[#1a0f2e] text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 border-none cursor-pointer shadow-lg transition-colors">
+                    <Download size={16}/> Veriyi İndir
+                  </button>
+                </div>
+
+                <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm mb-8">
+                  <h3 className="font-black text-sm text-[#2D1B4E] uppercase tracking-widest mb-4 flex items-center gap-2"><Filter size={16} className="text-[#E8622A]"/> Dinamik Segmentasyon Filtreleri</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="relative">
+                      <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
+                      <input type="text" placeholder="İsim, Telefon veya Mail..." value={crmSearchQuery} onChange={(e)=>setCrmSearchQuery(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 font-bold text-sm outline-none focus:border-[#E8622A]"/>
+                    </div>
+                    <div className="relative">
+                      <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
+                      <select value={filterRegion} onChange={(e)=>setFilterRegion(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 font-bold text-sm outline-none focus:border-[#E8622A] appearance-none cursor-pointer">
+                        <option value="Tümü">Tüm Bölgeler</option>
+                        <option value="Girne">Girne</option>
+                        <option value="Lefkoşa">Lefkoşa</option>
+                        <option value="Mağusa">Mağusa</option>
+                        <option value="İskele">İskele</option>
+                      </select>
+                    </div>
+                    <div className="relative md:col-span-2">
+                      <Scissors size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
+                      <input type="text" placeholder="Hizmet Adı (Örn: Tattoo, VIP Loca, Saç Kesimi)" value={filterService} onChange={(e)=>setFilterService(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 font-bold text-sm outline-none focus:border-[#E8622A]"/>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
+                    <p className="text-xs font-bold text-slate-500">Bu filtrelere uyan <span className="font-black text-[#E8622A]">{filteredCrmUsers.length}</span> eşsiz müşteri bulundu.</p>
+                    <button className="bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-colors border-none cursor-pointer">
+                      <Send size={14}/> Toplu Mail At
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden w-full">
+                  <div className="overflow-x-auto w-full">
+                    <table className="w-full text-left border-collapse">
+                      <thead className="bg-slate-50">
+                        <tr className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                          <th className="px-6 py-5 border-b border-slate-100">Müşteri</th>
+                          <th className="px-6 py-5 border-b border-slate-100">Gittiği Bölgeler</th>
+                          <th className="px-6 py-5 border-b border-slate-100">Aldığı Hizmetler</th>
+                          <th className="px-6 py-5 border-b border-slate-100 text-center">Toplam İşlem</th>
+                          <th className="px-6 py-5 border-b border-slate-100 text-center">Son Ziyaret</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredCrmUsers.map((u, i) => (
+                          <tr key={i} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="font-black text-sm text-[#2D1B4E]">{u.name}</div>
+                              <div className="text-[10px] font-bold text-slate-400 mt-1 flex gap-2"><span>{u.phone}</span> • <span>{u.email}</span></div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-wrap gap-1">
+                                {u.regions_visited.map((r, idx) => (<span key={idx} className="bg-orange-50 text-[#E8622A] px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest">{r}</span>))}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-wrap gap-1 max-w-xs">
+                                {u.services_received.slice(0, 3).map((s, idx) => (<span key={idx} className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-[9px] font-bold">{s}</span>))}
+                                {u.services_received.length > 3 && <span className="text-[9px] font-bold text-slate-400 mt-1">+{u.services_received.length - 3} daha</span>}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-center font-black text-lg text-[#2D1B4E]">{u.total_bookings}</td>
+                            <td className="px-6 py-4 text-center"><span className="font-bold text-sm text-[#E8622A]">{u.last_visit}</span></td>
+                          </tr>
+                        ))}
+                        {filteredCrmUsers.length === 0 && <tr><td colSpan="5" className="text-center p-10 text-slate-400 font-bold uppercase tracking-widest">Filtrelere uygun müşteri bulunamadı.</td></tr>}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* ------------------------------------- */}
 
             {activeTab === 'pending' && (
               <div className="bg-white border border-slate-200 rounded-[32px] overflow-hidden shadow-sm">
@@ -500,14 +645,9 @@ export default function SuperAdmin() {
 
             {activeTab === 'customers' && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="bg-[#2D1B4E] rounded-[32px] p-12 text-center relative overflow-hidden mb-10">
-                  <h2 className="text-3xl font-black uppercase text-white mb-4">Müşteri Veritabanı</h2>
-                  <p className="text-slate-300 max-w-2xl mx-auto mb-10">Pazarlama çalışmaları için müşteri datalarını Excel olarak indirebilirsiniz.</p>
-                  <button onClick={exportToExcel} className="bg-[#E8622A] hover:scale-105 transition-all text-white px-12 py-5 rounded-2xl font-black text-sm border-none cursor-pointer flex items-center justify-center gap-3 mx-auto shadow-lg"><Download size={20}/> EXCEL LİSTESİNİ İNDİR</button>
-                </div>
                 <div className="bg-white border border-slate-200 rounded-[32px] overflow-hidden shadow-sm">
                   <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                    <h2 className="text-lg font-black uppercase text-[#2D1B4E]">Müşteri Kayıtları ({uniqueCustomers.length})</h2>
+                    <h2 className="text-lg font-black uppercase text-[#2D1B4E]">Temel Müşteri Kayıtları ({uniqueCustomers.length})</h2>
                     <input type="text" placeholder="Müşteri Ara..." value={customerSearch} onChange={e=>setCustomerSearch(e.target.value)} className="bg-white border border-slate-200 rounded-xl py-2 px-4 outline-none focus:border-[#E8622A]"/>
                   </div>
                   <table className="w-full text-left border-collapse">
