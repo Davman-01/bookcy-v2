@@ -5,6 +5,23 @@ import { Search, MapPin, CheckCircle2, Calendar, Scissors } from 'lucide-react';
 import { useAppContext } from './providers';
 import { categories, cyprusRegions } from '@/lib/constants';
 
+// --- KATEGORİLER İÇİN OTOMATİK KURUMSAL FOTOĞRAF ATAYICI ---
+const getCategoryImage = (name) => {
+  const lowerName = name?.toLowerCase() || '';
+  if (lowerName.includes('berber') || lowerName.includes('barber') || lowerName.includes('erkek')) return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('kuaför') || lowerName.includes('hair') || lowerName.includes('saç')) return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('spa') || lowerName.includes('masaj')) return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('dövme') || lowerName.includes('tattoo')) return 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('bar') || lowerName.includes('pub') || lowerName.includes('club') || lowerName.includes('loca')) return 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('güzellik') || lowerName.includes('beauty') || lowerName.includes('estetik') || lowerName.includes('cilt')) return 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('tırnak') || lowerName.includes('nail') || lowerName.includes('manikür')) return 'https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('makyaj') || lowerName.includes('makeup')) return 'https://images.unsplash.com/photo-1596462502278-27bf85033e5a?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('klinik') || lowerName.includes('diş') || lowerName.includes('sağlık')) return 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=800&auto=format&fit=crop';
+  
+  // Eşleşmezse varsayılan premium mekan fotoğrafı
+  return 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&auto=format&fit=crop'; 
+};
+
 export default function Home() {
   const router = useRouter();
   
@@ -27,7 +44,7 @@ export default function Home() {
   if (!text) return null;
 
   return (
-    <div className="w-full">
+    <div className="w-full font-['DM_Sans']">
       {/* HERO BÖLÜMÜ */}
       <section className="relative min-h-[90vh] bg-[#2D1B4E] overflow-hidden flex flex-col items-center justify-center pt-24 pb-20">
         <div 
@@ -55,12 +72,12 @@ export default function Home() {
               </div>
               <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-2xl md:rounded-none px-4 py-3 md:py-2">
                   <MapPin size={20} className="text-slate-400 mr-3 shrink-0" />
-                  <select className="w-full bg-transparent font-bold text-sm outline-none text-[#2D1B4E] cursor-pointer" value={filterRegion} onChange={(e) => setFilterRegion(e.target.value)}>
+                  <select className="w-full bg-transparent font-bold text-sm outline-none text-[#2D1B4E] cursor-pointer appearance-none" value={filterRegion} onChange={(e) => setFilterRegion(e.target.value)}>
                       <option value="All">{text.hero?.searchLoc}</option>
                       {(cyprusRegions || []).map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
               </div>
-              <button type="submit" className="bg-[#E8622A] text-white rounded-[16px] md:rounded-[40px] px-8 py-4 font-black text-sm hover:bg-[#d4561f] transition-colors w-full md:w-auto border-none cursor-pointer">
+              <button type="submit" className="bg-[#E8622A] text-white rounded-[16px] md:rounded-[40px] px-8 py-4 font-black text-sm hover:bg-[#d4561f] transition-colors w-full md:w-auto border-none cursor-pointer uppercase tracking-wider">
                 {text.hero?.btn}
               </button>
           </form>
@@ -75,7 +92,6 @@ export default function Home() {
                  onClick={() => router.push(`/isletmeler?c=${c.dbName}`)} 
                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full border border-white/20 transition-colors cursor-pointer text-white font-bold"
                >
-                 <span className="text-base">{c.emoji}</span> 
                  <span>{c.dbName}</span>
                </button>
              ))}
@@ -103,35 +119,44 @@ export default function Home() {
         </div>
       </section>
 
-      {/* YENİ KATEGORİLER BÖLÜMÜ */}
+      {/* YENİ KATEGORİLER BÖLÜMÜ - KURUMSAL KARTVİZİT TARZI */}
       <section className="bg-white py-16 md:py-24 px-6 md:px-8 border-b border-slate-200">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
           <div>
             <div className="text-[11px] font-black text-[#E8622A] uppercase tracking-[0.3em] mb-2">{text.cats?.title}</div>
             <div className="text-3xl md:text-4xl font-black text-[#2D1B4E] tracking-tight">{text.cats?.sub}</div>
           </div>
-          <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer hover:underline" onClick={() => router.push('/isletmeler')}>
-            {text.cats?.seeAll}
+          <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer hover:underline uppercase text-sm tracking-wider" onClick={() => router.push('/isletmeler')}>
+            {text.cats?.seeAll} →
           </button>
         </div>
 
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 md:gap-6">
+        {/* Resimli Grid Yapısı */}
+        <div className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
           {(categories || []).map((c) => (
             <button 
               key={c.key} 
               type="button" 
               onClick={() => router.push(`/isletmeler?c=${c.dbName}`)} 
-              className="flex flex-col items-center gap-3 transition-transform hover:-translate-y-2 cursor-pointer bg-transparent border-none outline-none group"
+              className="relative w-full aspect-[4/5] rounded-[24px] overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group border-none cursor-pointer text-left bg-[#111]"
             >
-              <div 
-                className="w-full aspect-square rounded-[32px] overflow-hidden shadow-md group-hover:shadow-xl border border-slate-100 flex items-center justify-center text-4xl md:text-5xl transition-all" 
-                style={{background: c.bg}}
-              >
-                {c.emoji}
-              </div>
-              {/* Uzun isimlerin taşmaması için text-center ve leading-tight eklendi */}
-              <div className="text-[10px] md:text-[11px] font-black uppercase tracking-wider text-[#2D1B4E] text-center leading-tight px-1">
-                {c.dbName}
+              {/* Arkaplan Resmi */}
+              <img 
+                src={c.image || getCategoryImage(c.dbName)} 
+                alt={c.dbName} 
+                className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+              />
+              
+              {/* Karartma (Gradient) Efekti */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#111]/90 via-[#111]/30 to-transparent pointer-events-none"></div>
+              
+              {/* İçerik */}
+              <div className="absolute inset-0 p-5 flex flex-col justify-end z-10">
+                <span className="text-white font-black uppercase tracking-widest text-sm md:text-base leading-tight drop-shadow-md">
+                  {c.dbName}
+                </span>
+                {/* Turuncu Vurgu Çizgisi */}
+                <span className="w-6 h-1 bg-[#E8622A] mt-3 rounded-full transition-all duration-300 group-hover:w-12"></span>
               </div>
             </button>
           ))}
@@ -140,41 +165,41 @@ export default function Home() {
 
       {/* ÖNE ÇIKANLAR BÖLÜMÜ */}
       {recommendedShops.length > 0 && (
-          <section className="bg-slate-50 py-16 md:py-24 px-6 md:px-8 border-t border-slate-200">
-            <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+          <section className="bg-[#F8F9FA] py-16 md:py-24 px-6 md:px-8 border-t border-slate-200">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
               <div>
                 <div className="text-[11px] font-black text-[#E8622A] uppercase tracking-[0.3em] mb-2">{text.featured?.title}</div>
                 <div className="text-3xl md:text-4xl font-black text-[#2D1B4E] tracking-tight">{text.featured?.sub}</div>
               </div>
-              <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer hover:underline" onClick={()=>router.push('/isletmeler')}>
-                {text.cats?.seeAll}
+              <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer hover:underline uppercase text-sm tracking-wider" onClick={()=>router.push('/isletmeler')}>
+                Tümünü Gör →
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {recommendedShops.map((shop, idx) => (
                 <div 
                   key={shop.id} 
                   onClick={() => router.push(`/isletmeler/${shop.id}`)} 
                   className={`flex flex-col bg-white rounded-[32px] overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer ${idx === 0 ? 'md:row-span-2' : ''}`}
                 >
-                  <div className={`w-full bg-slate-100 flex items-center justify-center text-6xl relative ${idx === 0 ? 'h-[300px]' : 'h-[200px]'}`}>
+                  <div className={`w-full bg-[#111] flex items-center justify-center relative ${idx === 0 ? 'h-[300px]' : 'h-[200px]'}`}>
                     {shop.cover_url || shop.logo_url ? (
-                      <img loading="lazy" src={shop.cover_url || shop.logo_url} className="w-full h-full object-cover"/>
+                      <img loading="lazy" src={shop.cover_url || shop.logo_url} className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity"/>
                     ) : (
-                      (categories.find(c => c.dbName === shop.category)?.emoji || '✨')
+                      <img loading="lazy" src={getCategoryImage(shop.category)} className="w-full h-full object-cover opacity-80" />
                     )}
                     {idx === 0 && (
-                      <div className="absolute top-4 left-4 bg-gradient-to-r from-[#E8622A] to-orange-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-md">
-                        🔥 VIP
+                      <div className="absolute top-4 left-4 bg-[#E8622A] text-white text-[10px] font-black px-4 py-2 rounded-xl shadow-lg uppercase tracking-widest">
+                        🔥 VIP İşletme
                       </div>
                     )}
                   </div>
                   <div className="p-6 flex flex-col flex-1">
                     <div className="text-[10px] font-black text-[#E8622A] tracking-widest uppercase mb-2">{shop.category}</div>
                     <div className="text-xl font-black text-[#2D1B4E] mb-3">{shop.name}</div>
-                    <div className="text-sm font-bold text-slate-500 mb-6 flex items-center gap-1"><MapPin size={14}/> {shop.location}</div>
-                    <button className="mt-auto w-full bg-[#2D1B4E] text-white font-black py-4 rounded-xl uppercase text-xs hover:bg-[#E8622A] transition-colors border-none cursor-pointer">
+                    <div className="text-sm font-bold text-slate-500 mb-6 flex items-center gap-2"><MapPin size={16} className="text-slate-400"/> {shop.location}</div>
+                    <button className="mt-auto w-full bg-[#2D1B4E] text-white font-black py-4 rounded-xl uppercase text-xs hover:bg-[#E8622A] transition-colors border-none cursor-pointer tracking-widest">
                       Randevu Al →
                     </button>
                   </div>
@@ -193,32 +218,36 @@ export default function Home() {
             <div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-[2px] bg-slate-100 z-0"></div>
             
             <div className="relative z-10 flex flex-col items-center">
-              <div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">
-                🔍<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">1</div>
+              <div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-[#2D1B4E] mb-6 shadow-sm relative">
+                <Search size={32} strokeWidth={1.5}/>
+                <div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">1</div>
               </div>
               <div className="text-lg font-black text-[#2D1B4E] mb-2">{text.how?.s1}</div>
               <div className="text-sm text-slate-500 font-medium px-4">{text.how?.d1}</div>
             </div>
             
             <div className="relative z-10 flex flex-col items-center">
-              <div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">
-                📅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">2</div>
+              <div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-[#2D1B4E] mb-6 shadow-sm relative">
+                <Calendar size={32} strokeWidth={1.5}/>
+                <div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">2</div>
               </div>
               <div className="text-lg font-black text-[#2D1B4E] mb-2">{text.how?.s2}</div>
               <div className="text-sm text-slate-500 font-medium px-4">{text.how?.d2}</div>
             </div>
             
             <div className="relative z-10 flex flex-col items-center">
-              <div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">
-                ✅<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">3</div>
+              <div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-[#2D1B4E] mb-6 shadow-sm relative">
+                <CheckCircle2 size={32} strokeWidth={1.5}/>
+                <div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">3</div>
               </div>
               <div className="text-lg font-black text-[#2D1B4E] mb-2">{text.how?.s3}</div>
               <div className="text-sm text-slate-500 font-medium px-4">{text.how?.d3}</div>
             </div>
             
             <div className="relative z-10 flex flex-col items-center">
-              <div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-3xl mb-6 shadow-sm relative">
-                ✨<div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">4</div>
+              <div className="w-20 h-20 bg-white border-2 border-slate-200 rounded-3xl flex items-center justify-center text-[#2D1B4E] mb-6 shadow-sm relative">
+                <Scissors size={32} strokeWidth={1.5}/>
+                <div className="absolute -top-2 -right-2 w-7 h-7 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-xs font-black border-2 border-white">4</div>
               </div>
               <div className="text-lg font-black text-[#2D1B4E] mb-2">{text.how?.s4}</div>
               <div className="text-sm text-slate-500 font-medium px-4">{text.how?.d4}</div>
