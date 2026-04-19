@@ -16,16 +16,19 @@ const KATEGORILER = {
   berber: { ad: 'Berber', emoji: '💈', aciklama: 'profesyonel erkek saç ve sakal kesim merkezleri' },
   spa: { ad: 'Spa & Masaj', emoji: '🧖‍♀️', aciklama: 'rahatlatıcı masaj ve arınma terapileri' },
   tirnak: { ad: 'Tırnak Stüdyosu', emoji: '💅', aciklama: 'kalıcı oje ve protez tırnak merkezleri' },
-  dovme: { ad: 'Dövme Stüdyosu', emoji: '🖋️', aciklama: 'ödüllü dövme (tattoo) sanatçıları' }
+  dovme: { ad: 'Dövme Stüdyosu', emoji: '🖋️', aciklama: 'ödüllü dövme (tattoo) sanatçıları' },
+  estetik: { ad: 'Estetik', emoji: '✨', aciklama: 'medikal estetik ve cilt bakım klinikleri' }
 };
 
 // --- DİNAMİK SEO METADATA OLUŞTURUCU (Google'ın Okuyacağı Kısım) ---
 export async function generateMetadata({ params }) {
-  const sehirKey = params.sehir.toLowerCase();
-  const kategoriKey = params.kategori.toLowerCase();
+  // NEXT.JS 15 UYUMU: Parametreleri await ile bekliyoruz
+  const resolvedParams = await params;
+  const sehirKey = resolvedParams.sehir.toLowerCase();
+  const kategoriKey = resolvedParams.kategori.toLowerCase();
 
-  const sehir = SEHIRLER[sehirKey] || { ad: params.sehir };
-  const kategori = KATEGORILER[kategoriKey] || { ad: params.kategori };
+  const sehir = SEHIRLER[sehirKey] || { ad: resolvedParams.sehir };
+  const kategori = KATEGORILER[kategoriKey] || { ad: resolvedParams.kategori };
 
   return {
     title: `${sehir.ad} ${kategori.ad} Randevusu ve Fiyatları | Bookcy`,
@@ -38,13 +41,15 @@ export async function generateMetadata({ params }) {
 }
 
 // --- SAYFA TASARIMI ---
-export default function ProgrammaticSeoPage({ params }) {
-  const sehirKey = params.sehir.toLowerCase();
-  const kategoriKey = params.kategori.toLowerCase();
+export default async function ProgrammaticSeoPage({ params }) {
+  // NEXT.JS 15 UYUMU: Parametreleri await ile bekliyoruz
+  const resolvedParams = await params;
+  const sehirKey = resolvedParams.sehir.toLowerCase();
+  const kategoriKey = resolvedParams.kategori.toLowerCase();
 
-  // Eğer URL'de saçma bir şehir/kategori varsa varsayılan değer atar
-  const sehir = SEHIRLER[sehirKey] || { ad: params.sehir.toUpperCase(), ozellik: 'Kıbrıs\'ın gözde bölgelerinden biri' };
-  const kategori = KATEGORILER[kategoriKey] || { ad: params.kategori.toUpperCase(), emoji: '✨', aciklama: 'en seçkin hizmet noktaları' };
+  // Eğer URL'de eşleşmeyen bir şehir/kategori varsa varsayılan değer atar
+  const sehir = SEHIRLER[sehirKey] || { ad: resolvedParams.sehir.toUpperCase(), ozellik: 'Kıbrıs\'ın gözde bölgelerinden biri' };
+  const kategori = KATEGORILER[kategoriKey] || { ad: resolvedParams.kategori.toUpperCase(), emoji: '✨', aciklama: 'en seçkin hizmet noktaları' };
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] font-['DM_Sans']">
