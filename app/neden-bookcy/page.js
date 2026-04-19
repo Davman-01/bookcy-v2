@@ -7,7 +7,7 @@ import {
   ArrowRight, Sparkles, TrendingUp, Users, Clock, Star,
   Smartphone, Calendar, MessageCircle, Gift, MapPin, Mail, Phone
 } from 'lucide-react';
-import { cyprusRegions, categories } from '../lib/constants';
+import { cyprusRegions, categories } from '../../lib/constants';
 
 export default function NedenBookcyPage() {
   const router = useRouter();
