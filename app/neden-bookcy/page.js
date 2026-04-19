@@ -4,94 +4,27 @@ import { useRouter } from 'next/navigation';
 import { useAppContext } from '../providers';
 import { 
   CheckCircle2, Rocket, ShieldCheck, Globe, Zap, 
-  ArrowRight, Sparkles, TrendingUp, Users, Clock, Star 
+  ArrowRight, Sparkles, TrendingUp, Users, Clock, Star,
+  Smartphone, Calendar, MessageCircle, Gift, MapPin, Mail, Phone
 } from 'lucide-react';
-
-// İkonlar İçin SVG Bileşenleri
-const IconCheck = () => (
-  <svg className="w-5 h-5 text-[#E8622A] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-  </svg>
-);
-
-const IconArrowRight = () => (
-  <svg className="w-4 h-4 text-[#E8622A] mt-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-  </svg>
-);
-
-const tabData = [
-  {
-    id: "takvim",
-    title: "Takviminizi zahmetsizce yönetin",
-    desc: "İster tek bir salon işletin ister birden fazla şube, Bookcy ile gününüz her zaman düzenli ve kontrol altında olsun.",
-    features: [
-      "Randevuları kolaylıkla yönetin",
-      "Online rezervasyonlarla takviminizi doldurun",
-      "Birkaç saniyede randevu değiştirin veya iptal edin",
-      "Müşterilere sınırsız WhatsApp hatırlatıcısı gönderin",
-      "Ekibinizin verimliliğini optimize edin"
-    ],
-    mockup: "takvim"
-  },
-  {
-    id: "rezervasyon",
-    title: "Tekrar tekrar rezervasyon alın",
-    desc: "Bookcy, yeni müşteri çekmeyi ve onları geri getirmeyi kolaylaştırır. Uğraşmadan, stressiz.",
-    features: [
-      "Birden fazla kanaldan rezervasyon alın",
-      "Yeniden rezervasyon için davet gönderin",
-      "Son dakika indirimleriyle boş slotları doldurun",
-      "Google ve Instagram üzerinden rezervasyon alın",
-      "7/24 otomatik randevu sistemi"
-    ],
-    mockup: "rezervasyon"
-  },
-  {
-    id: "sadakat",
-    title: "Müşteri sadakati inşa edin",
-    desc: "Önemli olanı hatırlamanıza ve güven kazanmanıza yardımcı araçlarla müşterilerin geri gelmesini sağlayın.",
-    features: [
-      "Müşteri geçmişini kaydedin ve takip edin",
-      "Tercihler ve özel notları saklayın",
-      "Yeniden rezervasyon için otomatik hatırlatıcı",
-      "Sadakat puanı sistemi ile ödüllendirin"
-    ],
-    mockup: "sadakat"
-  },
-  {
-    id: "yonetim",
-    title: "Yönetimde zamandan kazanın",
-    desc: "Bookcy, salonunuzu neredeyse kendi kendine işliyormuş gibi hissettiren bir yazılımdır.",
-    features: [
-      "Stok ve malzeme takibi yapın",
-      "Tüm muhasebe verilerinize anında erişin",
-      "Hizmet ve personel satışlarını takip edin",
-      "Anlık raporlar ve istatistikler"
-    ],
-    mockup: "yonetim"
-  },
-  {
-    id: "ekip",
-    title: "Ekibinizi başarıya hazırlayın",
-    desc: "Her ekip üyesindeki en iyiyi ortaya çıkarmak için çalışmalarını destekleyen araçlarla.",
-    features: [
-      "Personele özel esnek fiyatlandırma",
-      "Personel portfolyolarını sergileyin",
-      "Ekip performansını takip edin",
-      "Akıllı çalışma programları oluşturun"
-    ],
-    mockup: "ekip"
-  }
-];
+import { cyprusRegions, categories } from '../lib/constants';
 
 export default function NedenBookcyPage() {
   const router = useRouter();
-  const { lang = 'TR' } = useAppContext();
-  const [activeTab, setActiveTab] = useState("takvim");
+  const { lang = 'TR', t } = useAppContext();
+  const text = t?.[lang] || {};
+
+  // Form State
+  const [formData, setFormData] = useState({
+    shopName: '',
+    category: 'Kişisel Bakım',
+    location: 'Girne',
+    fullName: '',
+    phone: '',
+    email: ''
+  });
 
   const scrollToForm = () => document.getElementById("demo-form")?.scrollIntoView({ behavior: "smooth" });
-  const currentTab = tabData.find(t => t.id === activeTab) || tabData[0];
 
   return (
     <div className="w-full bg-white min-h-screen font-['Plus_Jakarta_Sans']">
@@ -102,134 +35,110 @@ export default function NedenBookcyPage() {
           <div className="absolute -top-24 -left-24 w-[500px] h-[500px] bg-[#E8622A] rounded-full blur-[150px]"></div>
           <div className="absolute -bottom-24 -right-24 w-[500px] h-[500px] bg-[#8B5CF6] rounded-full blur-[150px]"></div>
         </div>
-
         <div className="max-w-4xl mx-auto relative z-10">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 px-4 py-2 rounded-full text-[#E9D5FF] text-xs font-black tracking-[0.2em] uppercase mb-8">
-            <Sparkles size={14} className="text-[#E8622A]"/> Kıbrıs'ın #1 Çözümü
+            <Sparkles size={14} className="text-[#E8622A]"/> Neden Bookcy?
           </div>
           <h1 className="text-4xl md:text-7xl font-black text-white uppercase tracking-tighter mb-8 leading-[1.1]">
-            İşletmeni <span className="text-[#E8622A]">Büyüten</span> <br/> Akıllı Teknoloji
+            İşletmen İçin <span className="text-[#E8622A]">En Doğru</span> <br/> Karar.
           </h1>
           <p className="text-xl md:text-2xl text-[#E9D5FF] font-medium leading-relaxed max-w-2xl mx-auto">
-            Bookcy ile randevularını, personelini ve müşteri ilişkilerini tek platformdan yönet. Zamandan kazan, işletmeni şifrele.
+            Kıbrıs'ın en gelişmiş randevu sistemini keşfet. Manuel işleri bırak, dijitalin gücünü kullan.
           </p>
         </div>
       </section>
 
-      {/* 2. ETKİLEŞİMLİ SEKMELİ MOCKUP KARTI */}
-      <section className="max-w-7xl mx-auto px-6 -mt-32 relative z-20">
-        <div className="bg-white rounded-[48px] shadow-[0_40px_100px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden">
-          
-          {/* Tab Menü */}
-          <div className="flex flex-wrap bg-slate-50 border-b border-slate-100 p-2">
-            {tabData.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 min-w-[140px] py-6 px-4 text-[10px] md:text-xs font-black uppercase tracking-widest transition-all duration-300 ${
-                  activeTab === tab.id 
-                  ? "bg-white text-[#E8622A] shadow-sm rounded-2xl" 
-                  : "text-slate-400 hover:text-slate-600"
-                }`}
-              >
-                {tab.id}
-              </button>
-            ))}
+      {/* 2. ALT ALTA DEV KURUMSAL KARTLAR (TÜM MOCKUP'LAR DAHİL) */}
+      <section className="max-w-6xl mx-auto px-6 -mt-32 relative z-20 space-y-12">
+        
+        {/* KART 1: TAKVİM */}
+        <div className="bg-white rounded-[60px] shadow-[0_40px_100px_rgba(0,0,0,0.08)] border border-slate-100 p-8 md:p-16 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center shadow-sm"><Calendar size={32}/></div>
+            <h2 className="text-3xl md:text-4xl font-black text-[#2D1B4E] uppercase italic">Akıllı Takvim <br/> <span className="text-[#E8622A]">Yönetimi</span></h2>
+            <p className="text-slate-500 text-lg font-medium leading-relaxed">Randevuları saniyeler içinde değiştirin, personelinizi organize edin ve çakışmaları %100 engelleyin.</p>
+            <ul className="space-y-3">
+              {["7/24 Online Rezervasyon", "WhatsApp Onay Bildirimleri", "Kişisel Mola ve İzin Ayarları"].map((f, i) => (
+                <li key={i} className="flex items-center gap-3 font-bold text-sm text-slate-700 uppercase tracking-wide"><CheckCircle2 size={18} className="text-[#E8622A]"/> {f}</li>
+              ))}
+            </ul>
           </div>
-
-          <div className="p-8 md:p-16">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              
-              {/* Sol İçerik */}
-              <div className="space-y-8">
-                <h2 className="text-3xl md:text-4xl font-black text-[#2D1B4E] uppercase italic leading-tight">
-                  {currentTab.title}
-                </h2>
-                <p className="text-slate-500 text-lg leading-relaxed font-medium">
-                  {currentTab.desc}
-                </p>
-                <div className="space-y-4">
-                  {currentTab.features.map((feat, idx) => (
-                    <div key={idx} className="flex items-start gap-4 p-4 rounded-2xl hover:bg-slate-50 transition-colors">
-                      <IconCheck />
-                      <span className="text-slate-700 font-bold text-sm uppercase">{feat}</span>
-                    </div>
-                  ))}
-                </div>
+          <div className="bg-slate-50 rounded-[40px] p-8 border border-slate-100 flex justify-center">
+            <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-sm border border-[#F1F5F9] animate-in zoom-in-95">
+              <div className="flex items-center gap-3 mb-6 border-b pb-4">
+                <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-xl">📅</div>
+                <div><h4 className="font-bold text-[#2D1B4E] text-sm">Nisan 2026</h4><p className="text-[10px] text-gray-500 font-bold uppercase">Tam Doluluk</p></div>
               </div>
-
-              {/* Sağ - Senin Orijinal Mockup Çizimlerin */}
-              <div className="bg-[#F3E8FF]/30 p-8 rounded-[40px] shadow-inner relative overflow-hidden flex items-center justify-center min-h-[400px]">
-                
-                {activeTab === "takvim" && (
-                  <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md border border-[#F1F5F9] animate-in zoom-in-95">
-                    <div className="flex items-center gap-3 mb-6 border-b pb-4">
-                      <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-xl">📅</div>
-                      <div><h4 className="font-bold text-[#2D1B4E]">Nisan 2026</h4><p className="text-xs text-gray-500">Tam Doluluk</p></div>
-                    </div>
-                    <div className="grid grid-cols-7 gap-2 text-center text-[10px] text-gray-400 mb-2"><div>Pt</div><div>Sa</div><div>Ça</div><div>Pe</div><div>Cu</div><div>Ct</div><div>Pz</div></div>
-                    <div className="grid grid-cols-7 gap-2">
-                      {[...Array(21)].map((_, i) => (
-                        <div key={i} className={`aspect-square rounded-md flex items-center justify-center text-xs font-semibold ${[1,2,5,7,8,9,11,12,15,16,17,18,19].includes(i) ? 'bg-[#E8622A] text-white' : 'bg-gray-50 text-gray-300'}`}>{i + 1}</div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === "rezervasyon" && (
-                  <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md border border-[#F1F5F9] space-y-6 animate-in zoom-in-95">
-                    <div className="flex items-center gap-3 border-b pb-4">
-                      <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-xl">📲</div>
-                      <div><h4 className="font-bold text-[#2D1B4E]">Yeni Rezervasyonlar</h4><p className="text-xs text-gray-500">Haftalık Rapor</p></div>
-                    </div>
-                    <div className="space-y-4">
-                      <div><div className="flex justify-between text-[10px] font-bold text-[#2D1B4E] mb-1"><span>Google</span><span>%25</span></div><div className="h-2 bg-gray-100 rounded-full"><div className="h-2 bg-[#E8622A] rounded-full w-[25%]"></div></div></div>
-                      <div><div className="flex justify-between text-[10px] font-bold text-[#2D1B4E] mb-1"><span>Instagram</span><span>%45</span></div><div className="h-2 bg-gray-100 rounded-full"><div className="h-2 bg-[#8B5CF6] rounded-full w-[45%]"></div></div></div>
-                    </div>
-                    <div className="bg-orange-50 p-4 rounded-xl text-center"><h3 className="text-3xl font-black text-[#E8622A]">%0</h3><p className="text-[10px] text-[#E8622A] font-bold uppercase">Komisyon</p></div>
-                  </div>
-                )}
-
-                {activeTab === "sadakat" && (
-                  <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md border border-[#F1F5F9] space-y-4 animate-in zoom-in-95">
-                    <div className="flex items-center gap-3"><div className="w-10 h-10 bg-pink-50 rounded-full flex items-center justify-center text-xl">❤️</div><div><h4 className="font-bold text-[#2D1B4E]">Müşteri Kartı</h4><p className="text-xs text-gray-500">Ayşe Kaya</p></div></div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-[#FAF7F2] p-4 rounded-xl"><p className="text-[10px] text-gray-400">Ziyaret</p><p className="text-xl font-bold text-[#2D1B4E]">24</p></div>
-                      <div className="bg-orange-50 p-4 rounded-xl"><p className="text-[10px] text-[#E8622A]">Puan</p><p className="text-xl font-bold text-[#E8622A]">480</p></div>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === "yonetim" && (
-                  <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md border border-[#F1F5F9] space-y-4 animate-in zoom-in-95">
-                    <div className="flex items-center gap-3"><div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center text-xl">📊</div><div><h4 className="font-bold text-[#2D1B4E]">Aylık Gelir</h4><p className="text-xs text-gray-500">Nisan Raporu</p></div></div>
-                    <div className="h-32 flex items-end gap-2 justify-between">
-                      {[40, 70, 45, 90, 65, 80].map((h, i) => <div key={i} style={{height: `${h}%`}} className="w-full bg-[#2D1B4E] rounded-t-lg"></div>)}
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === "ekip" && (
-                  <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md border border-[#F1F5F9] space-y-3 animate-in zoom-in-95">
-                    <div className="flex items-center justify-between p-3 border rounded-xl bg-white shadow-sm">
-                      <div className="flex items-center gap-3"><div className="w-8 h-8 rounded-full bg-[#E8622A] text-white flex items-center justify-center text-[10px] font-bold">MA</div><p className="font-bold text-xs">Mehmet Abi</p></div>
-                      <div className="text-[10px] font-black text-green-600">★ 4.9</div>
-                    </div>
-                  </div>
-                )}
-
+              <div className="grid grid-cols-7 gap-2 text-center text-[10px] text-gray-400 mb-2 font-black"><div>PT</div><div>SA</div><div>ÇA</div><div>PE</div><div>CU</div><div>CT</div><div>PZ</div></div>
+              <div className="grid grid-cols-7 gap-2">
+                {[...Array(21)].map((_, i) => (
+                  <div key={i} className={`aspect-square rounded-md flex items-center justify-center text-xs font-black ${[3,8,9,15,16,19].includes(i) ? 'bg-[#E8622A] text-white shadow-md shadow-orange-200' : 'bg-gray-50 text-gray-300'}`}>{i + 1}</div>
+                ))}
               </div>
             </div>
           </div>
         </div>
+
+        {/* KART 2: REZERVASYON VE GELİR ANALİZİ */}
+        <div className="bg-white rounded-[60px] shadow-[0_40px_100px_rgba(0,0,0,0.08)] border border-slate-100 p-8 md:p-16 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="lg:order-2 space-y-6">
+            <div className="w-16 h-16 bg-orange-50 text-[#E8622A] rounded-3xl flex items-center justify-center shadow-sm"><TrendingUp size={32}/></div>
+            <h2 className="text-3xl md:text-4xl font-black text-[#2D1B4E] uppercase italic">Gelirini <br/> <span className="text-[#E8622A]">Katla</span></h2>
+            <p className="text-slate-500 text-lg font-medium leading-relaxed">Google ve Instagram üzerinden gelen yeni müşterilere kapını aç. Komisyon ödemeden büyümenin keyfini çıkar.</p>
+            <ul className="space-y-3">
+              {["%0 Komisyon Garantisi", "Google Haritalar Rezervasyonu", "Kampanya ve İndirim Araçları"].map((f, i) => (
+                <li key={i} className="flex items-center gap-3 font-bold text-sm text-slate-700 uppercase tracking-wide"><CheckCircle2 size={18} className="text-[#E8622A]"/> {f}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="lg:order-1 bg-orange-50/50 rounded-[40px] p-8 border border-orange-100/50 flex flex-col gap-4 animate-in slide-in-from-left-10">
+             <div className="bg-white p-5 rounded-2xl shadow-md border border-slate-100">
+                <div className="flex justify-between text-[10px] font-black mb-4 uppercase tracking-widest text-slate-400"><span>Haftalık Kazanç Grafiği</span><span className="text-green-600 bg-green-50 px-2 py-0.5 rounded">↑ %18</span></div>
+                <div className="h-32 flex items-end gap-2 justify-between">
+                  {[30, 50, 40, 80, 60, 95, 70].map((h, i) => <div key={i} style={{height: `${h}%`}} className="flex-1 bg-[#2D1B4E] rounded-t-lg transition-all hover:bg-[#E8622A]"></div>)}
+                </div>
+             </div>
+             <div className="bg-[#E8622A] p-4 rounded-2xl text-white text-center font-black uppercase text-[10px] tracking-[0.2em] shadow-lg shadow-orange-200">Komisyonsuz Rezervasyon Aktif</div>
+          </div>
+        </div>
+
+        {/* KART 3: EKİP VE MÜŞTERİ SADAKATİ */}
+        <div className="bg-white rounded-[60px] shadow-[0_40px_100px_rgba(0,0,0,0.08)] border border-slate-100 p-8 md:p-16 grid lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <div className="w-16 h-16 bg-purple-50 text-purple-600 rounded-3xl flex items-center justify-center shadow-sm"><Users size={32}/></div>
+            <h2 className="text-3xl md:text-4xl font-black text-[#2D1B4E] uppercase italic">Ekibini <br/> <span className="text-[#E8622A]">Öne Çıkar</span></h2>
+            <p className="text-slate-500 text-lg font-medium leading-relaxed">Personel performansı, müşteri sadakati ve dijital portfolyo yönetimi tek bir noktada.</p>
+            <ul className="space-y-3">
+              {["Müşteri Sadakat Puanları", "Personel Performans Analizi", "Otomatik Hatırlatıcılar"].map((f, i) => (
+                <li key={i} className="flex items-center gap-3 font-bold text-sm text-slate-700 uppercase tracking-wide"><CheckCircle2 size={18} className="text-[#E8622A]"/> {f}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="bg-purple-50 rounded-[40px] p-8 border border-purple-100 flex flex-col gap-4">
+             {/* Sadakat Kartı Mockup */}
+             <div className="bg-white p-6 rounded-2xl shadow-xl border border-slate-100 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-pink-100 text-pink-500 rounded-full flex items-center justify-center text-xl">❤️</div>
+                  <div><h4 className="font-black text-[#2D1B4E] text-xs uppercase">Müşteri Kartı</h4><p className="text-[10px] text-slate-400 font-bold">Ayşe Kaya — 480 Puan</p></div>
+                </div>
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-pink-500 w-[80%]"></div></div>
+             </div>
+             {/* Personel Mockup */}
+             <div className="bg-white p-4 rounded-2xl flex justify-between items-center shadow-md border border-slate-100">
+                <div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-[#2D1B4E] text-white flex items-center justify-center font-black text-[10px]">MA</div><span className="font-black text-xs uppercase tracking-tighter">Mehmet Abi</span></div>
+                <div className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded">4.9 ★</div>
+             </div>
+          </div>
+        </div>
+
       </section>
 
-      {/* 3. MÜŞTERİ YORUMLARI (Senin Kodun) */}
-      <section className="bg-[#2D1B4E] py-24 md:py-32 text-white mt-24">
-        <div className="container mx-auto px-6">
+      {/* 3. MÜŞTERİ YORUMLARI (GELİŞTİRİLMİŞ) */}
+      <section className="bg-[#2D1B4E] py-24 md:py-32 text-white mt-24 relative overflow-hidden">
+        <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
-            <h4 className="text-[#E8622A] font-bold tracking-widest text-sm uppercase mb-3">Ortaklarımız</h4>
-            <h2 className="text-4xl md:text-5xl font-black mb-4 uppercase tracking-tighter">İşletmeler Bookcy ile Büyüyor</h2>
+            <h4 className="text-[#E8622A] font-bold tracking-widest text-sm uppercase mb-3">İş Ortaklarımız</h4>
+            <h2 className="text-4xl md:text-6xl font-black mb-4 uppercase tracking-tighter italic">Onlar Bookcy İle Güçlendi</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -237,12 +146,12 @@ export default function NedenBookcyPage() {
               { quote: "Ayda 30 yeni müşteri kazandım sadece platform sayesinde. Şiddetle tavsiye ederim.", name: "Selin Yılmaz", salon: "Selin Güzellik Merkezi — Lefkoşa", initials: "SY" },
               { quote: "Komisyon yok, sabit ücret var. Kıbrıs'ın kendi platformu olması çok değerli.", name: "Hüseyin Tekin", salon: "Elite Spa — Mağusa", initials: "HT" }
             ].map((t, i) => (
-              <div key={i} className="bg-white/5 border border-white/10 p-8 rounded-[32px] hover:bg-white/10 transition">
-                <div className="flex gap-1 text-[#E8622A] text-sm mb-6"><Star size={14} fill="currentColor"/><Star size={14} fill="currentColor"/><Star size={14} fill="currentColor"/><Star size={14} fill="currentColor"/><Star size={14} fill="currentColor"/></div>
-                <p className="text-lg text-white/90 italic mb-8">"{t.quote}"</p>
+              <div key={i} className="bg-white/5 border border-white/10 p-10 rounded-[48px] hover:bg-white/10 transition-all duration-300">
+                <div className="flex gap-1 text-[#E8622A] text-sm mb-6"><Star size={16} fill="currentColor"/><Star size={16} fill="currentColor"/><Star size={16} fill="currentColor"/><Star size={16} fill="currentColor"/><Star size={16} fill="currentColor"/></div>
+                <p className="text-xl text-white/90 italic font-medium mb-10 leading-relaxed">"{t.quote}"</p>
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#E8622A] flex items-center justify-center font-bold text-white text-xs">{t.initials}</div>
-                  <div><p className="font-bold text-white text-sm">{t.name}</p><p className="text-xs text-white/50">{t.salon}</p></div>
+                  <div className="w-12 h-12 rounded-full bg-[#E8622A] flex items-center justify-center font-black text-white text-xs shadow-lg shadow-orange-500/20">{t.initials}</div>
+                  <div><p className="font-black text-white text-sm uppercase tracking-tight">{t.name}</p><p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">{t.salon}</p></div>
                 </div>
               </div>
             ))}
@@ -250,18 +159,58 @@ export default function NedenBookcyPage() {
         </div>
       </section>
 
-      {/* 4. DEMO FORMU (Senin Kodun) */}
-      <section id="demo-form" className="py-24 bg-[#FAF7F2]">
-        <div className="container mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
-          <div className="space-y-6">
-            <h2 className="text-4xl md:text-5xl font-black text-[#2D1B4E] uppercase tracking-tighter italic">Demo Talep Edin</h2>
-            <p className="text-lg text-slate-500 font-medium">Ekibimiz 48 saat içinde sizinle iletişime geçer. Platformu birlikte keşfedelim.</p>
-          </div>
-          <div className="bg-white p-10 rounded-[40px] shadow-xl border border-slate-100">
-            <form className="space-y-5">
-              <input placeholder="İşletme Adı" className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-[#E8622A]" />
-              <input placeholder="Telefon" className="w-full px-5 py-4 rounded-xl border border-slate-200 bg-slate-50 text-sm font-bold outline-none focus:border-[#E8622A]" />
-              <button className="w-full bg-[#E8622A] text-white py-5 rounded-xl font-black uppercase tracking-widest text-xs shadow-lg">Demo Talep Et →</button>
+      {/* 4. TAM TEŞEKKÜLLÜ DEMO FORMU */}
+      <section id="demo-form" className="py-32 bg-[#FAF7F2]">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="bg-white p-8 md:p-16 rounded-[60px] shadow-2xl border border-slate-100 relative">
+            <div className="text-center mb-12">
+               <h2 className="text-3xl md:text-5xl font-black text-[#2D1B4E] uppercase italic mb-4">Ücretsiz Kurulum <span className="text-[#E8622A]">Talebi</span></h2>
+               <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Bilgilerinizi bırakın, işletmenizi 48 saat içinde dijital dünyaya taşıyalım.</p>
+            </div>
+
+            <form className="space-y-6">
+               <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-[#2D1B4E] uppercase ml-2 tracking-widest">İşletme Adı *</label>
+                    <input required type="text" placeholder="Örn: Bookcy Salon" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:border-[#E8622A] transition-all" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-[#2D1B4E] uppercase ml-2 tracking-widest">Kategori *</label>
+                    <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:border-[#E8622A] transition-all">
+                      {categories.map(c => <option key={c.dbName} value={c.dbName}>{c.dbName}</option>)}
+                    </select>
+                  </div>
+               </div>
+
+               <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-[#2D1B4E] uppercase ml-2 tracking-widest">Bölge *</label>
+                    <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:border-[#E8622A] transition-all">
+                      {cyprusRegions.map(r => <option key={r} value={r}>{r}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-[#2D1B4E] uppercase ml-2 tracking-widest">Ad Soyad *</label>
+                    <input required type="text" placeholder="İşletme Sahibi" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:border-[#E8622A] transition-all" />
+                  </div>
+               </div>
+
+               <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-[#2D1B4E] uppercase ml-2 tracking-widest">WhatsApp Hattınız *</label>
+                    <input required type="tel" placeholder="+90 5xx xxx xx xx" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:border-[#E8622A] transition-all" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-[#2D1B4E] uppercase ml-2 tracking-widest">E-posta Adresiniz *</label>
+                    <input required type="email" placeholder="iletisim@isletme.com" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-sm font-bold outline-none focus:border-[#E8622A] transition-all" />
+                  </div>
+               </div>
+
+               <button type="submit" className="w-full bg-[#E8622A] text-white py-6 rounded-[24px] font-black uppercase tracking-[0.2em] text-sm shadow-xl hover:bg-[#d5521d] transition-all mt-6 flex items-center justify-center gap-3">
+                  Ücretsiz Kurulumu Başlat <ArrowRight size={20}/>
+               </button>
+               
+               <p className="text-[10px] text-slate-400 text-center font-bold">Kaydınızın ardından ekibimiz en kısa sürede sizinle iletişime geçecektir.</p>
             </form>
           </div>
         </div>
