@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { t } from '@/lib/constants';
+import { supabase } from '../lib/supabase';
+import { t } from '../lib/constants';
 
 const AppContext = createContext();
 
