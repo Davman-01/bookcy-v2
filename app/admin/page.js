@@ -6,7 +6,7 @@ import {
   ShieldCheck, XCircle, LogOut, Download, CheckCircle2, ChevronRight,
   TrendingUp, Trash2, AlertCircle, FileSpreadsheet, MapPin, Crown, 
   Activity, CalendarCheck, Check, Lock, Phone, Star, MessageSquare, BarChart3,
-  CreditCard, Send, Eye, EyeOff, Filter, Scissors
+  CreditCard, Send, Eye, EyeOff, Filter, Scissors, Loader2
 } from 'lucide-react';
 import AdminTrialControl from '@/components/AdminTrialControl';
 import { supabase } from '@/lib/supabase';
@@ -57,12 +57,15 @@ export default function SuperAdmin() {
   const [filterRegion, setFilterRegion] = useState('Tümü');
   const [filterService, setFilterService] = useState('');
 
-  // 1. UYGULAMA AÇILDIĞINDA OTURUM KONTROLÜ
+  // -- TOPLU MAİL MODAL STATELERİ --
+  const [showMailModal, setShowMailModal] = useState(false);
+  const [mailSubject, setMailSubject] = useState('');
+  const [mailContent, setMailContent] = useState('');
+  const [isSendingBulk, setIsSendingBulk] = useState(false);
+
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
-      // Eğer sistemde senin mailinle bir oturum açıksa içeri al
       if (session && session.user.email === 'dogukandavman01@gmail.com') {
         setIsAuthenticated(true);
         fetchData(); 
@@ -71,11 +74,9 @@ export default function SuperAdmin() {
         setLoading(false); 
       }
     };
-    
     checkSession();
   }, []);
 
-  // 2. SUPABASE İLE ASKERİ DÜZEY GİRİŞ SİSTEMİ
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoginLoading(true);
@@ -133,7 +134,6 @@ export default function SuperAdmin() {
     }
   }
 
-  // GLOBAL CRM VERİSİNİ HAZIRLA (Randevular veya İşletmeler Değiştiğinde Çalışır)
   useEffect(() => {
     if (!appointments.length || !shops.length) return;
 
@@ -176,10 +176,60 @@ export default function SuperAdmin() {
     setCrmUsers(processedUsers);
   }, [appointments, shops]);
 
+  // -- FİLTRELENMİŞ KULLANICILAR (Global CRM) --
+  const filteredCrmUsers = crmUsers.filter(u => {
+    const matchesSearch = u.name.includes(crmSearchQuery.toUpperCase()) || (u.phone && u.phone.includes(crmSearchQuery)) || u.email.toLowerCase().includes(crmSearchQuery.toLowerCase());
+    const matchesRegion = filterRegion === 'Tümü' || u.regions_visited.includes(filterRegion);
+    const matchesService = filterService === '' || u.services_received.some(s => s.toLowerCase().includes(filterService.toLowerCase()));
+    return matchesSearch && matchesRegion && matchesService;
+  });
+
+  // --- YENİ EKLENEN: TOPLU MAİL GÖNDERİM FONKSİYONU ---
+  const handleBulkEmailSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Geçerli (Belirtilmemiş olmayan) e-posta adreslerini ayıklıyoruz
+    const targetEmails = filteredCrmUsers.map(u => u.email).filter(email => email && email !== 'Belirtilmemiş' && email.includes('@'));
+    
+    if (targetEmails.length === 0) {
+      return alert("Seçili kitlede geçerli bir e-posta adresi bulunamadı!");
+    }
+
+    const isConfirmed = window.confirm(`Bu mail ${targetEmails.length} kişiye gönderilecek. Onaylıyor musunuz?`);
+    if (!isConfirmed) return;
+
+    setIsSendingBulk(true);
+    try {
+      const res = await fetch('/api/bulk-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: targetEmails,
+          subject: mailSubject,
+          html: mailContent
+        })
+      });
+
+      const data = await res.json();
+      
+      if (res.ok) {
+        alert("🎉 Mailler başarıyla kuyruğa alındı ve gönderimi başladı!");
+        setShowMailModal(false);
+        setMailSubject('');
+        setMailContent('');
+      } else {
+        alert("Hata oluştu: " + (data.error || "Bilinmeyen hata"));
+      }
+    } catch (error) {
+      alert("Sunucuya bağlanırken bir hata oluştu.");
+    } finally {
+      setIsSendingBulk(false);
+    }
+  };
+
   const approveShop = async (shop) => {
     const isConfirmed = window.confirm(`${shop.name} işletmesini ONAYLAMAK istediğinize emin misiniz?`);
     if (!isConfirmed) return;
-
     setLoading(true);
     const { error } = await supabase.from('shops').update({ status: 'approved' }).eq('id', shop.id);
     if (!error) {
@@ -190,12 +240,7 @@ export default function SuperAdmin() {
           body: JSON.stringify({
             to: shop.admin_email,
             subject: 'Hesabınız Aktif Edildi - Bookcy',
-            html: getActivationTemplate({
-              shopName: shop.name,
-              packageName: shop.package || 'Standart Paket',
-              username: shop.admin_username,
-              password: shop.admin_password
-            })
+            html: getActivationTemplate({ shopName: shop.name, packageName: shop.package || 'Standart Paket', username: shop.admin_username, password: shop.admin_password })
           }),
         });
       } catch (err) { console.error(err); }
@@ -227,29 +272,16 @@ export default function SuperAdmin() {
         body: JSON.stringify({
           to: shop.admin_email,
           subject: 'Ödeme Hatırlatması - Bookcy Kayıt Talebi',
-          html: getRegistrationTemplate({
-            shopName: shop.name,
-            date: new Date(shop.created_at).toLocaleDateString('tr-TR'),
-            packageName: (shop.package || 'Standart Paket').toUpperCase(),
-            price: (shop.package === 'Premium' || shop.package === 'Premium Paket') ? '100 STG' : '60 STG'
-          })
+          html: getRegistrationTemplate({ shopName: shop.name, date: new Date(shop.created_at).toLocaleDateString('tr-TR'), packageName: (shop.package || 'Standart Paket').toUpperCase(), price: (shop.package === 'Premium' || shop.package === 'Premium Paket') ? '100 STG' : '60 STG' })
         }),
       });
       alert("Hatırlatma maili başarıyla gönderildi!");
-    } catch (err) {
-      alert("Mail hatası.");
-    } finally {
-      setIsSendingMail(false);
-    }
+    } catch (err) { alert("Mail hatası."); } finally { setIsSendingMail(false); }
   };
 
-  const sendReminderMailAbonelik = (shop) => {
-    alert(`${shop.name} işletmesine abonelik yenileme hatırlatması başarıyla gönderildi.`);
-  };
+  const sendReminderMailAbonelik = (shop) => { alert(`${shop.name} işletmesine abonelik yenileme hatırlatması başarıyla gönderildi.`); };
 
-  const togglePassword = (id) => {
-    setShowPasswords(prev => ({ ...prev, [id]: !prev[id] }));
-  };
+  const togglePassword = (id) => { setShowPasswords(prev => ({ ...prev, [id]: !prev[id] })); };
 
   const exportToExcel = () => {
     if(appointments.length === 0) return alert("Dışa aktarılacak veri bulunmuyor.");
@@ -285,13 +317,6 @@ export default function SuperAdmin() {
     (c.customer_phone && c.customer_phone.includes(customerSearch))
   );
 
-  const filteredCrmUsers = crmUsers.filter(u => {
-    const matchesSearch = u.name.includes(crmSearchQuery.toUpperCase()) || (u.phone && u.phone.includes(crmSearchQuery)) || u.email.toLowerCase().includes(crmSearchQuery.toLowerCase());
-    const matchesRegion = filterRegion === 'Tümü' || u.regions_visited.includes(filterRegion);
-    const matchesService = filterService === '' || u.services_received.some(s => s.toLowerCase().includes(filterService.toLowerCase()));
-    return matchesSearch && matchesRegion && matchesService;
-  });
-
   const totalRevs = reviews.length;
   const avgTotal = totalRevs > 0 ? (reviews.reduce((a, b) => a + Number(b.average_score || 0), 0) / totalRevs).toFixed(1) : 0;
   
@@ -319,27 +344,9 @@ export default function SuperAdmin() {
           <h1 className="text-2xl font-black text-white uppercase tracking-tight mb-2">SİSTEM YÖNETİMİ</h1>
           <p className="text-slate-400 text-sm mb-8">Devam etmek için yetkili hesapla giriş yapın.</p>
           <form onSubmit={handleLogin} className="space-y-4">
-            <input 
-              type="email" 
-              required 
-              placeholder="Yönetici E-Posta" 
-              className="w-full bg-[#1D122A] border border-[#382252] rounded-2xl py-4 px-6 text-white outline-none focus:border-[#E8622A]" 
-              value={adminEmail} 
-              onChange={(e) => setAdminEmail(e.target.value)} 
-            />
-            <input 
-              type="password" 
-              required 
-              placeholder="Sistem Şifresi" 
-              className="w-full bg-[#1D122A] border border-[#382252] rounded-2xl py-4 px-6 text-white outline-none focus:border-[#E8622A]" 
-              value={adminPass} 
-              onChange={(e) => setAdminPass(e.target.value)} 
-            />
-            <button 
-              type="submit" 
-              disabled={loginLoading}
-              className={`w-full text-white py-4 rounded-2xl font-black uppercase border-none cursor-pointer transition-all ${loginLoading ? 'bg-slate-600' : 'bg-[#E8622A] hover:bg-[#d5521b]'}`}
-            >
+            <input type="email" required placeholder="Yönetici E-Posta" className="w-full bg-[#1D122A] border border-[#382252] rounded-2xl py-4 px-6 text-white outline-none focus:border-[#E8622A]" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
+            <input type="password" required placeholder="Sistem Şifresi" className="w-full bg-[#1D122A] border border-[#382252] rounded-2xl py-4 px-6 text-white outline-none focus:border-[#E8622A]" value={adminPass} onChange={(e) => setAdminPass(e.target.value)} />
+            <button type="submit" disabled={loginLoading} className={`w-full text-white py-4 rounded-2xl font-black uppercase border-none cursor-pointer transition-all ${loginLoading ? 'bg-slate-600' : 'bg-[#E8622A] hover:bg-[#d5521b]'}`}>
               {loginLoading ? 'DOĞRULANIYOR...' : 'SİSTEMİ AÇ'}
             </button>
           </form>
@@ -349,7 +356,7 @@ export default function SuperAdmin() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex text-[#2D1B4E] font-['DM_Sans']">
+    <div className="min-h-screen bg-[#F8FAFC] flex text-[#2D1B4E] font-['DM_Sans'] relative">
       <aside className="w-64 bg-[#2D1B4E] text-white h-screen sticky top-0 flex flex-col shrink-0 shadow-2xl z-40 hidden md:flex">
         <div className="p-8 border-b border-white/10">
           <span className="font-black text-xl tracking-tighter font-['Plus_Jakarta_Sans']">admin<span className="text-[#E8622A]">.</span></span>
@@ -358,10 +365,7 @@ export default function SuperAdmin() {
           <button onClick={() => setActiveTab('overview')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'overview' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><LayoutDashboard size={18}/> Özet Panel</button>
           <button onClick={() => setActiveTab('pending')} className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'pending' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><span className="flex items-center gap-3"><Clock size={18}/> Yeni Başvurular</span> {pendingShops.length > 0 && <span className="bg-white text-[#E8622A] text-xs px-2 rounded-full font-black">{pendingShops.length}</span>}</button>
           <button onClick={() => setActiveTab('active')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'active' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><Store size={18}/> Aktif İşletmeler</button>
-          
-          {/* YENİ EKLENEN GLOBAL CRM BUTONU */}
           <button onClick={() => setActiveTab('crm')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'crm' ? 'bg-[#E8622A] text-white shadow-md' : 'bg-transparent text-slate-400 hover:text-white'}`}><ShieldCheck size={18}/> Global CRM</button>
-          
           <button onClick={() => setActiveTab('appointments')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'appointments' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><CalendarCheck size={18} /> Randevular</button>
           <button onClick={() => setActiveTab('customers')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'customers' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><Users size={18}/> Temel Müşteriler</button>
           <button onClick={() => setActiveTab('billing')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'billing' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><CreditCard size={18} /> Abonelik</button>
@@ -370,39 +374,25 @@ export default function SuperAdmin() {
         <div className="p-4"><button onClick={handleLogout} className="w-full bg-red-500/10 text-red-500 py-4 rounded-xl font-bold text-xs uppercase border-none cursor-pointer hover:bg-red-500 hover:text-white transition-all">Çıkış Yap</button></div>
       </aside>
 
-      <main className="flex-1 p-8 overflow-y-auto h-screen">
+      <main className="flex-1 p-8 overflow-y-auto h-screen relative">
         {loading ? (
           <div className="text-center py-32 animate-pulse font-black text-[#2D1B4E] flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-[#E8622A] border-t-transparent rounded-full animate-spin"></div>
             SİSTEM YÜKLENİYOR...
           </div>
         ) : (
-          <div className="max-w-[1400px] mx-auto pb-20">
+          <div className="max-w-[1400px] mx-auto pb-20 relative">
             
             {activeTab === 'overview' && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-                  <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Toplam İşletme</p>
-                    <p className="text-4xl font-black text-[#2D1B4E]">{activeShops.length}</p>
-                  </div>
-                  <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Onay Bekleyen</p>
-                    <p className="text-4xl font-black text-orange-500">{pendingShops.length}</p>
-                  </div>
-                  <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Kayıtlı Müşteri</p>
-                    <p className="text-4xl font-black text-blue-500">{uniqueCustomers.length}</p>
-                  </div>
-                  <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Ortalama Puan</p>
-                    <p className="text-4xl font-black text-yellow-500">{avgTotal}</p>
-                  </div>
+                  <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm"><p className="text-[10px] font-black uppercase text-slate-400 mb-1">Toplam İşletme</p><p className="text-4xl font-black text-[#2D1B4E]">{activeShops.length}</p></div>
+                  <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm"><p className="text-[10px] font-black uppercase text-slate-400 mb-1">Onay Bekleyen</p><p className="text-4xl font-black text-orange-500">{pendingShops.length}</p></div>
+                  <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm"><p className="text-[10px] font-black uppercase text-slate-400 mb-1">Kayıtlı Müşteri</p><p className="text-4xl font-black text-blue-500">{uniqueCustomers.length}</p></div>
+                  <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm"><p className="text-[10px] font-black uppercase text-slate-400 mb-1">Ortalama Puan</p><p className="text-4xl font-black text-yellow-500">{avgTotal}</p></div>
                 </div>
 
-                <div className="mb-10">
-                  <AdminTrialControl />
-                </div>
+                <div className="mb-10"><AdminTrialControl /></div>
 
                 <div className="bg-white rounded-[32px] p-8 border border-slate-100 mb-10 shadow-sm">
                   <h3 className="text-xl font-black uppercase mb-8 flex items-center gap-2"><BarChart3 className="text-[#E8622A]"/> Sektörel Dağılım</h3>
@@ -418,7 +408,7 @@ export default function SuperAdmin() {
               </div>
             )}
 
-            {/* --- YENİ GLOBAL CRM SEKMESİ --- */}
+            {/* --- GLOBAL CRM SEKMESİ --- */}
             {activeTab === 'crm' && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex justify-between items-center mb-8 border-b border-slate-200 pb-6">
@@ -450,13 +440,13 @@ export default function SuperAdmin() {
                     </div>
                     <div className="relative md:col-span-2">
                       <Scissors size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
-                      <input type="text" placeholder="Hizmet Adı (Örn: Tattoo, VIP Loca, Saç Kesimi)" value={filterService} onChange={(e)=>setFilterService(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 font-bold text-sm outline-none focus:border-[#E8622A]"/>
+                      <input type="text" placeholder="Hizmet Adı (Örn: Tattoo, Saç Kesimi)" value={filterService} onChange={(e)=>setFilterService(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 font-bold text-sm outline-none focus:border-[#E8622A]"/>
                     </div>
                   </div>
                   
                   <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
-                    <p className="text-xs font-bold text-slate-500">Bu filtrelere uyan <span className="font-black text-[#E8622A]">{filteredCrmUsers.length}</span> eşsiz müşteri bulundu.</p>
-                    <button className="bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-colors border-none cursor-pointer">
+                    <p className="text-xs font-bold text-slate-500">Filtrelenen: <span className="font-black text-[#E8622A]">{filteredCrmUsers.length}</span> müşteri</p>
+                    <button onClick={() => setShowMailModal(true)} className="bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-colors border-none cursor-pointer">
                       <Send size={14}/> Toplu Mail At
                     </button>
                   </div>
@@ -503,8 +493,7 @@ export default function SuperAdmin() {
                 </div>
               </div>
             )}
-            {/* ------------------------------------- */}
-
+            
             {activeTab === 'pending' && (
               <div className="bg-white border border-slate-200 rounded-[32px] overflow-hidden shadow-sm">
                 <div className="p-8 border-b border-slate-100 flex items-center gap-3 bg-slate-50">
@@ -746,6 +735,39 @@ export default function SuperAdmin() {
           </div>
         )}
       </main>
+
+      {/* --- TOPLU MAİL MODALI --- */}
+      {showMailModal && (
+        <div className="fixed inset-0 bg-[#2D1B4E]/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-[600px] rounded-[32px] p-8 relative shadow-2xl animate-in zoom-in-95">
+            <button onClick={() => setShowMailModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-black bg-transparent border-none cursor-pointer"><XCircle size={24}/></button>
+            
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><Mail size={24}/></div>
+              <div>
+                <h2 className="text-xl font-black text-[#2D1B4E] uppercase">Toplu Mail Gönderimi</h2>
+                <p className="text-xs font-bold text-slate-500">Hedef Kitle: <span className="text-[#E8622A]">{filteredCrmUsers.filter(u => u.email && u.email !== 'Belirtilmemiş' && u.email.includes('@')).length}</span> Kişi</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleBulkEmailSubmit} className="space-y-4">
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Mail Konusu (Subject)</label>
+                <input required type="text" value={mailSubject} onChange={e => setMailSubject(e.target.value)} placeholder="Örn: Hafta sonuna özel tüm hizmetlerde %20 indirim!" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 font-bold text-sm outline-none focus:border-blue-500"/>
+              </div>
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Mail İçeriği (HTML Destekler)</label>
+                <textarea required rows="6" value={mailContent} onChange={e => setMailContent(e.target.value)} placeholder="Merhaba,&#10;Sizi tekrar aramızda görmek isteriz..." className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 font-bold text-sm outline-none focus:border-blue-500 resize-none"></textarea>
+              </div>
+              <button type="submit" disabled={isSendingBulk} className={`w-full text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 border-none cursor-pointer transition-colors shadow-lg mt-4 ${isSendingBulk ? 'bg-slate-400' : 'bg-blue-600 hover:bg-blue-700'}`}>
+                {isSendingBulk ? <Loader2 className="animate-spin" size={16}/> : <Send size={16}/>} 
+                {isSendingBulk ? 'GÖNDERİLİYOR...' : 'KAMPANYAYI BAŞLAT'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
