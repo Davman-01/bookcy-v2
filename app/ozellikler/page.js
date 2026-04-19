@@ -1,118 +1,134 @@
 "use client";
 import React from 'react';
-import { 
-  Store, CalendarCheck, Users, Target, BarChart3, 
-  Ticket, Globe, BellRing, ShieldCheck, Zap
-} from 'lucide-react';
-// Not: Header ve Footer bileşenlerini kendi projendeki yollara göre ayarlayabilirsin.
-// import Header from '@/components/Header';
-// import Footer from '@/components/Footer';
+import { Zap, CheckCircle2 } from 'lucide-react';
 
 const features = [
   {
-    icon: <Globe size={32} strokeWidth={1.5} />,
-    title: "Dijital Vitrin (Bookcy Profili)",
-    description: "İşletmenizin dijital kimliğini saniyeler içinde oluşturun. Çalışma saatlerinizi, detaylı hizmet menünüzü, fiyatlarınızı ve galerinizi tek bir merkezden yöneterek müşterilerinize profesyonel bir imaj çizin.",
-    tags: ["Özel Galeri", "WhatsApp Entegrasyonu", "Esnek Çalışma Saatleri"]
+    title: "Dijital Vitrin",
+    subTitle: "Bookcy Business Profile",
+    description: "İşletmenizin tüm detaylarını, hizmetlerini ve kalitesini yansıtan, Google SEO uyumlu profesyonel bir dijital kimlik.",
+    image: "https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?q=80&w=800&auto=format&fit=crop",
+    tags: ["SEO Uyumlu", "Foto Galeri"]
   },
   {
-    icon: <CalendarCheck size={32} strokeWidth={1.5} />,
-    title: "7/24 Online Randevu",
-    description: "Müşterilerinizin dükkan kapalıyken bile günün her saati randevu almasını sağlayın. Akıllı takvim yönetimimiz sayesinde çakışmaları önleyin, boş slotlarınızı otomatik doldurun ve zaman kazanın.",
-    tags: ["Akıllı Takvim", "Hızlı Kayıt Modülü", "Anlık Durum Kontrolü"]
+    title: "Akıllı Randevu",
+    subTitle: "7/24 Rezervasyon",
+    description: "Siz uyurken bile dükkanınız açık kalsın. Müşterileriniz saniyeler içinde uygun saati seçsin, randevu anında cebinize düşsün.",
+    image: "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?q=80&w=800&auto=format&fit=crop",
+    tags: ["Anlık Bildirim", "Otomatik Takvim"]
   },
   {
-    icon: <Target size={32} strokeWidth={1.5} />,
-    title: "Gelişmiş CRM ve Pazarlama",
-    description: "Müşteri sadakatini zirveye taşıyın. Gelişmiş segmentasyon ile (ör: 1 aydır gelmeyenler, VIP müşteriler) hedef kitlenizi belirleyin ve tek tıkla binlerce kişiye Toplu E-Posta veya SMS kampanyaları düzenleyin.",
-    tags: ["Dinamik Segmentasyon", "Toplu Mail (Bulk Email)", "Müşteri Analizi"]
+    title: "Global CRM",
+    subTitle: "Müşteri Yönetimi",
+    description: "Tüm müşteri veritabanınızı tek merkezden yönetin. Kim ne zaman geldi, hangi hizmeti aldı? Her şey kontrolünüz altında.",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop",
+    tags: ["Segmentasyon", "Data Analizi"]
   },
   {
-    icon: <Users size={32} strokeWidth={1.5} />,
-    title: "Kapsamlı Ekip Yönetimi",
-    description: "Sınırsız personel ekleyin ve ekibinizin performansını anlık takip edin. Kimin ne kadar ciro yaptığını görün, personellere özel şifreli panel giriş yetkileri tanımlayın ve işletme kontrolünü elinizde tutun.",
-    tags: ["Performans Ölçümü", "Yetkilendirme (RLS)", "Uzman Seçimi"]
+    title: "Toplu Pazarlama",
+    subTitle: "E-Posta & SMS",
+    description: "Filtrelediğiniz hedef kitleye tek tıkla ulaşın. Kampanyalarınızı binlerce kişiye aynı anda göndererek cironuzu katlayın.",
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=800&auto=format&fit=crop",
+    tags: ["Bulk Email", "Kampanya Yönetimi"]
   },
   {
-    icon: <BarChart3 size={32} strokeWidth={1.5} />,
-    title: "Detaylı Finans ve Raporlama",
-    description: "İşletmenizin finansal nabzını tutun. Günlük, haftalık ve aylık gelir tablolarınızı, en çok satan hizmetlerinizi ve personel bazlı kazanç istatistiklerinizi karmaşık Excel tabloları olmadan tek ekranda analiz edin.",
-    tags: ["Ciro Tahmini", "Popüler Hizmetler", "Görsel Grafikler"]
+    title: "Ekip Yönetimi",
+    subTitle: "Personel Takibi",
+    description: "Sınırsız personel ekleyin. Kim ne kadar ciro yaptı, hangi uzman daha popüler? Performansı verilerle ölçün.",
+    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&auto=format&fit=crop",
+    tags: ["Ciro Takibi", "Özel Yetkiler"]
   },
   {
-    icon: <Ticket size={32} strokeWidth={1.5} />,
-    title: "Loca ve Etkinlik Yönetimi",
-    description: "Eğlence sektörü (Bar & Club) için özel tasarlanmış modül. Kendi DJ partilerinizi ve etkinliklerinizi oluşturun, afişlerinizi yükleyin. Loca, bistro ve bilet kapasitelerini fiyatlandırarak kolayca rezerve edin.",
-    tags: ["Afiş Yükleme", "Kapasite Kontrolü", "Etkinlik Takvimi"]
+    title: "Finansal Raporlar",
+    subTitle: "Muhasebe & Analiz",
+    description: "Karmaşık tablolara son. Günlük kazancınızı, popüler hizmetlerinizi ve gelecek tahminlerinizi görsel grafiklerle izleyin.",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop",
+    tags: ["Net Kazanç", "Görsel Grafikler"]
   },
   {
-    icon: <Store size={32} strokeWidth={1.5} />,
-    title: "Pazaryeri Ayrıcalığı",
-    description: "Bookcy sadece bir yazılım değil, aynı zamanda dev bir pazaryeridir. Platformu aktif olarak kullanan binlerce müşteriye doğrudan ulaşın. Bölge bazlı aramalarda öne çıkarak yeni müşteriler kazanın.",
-    tags: ["Bölgesel Keşif", "Doğrudan Erişim", "SEO Uyumlu Profil"]
+    title: "Loca & Etkinlik",
+    subTitle: "VIP Rezervasyon",
+    description: "Bar ve Club'lar için özel loca yönetimi. DJ partileri oluşturun, bilet ve masa kapasitelerini anlık yönetin.",
+    image: "https://images.unsplash.com/photo-1514525253361-bee8718a747c?q=80&w=800&auto=format&fit=crop",
+    tags: ["Kapasite Kontrolü", "Bilet Satış"]
   },
   {
-    icon: <BellRing size={32} strokeWidth={1.5} />,
-    title: "Otomatik Bildirimler",
-    description: "Randevu unutulmalarına son verin. İşlem durumları ('Tamamlandı', 'İptal') güncellendiğinde veya yeni rezervasyon geldiğinde anlık bildirimler alarak operasyonel süreçlerinizi hızlandırın.",
-    tags: ["Durum Bildirimleri", "Hatırlatıcılar", "Sıfır İletişim Kopukluğu"]
+    title: "Bölgesel Keşif",
+    subTitle: "Pazaryeri Gücü",
+    description: "Bookcy ekosistemindeki binlerce kullanıcıya doğrudan ulaşın. Bulunduğunuz bölgede aramalarla en ön sırada yer alın.",
+    image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=800&auto=format&fit=crop",
+    tags: ["Bölgesel Filtre", "Müşteri Erişimi"]
   },
   {
-    icon: <ShieldCheck size={32} strokeWidth={1.5} />,
-    title: "Üst Düzey Veri Güvenliği",
-    description: "Müşteri verileriniz ve ticari sırlarınız askeri düzeyde şifreleme (RLS) ile korunur. Hiçbir işletme diğerinin verisine ulaşamaz. Sisteminize sadece sizin yetki verdiğiniz kişiler erişebilir.",
-    tags: ["Satır Bazlı Güvenlik (RLS)", "İzole Veritabanı", "Bulut Yedekleme"]
+    title: "Veri Güvenliği",
+    subTitle: "Askeri Düzey Koruma",
+    description: "Tüm verileriniz satır bazlı güvenlik (RLS) ile korunur. Ticari sırlarınız ve müşteri listeniz sadece sizin erişiminize açıktır.",
+    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop",
+    tags: ["RLS Koruması", "Cloud Backup"]
   }
 ];
 
 export default function FeaturesPage() {
   return (
-    <div className="min-h-screen bg-[#F8F9FA] font-['DM_Sans'] flex flex-col">
-      {/* <Header /> */}
-
+    <div className="min-h-screen bg-[#F1F3F6] font-['DM_Sans']">
+      
       {/* HERO SECTION */}
-      <section className="bg-[#2D1B4E] text-white py-24 px-4 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 20% 150%, #E8622A 0%, transparent 50%)' }}></div>
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tight mb-6">
-            TÜM <span className="text-[#E8622A]">ÖZELLİKLER</span>
+      <section className="bg-[#2D1B4E] text-white py-28 px-4 relative">
+        <div className="max-w-5xl mx-auto text-center">
+            <span className="bg-[#E8622A]/20 text-[#E8622A] px-4 py-2 rounded-full text-xs font-black tracking-widest mb-6 inline-block uppercase">
+                Kurumsal Çözüm Ortaklığı
+            </span>
+          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter mb-8">
+            İŞLETMENİZ İÇİN <br/><span className="text-[#E8622A]">TAM KONTROL.</span>
           </h1>
-          <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            İşletmenizi dijitalleştirirken ihtiyaç duyduğunuz her şey tek bir platformda. Bookcy ile tanışın, kontrolü elinize alın ve büyümenin keyfini çıkarın.
+          <p className="text-lg text-slate-300 max-w-2xl mx-auto font-medium leading-relaxed">
+            Sıradan bir randevu sisteminden çok daha fazlası. Bookcy, modern işletmelerin ihtiyaç duyduğu tüm dijital araçları tek bir çatı altında sunar.
           </p>
         </div>
       </section>
 
-      {/* FEATURES GRID SECTION */}
-      <section className="py-20 px-4">
+      {/* FEATURES CARDS GRID */}
+      <section className="py-24 px-4 -mt-16">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {features.map((f, i) => (
               <div 
-                key={index} 
-                className="bg-white rounded-[32px] p-8 md:p-10 border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#E8622A]/30 transition-all duration-300 group flex flex-col h-full"
+                key={i} 
+                className="group bg-white rounded-[24px] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-200 flex flex-col"
               >
-                <div className="w-16 h-16 bg-orange-50 text-[#E8622A] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  {feature.icon}
+                {/* Image Header */}
+                <div className="h-56 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-[#2D1B4E]/20 group-hover:bg-transparent transition-colors z-10"></div>
+                  <img 
+                    src={f.image} 
+                    alt={f.title} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute bottom-4 left-4 z-20">
+                    <span className="bg-white/90 backdrop-blur text-[#2D1B4E] px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg">
+                        {f.subTitle}
+                    </span>
+                  </div>
                 </div>
                 
-                <h3 className="text-xl font-black text-[#2D1B4E] uppercase tracking-tight mb-4">
-                  {feature.title}
-                </h3>
-                
-                <p className="text-slate-600 leading-relaxed font-medium mb-8 flex-1">
-                  {feature.description}
-                </p>
-                
-                <div className="mt-auto pt-6 border-t border-slate-100 flex flex-wrap gap-2">
-                  {feature.tags.map((tag, tagIndex) => (
-                    <span 
-                      key={tagIndex} 
-                      className="bg-slate-50 text-slate-500 border border-slate-200 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                {/* Content Body */}
+                <div className="p-8 flex-1 flex flex-col">
+                  <h3 className="text-2xl font-black text-[#2D1B4E] uppercase tracking-tight mb-4 group-hover:text-[#E8622A] transition-colors">
+                    {f.title}
+                  </h3>
+                  
+                  <p className="text-slate-500 font-medium leading-relaxed mb-8 text-sm">
+                    {f.description}
+                  </p>
+                  
+                  {/* Footer Tags */}
+                  <div className="mt-auto pt-6 border-t border-slate-50 flex flex-wrap gap-2">
+                    {f.tags.map((tag, ti) => (
+                      <span key={ti} className="flex items-center gap-1 text-[9px] font-black uppercase tracking-tighter text-slate-400">
+                        <CheckCircle2 size={12} className="text-[#E8622A]"/> {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}
@@ -120,25 +136,25 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* CTA SECTION */}
-      <section className="py-20 px-4 bg-white border-t border-slate-200">
-        <div className="max-w-4xl mx-auto text-center bg-[#F8F9FA] rounded-[40px] p-12 md:p-20 border border-slate-200 shadow-sm">
-          <div className="w-20 h-20 bg-white shadow-lg rounded-full flex items-center justify-center mx-auto mb-6">
-            <Zap size={32} className="text-[#E8622A]"/>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-black text-[#2D1B4E] uppercase tracking-tight mb-6">
-            İşletmenizi Çağ Atlatmaya Hazır Mısınız?
+      {/* CALL TO ACTION */}
+      <section className="pb-24 px-4">
+        <div className="max-w-4xl mx-auto bg-[#2D1B4E] rounded-[48px] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#E8622A] opacity-10 blur-[100px]"></div>
+          <h2 className="text-3xl md:text-5xl font-black text-white uppercase mb-6 leading-tight">
+            Geleceğin İşletmesini <br/> Bugün İnşa Edin
           </h2>
-          <p className="text-slate-600 font-medium mb-10 max-w-2xl mx-auto">
-            Hemen ücretsiz deneme sürenizi başlatın, Bookcy'nin gücünü kendi işletmenizde risk almadan test edin.
-          </p>
-          <button className="bg-[#E8622A] hover:bg-orange-600 text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-[0.15em] transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
-            Ücretsiz Denemeye Başla
-          </button>
+          <p className="text-slate-300 mb-10 font-medium">Bookcy dünyasına katılın, dijitalleşmenin ve büyümenin keyfini sürün.</p>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+            <button className="w-full md:w-auto bg-[#E8622A] text-white px-10 py-5 rounded-2xl font-black uppercase text-sm tracking-widest hover:scale-105 transition-all shadow-xl">
+                ÜCRETSİZ DENEMEYİ BAŞLAT
+            </button>
+            <button className="w-full md:w-auto bg-white/5 text-white border border-white/10 px-10 py-5 rounded-2xl font-black uppercase text-sm tracking-widest hover:bg-white/10 transition-all">
+                SATIŞ EKİBİYLE GÖRÜŞ
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* <Footer /> */}
     </div>
   );
 }
