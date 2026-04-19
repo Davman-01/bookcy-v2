@@ -184,11 +184,9 @@ export default function SuperAdmin() {
     return matchesSearch && matchesRegion && matchesService;
   });
 
-  // --- YENİ EKLENEN: TOPLU MAİL GÖNDERİM FONKSİYONU ---
   const handleBulkEmailSubmit = async (e) => {
     e.preventDefault();
     
-    // Geçerli (Belirtilmemiş olmayan) e-posta adreslerini ayıklıyoruz
     const targetEmails = filteredCrmUsers.map(u => u.email).filter(email => email && email !== 'Belirtilmemiş' && email.includes('@'));
     
     if (targetEmails.length === 0) {
@@ -200,7 +198,8 @@ export default function SuperAdmin() {
 
     setIsSendingBulk(true);
     try {
-      const res = await fetch('/api/bulk-email', {
+      // DİKKAT: Adres klasör yapına göre /api/email/bulk-email olarak güncellendi!
+      const res = await fetch('/api/email/bulk-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
