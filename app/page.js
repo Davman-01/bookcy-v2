@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, MapPin, CheckCircle2, Calendar, Scissors } from 'lucide-react';
 import { useAppContext } from './providers';
-import { categories, cyprusRegions } from '@/lib/constants';
+import { categories, cyprusRegions } from '../lib/constants';
 
 // --- KATEGORİLER İÇİN OTOMATİK KURUMSAL FOTOĞRAF ATAYICI ---
 const getCategoryImage = (name) => {

@@ -4,7 +4,7 @@ import {
   Users, MapPin, Scissors, Search, Filter, 
   Store, Calendar, Download, Send, ShieldAlert
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../../lib/supabase';
 
 export default function SuperAdminCRM() {
   const [loading, setLoading] = useState(true);

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { Send, CheckCircle2, MessageSquareWarning } from 'lucide-react';
-import { useAppContext } from '@/app/providers';
+import { useAppContext } from '../providers';
 
 export default function ComplaintsPage() {
   const { lang = 'TR', t } = useAppContext();

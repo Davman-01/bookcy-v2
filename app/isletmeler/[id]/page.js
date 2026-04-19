@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { MapPin, Star, ChevronLeft, Calendar, Clock, Music, Scissors, UserCircle, Users, CalendarOff, CheckCircle2, Gem } from 'lucide-react';
 import { useAppContext } from '../../providers';
-import { supabase } from '@/lib/supabase';
-import { getNewBookingShopTemplate, getBookingConfirmationTemplate } from '@/lib/emailTemplates';
+import { supabase } from '../../../lib/supabase';
+import { getNewBookingShopTemplate, getBookingConfirmationTemplate } from '../../../lib/emailTemplates';
 
 function parseDuration(d) { const m = (d||'').match(/\d+/); return m ? parseInt(m[0]) : 30; }
 function getRequiredSlots(d) { return Math.ceil(parseDuration(d) / 30); }

@@ -1,9 +1,9 @@
 "use client";
 import './globals.css';
 import { AppProvider } from './providers';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import BetaPopup from '@/components/BetaPopup'; // YENİ EKLENDİ: Pop-up'ı içeri aktarıyoruz
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import BetaPopup from '../components/BetaPopup';
 import { usePathname } from 'next/navigation'; 
 
 // EKLENDİ: SEO Metadata tanımlamalarını layout içinden kaldırdık çünkü "use client" ile metadata kullanılamaz.

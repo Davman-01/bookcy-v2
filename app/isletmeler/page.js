@@ -3,7 +3,7 @@ import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { MapPin, ChevronLeft, Gem } from 'lucide-react';
 import { useAppContext } from '../providers';
-import { categories, cyprusRegions } from '@/lib/constants';
+import { categories, cyprusRegions } from '../../lib/constants';
 
 function ShopList() {
   const router = useRouter();
