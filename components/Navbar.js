@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { ChevronDown, ChevronRight, Menu, X, UserCircle, CheckCircle2, Lock, Upload, MessageCircle, Gift } from 'lucide-react';
-import { useAppContext } from '@/app/providers';
-import { supabase } from '@/lib/supabase';
-import { getRegistrationTemplate } from '@/lib/emailTemplates';
-import { cyprusRegions, categories, packages } from '@/lib/constants';
+// --- DÜZELTİLMİŞ IMPORT YOLLARI ---
+import { useAppContext } from '../app/providers';
+import { supabase } from '../lib/supabase';
+import { getRegistrationTemplate } from '../lib/emailTemplates';
+import { cyprusRegions, categories, packages } from '../lib/constants';
 
 export default function Navbar() {
   const router = useRouter();

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+// --- DÜZELTİLMİŞ IMPORT YOLU ---
+import { supabase } from '../lib/supabase';
 import { AlertTriangle, MailWarning, PowerOff, CheckCircle2 } from 'lucide-react';
 
 export default function AdminTrialControl() {

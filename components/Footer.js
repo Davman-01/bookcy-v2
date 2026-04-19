@@ -2,8 +2,9 @@
 import Link from 'next/link';
 import { Info, MessageCircle } from 'lucide-react'; 
 import { useState, useEffect } from 'react';
-import { useAppContext } from '@/app/providers';
-import { cyprusRegions } from '@/lib/constants';
+// --- DÜZELTİLMİŞ IMPORT YOLLARI ---
+import { useAppContext } from '../app/providers';
+import { cyprusRegions } from '../lib/constants';
 import { usePathname } from 'next/navigation';
 
 const InstagramIcon = ({ size = 24 }) => (

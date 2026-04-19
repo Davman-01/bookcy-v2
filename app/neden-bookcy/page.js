@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react';
-import { useAppContext } from '@/app/providers';
+// --- DÜZELTİLMİŞ IMPORT YOLU ---
+import { useAppContext } from '../providers';
 
 // İkonlar İçin SVG Bileşenleri
 const IconCheck = () => (
