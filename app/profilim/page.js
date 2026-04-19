@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { LogOut, Calendar, Scissors, MapPin, Loader2, XCircle } from 'lucide-react';
 
 export default function ProfilePage() {
