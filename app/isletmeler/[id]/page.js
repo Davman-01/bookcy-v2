@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { MapPin, Star, ChevronLeft, Calendar, Clock, Music, Scissors, UserCircle, Users, CalendarOff, CheckCircle2, Gem, Phone, Mail, Instagram, Globe } from 'lucide-react';
+// DİKKAT: Instagram ve Globe ikonları kaldırıldı, yerine Link ikonu eklendi.
+import { MapPin, Star, ChevronLeft, Calendar, Clock, Music, Scissors, UserCircle, Users, CalendarOff, CheckCircle2, Gem, Phone, Mail, Link } from 'lucide-react';
 import { useAppContext } from '../../providers';
 import { supabase } from '../../../lib/supabase';
 import { getNewBookingShopTemplate, getBookingConfirmationTemplate } from '../../../lib/emailTemplates';
@@ -150,7 +151,6 @@ export default function ShopDetail() {
   }
 
   if (bookingPhase === 'success') {
-      // (Burası onay ekranı kodların aynı)
       return ( <div className="w-full bg-[#FAF7F2] min-h-screen pt-10"><div className="text-center py-20"><div className="w-32 h-32 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-10"><CheckCircle2 size={64}/></div><h2 className="text-4xl font-black text-[#2D1B4E] uppercase mb-4 tracking-tight">Başarılı!</h2><button onClick={() => router.push('/')} className="bg-[#E8622A] text-white px-12 py-5 rounded-full font-black uppercase text-sm border-none cursor-pointer">Ana Sayfa</button></div></div> );
   }
 
@@ -181,7 +181,7 @@ export default function ShopDetail() {
           <button onClick={() => setProfileTab('about')} className={`pb-4 text-sm md:text-base font-black uppercase whitespace-nowrap bg-transparent border-none cursor-pointer border-b-4 transition-colors ${profileTab === 'about' ? 'border-[#E8622A] text-[#E8622A]' : 'border-transparent text-slate-400 hover:text-[#2D1B4E]'}`}>{text?.profile?.about || 'Hakkında'}</button>
       </div>
 
-      {/* Grid Yapısı (Dövme ise tek sütun (tam genişlik), değilse çift sütun) */}
+      {/* Grid Yapısı (Dövme ise tek sütun, değilse çift sütun) */}
       <div className={isTattooShop ? "w-full max-w-5xl mx-auto px-2 md:px-6" : "grid grid-cols-1 lg:grid-cols-12 gap-10"}>
           
           <div className={isTattooShop ? "w-full" : "lg:col-span-7 px-2 md:px-6"}>
@@ -222,7 +222,7 @@ export default function ShopDetail() {
                               <h3 className="text-sm font-black uppercase tracking-widest text-[#2D1B4E] mb-2 border-b border-slate-100 pb-4">İletişim</h3>
                               {selectedShop?.phone && <div className="flex items-center gap-3 text-slate-600 font-bold"><Phone size={18} className="text-[#E8622A]"/> {selectedShop.phone}</div>}
                               {selectedShop?.email && <div className="flex items-center gap-3 text-slate-600 font-bold"><Mail size={18} className="text-[#E8622A]"/> {selectedShop.email}</div>}
-                              {selectedShop?.instagram && <a href={selectedShop.instagram} target="_blank" className="flex items-center gap-3 text-slate-600 font-bold hover:text-[#E8622A]"><Instagram size={18} className="text-[#E8622A]"/> Instagram Hesabımız</a>}
+                              {selectedShop?.instagram && <a href={selectedShop.instagram} target="_blank" className="flex items-center gap-3 text-slate-600 font-bold hover:text-[#E8622A]"><Link size={18} className="text-[#E8622A]"/> Instagram Hesabımız</a>}
                           </div>
 
                           <div className="bg-white border border-slate-200 p-8 rounded-[32px] shadow-sm">
