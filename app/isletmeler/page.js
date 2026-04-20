@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { MapPin, ChevronLeft, Gem } from 'lucide-react';
+import { MapPin, ChevronLeft, Gem, X } from 'lucide-react'; // X ikonunu ekledik
 import { useAppContext } from '../providers';
 import { categories, cyprusRegions } from '../../lib/constants';
+import TattooBriefForm from '@/components/TattooBriefForm';
 
 function ShopList() {
   const router = useRouter();
@@ -11,7 +12,6 @@ function ShopList() {
   
   const { lang = 'TR', t, shops = [] } = useAppContext();
   
-  // Güvenlik: Eğer text objesi yüklenmemişse boş çevirme, dilleri manuel doldur.
   const text = t?.[lang]?.shops || {
     back: "GERİ DÖN", title: "Arama Sonuçları", found: "Mekan Bulundu", search: "Mekan Ara...", allReg: "Tüm Bölgeler", allCat: "Tüm Kategoriler", select: "SEÇ", empty: "Aradığınız kriterlere uygun mekan bulunamadı."
   };
@@ -19,6 +19,9 @@ function ShopList() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [filterRegion, setFilterRegion] = useState(searchParams.get('r') || 'All');
   const [filterService, setFilterService] = useState(searchParams.get('c') || 'All');
+  
+  // AÇILIR PENCERE (MODAL) İÇİN YENİ STATE EKLEDİK
+  const [isTattooModalOpen, setIsTattooModalOpen] = useState(false);
 
   const approvedShops = (shops || []).filter(s => s?.status === 'approved');
 
@@ -38,9 +41,19 @@ function ShopList() {
   return (
     <div className="w-full max-w-[1400px] mx-auto pt-10 md:pt-24 px-6 md:px-8 pb-20 min-h-screen">
       <button onClick={() => router.push('/')} className="flex items-center text-slate-400 hover:text-[#E8622A] mb-8 text-[10px] font-black uppercase tracking-[0.2em] bg-transparent border-none cursor-pointer transition-colors"><ChevronLeft size={16} className="mr-2"/> {text.back}</button>
+      
       <div className="flex flex-col md:flex-row justify-between md:items-end mb-8 border-b border-slate-200 pb-4 gap-4">
         <h2 className="text-2xl md:text-3xl font-black uppercase text-[#2D1B4E] tracking-tight">{text.title}</h2>
-        <span className="text-sm font-bold text-[#E8622A] bg-orange-50 px-4 py-2 rounded-xl w-fit">{sortedShops.length} {text.found}</span>
+        <div className="flex items-center gap-3">
+          {/* DÖVME TEST BUTONU EKLENDİ */}
+          <button 
+            onClick={() => setIsTattooModalOpen(true)} 
+            className="text-sm font-bold text-white bg-[#2D1B4E] hover:bg-[#E8622A] px-4 py-2 rounded-xl transition-colors shadow-md"
+          >
+            🎨 Dövme Formunu Test Et
+          </button>
+          <span className="text-sm font-bold text-[#E8622A] bg-orange-50 px-4 py-2 rounded-xl w-fit">{sortedShops.length} {text.found}</span>
+        </div>
       </div>
       
       <div className="flex flex-col lg:flex-row gap-8 items-start">
@@ -61,6 +74,22 @@ function ShopList() {
             {sortedShops.length === 0 && <div className="text-center py-20 text-slate-400 font-bold uppercase tracking-widest bg-white rounded-[32px] border border-slate-200">{text.empty}</div>}
         </div>
       </div>
+
+      {/* DÖVME FORMU MODALI (AÇILIR PENCERE) */}
+      {isTattooModalOpen && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 overflow-y-auto" style={{ backdropFilter: 'blur(5px)' }}>
+          <div className="relative w-full max-w-lg mt-10 mb-10">
+            <button 
+              onClick={() => setIsTattooModalOpen(false)} 
+              className="absolute -top-12 right-0 text-white hover:text-[#E8622A] flex items-center gap-2 font-bold transition-colors cursor-pointer"
+            >
+              <X size={24} /> Kapat
+            </button>
+            <TattooBriefForm />
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

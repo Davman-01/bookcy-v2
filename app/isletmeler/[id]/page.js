@@ -5,6 +5,7 @@ import { MapPin, Star, ChevronLeft, Calendar, Clock, Music, Scissors, UserCircle
 import { useAppContext } from '../../providers';
 import { supabase } from '../../../lib/supabase';
 import { getNewBookingShopTemplate, getBookingConfirmationTemplate } from '../../../lib/emailTemplates';
+import TattooBriefForm from '@/components/TattooBriefForm';
 
 function parseDuration(d) { const m = (d||'').match(/\d+/); return m ? parseInt(m[0]) : 30; }
 function getRequiredSlots(d) { return Math.ceil(parseDuration(d) / 30); }
@@ -107,6 +108,8 @@ export default function ShopDetail() {
   if (!selectedShop || !t?.[lang]) return <div className="p-20 text-center font-bold text-slate-400 uppercase tracking-widest">Yükleniyor...</div>;
 
   const isClub = selectedShop?.category === 'Bar & Club';
+  // Dövme kategorilerini algılamak için dizi (Veritabanındaki adına göre burayı güncelleyebilirsin)
+  const isTattooShop = ['Dövme', 'Tattoo', 'Dövme Stüdyosu', 'Tattoo Studio'].includes(selectedShop?.category);
   const text = t[lang] || {};
 
   const handleBookingEmailChange = (e) => setFormData(prev => ({...prev, email: e.target.value}));
@@ -288,99 +291,108 @@ export default function ShopDetail() {
 
           <div className="lg:col-span-5 relative mt-10 lg:mt-0">
               <div className="lg:sticky lg:top-28 bg-white border border-slate-200 rounded-[40px] p-6 md:p-10 flex flex-col min-h-[450px] shadow-xl mb-10 lg:mb-0">
-                  <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-6"><h3 className="text-xl font-black uppercase text-[#2D1B4E] tracking-tight">{text?.booking?.title || 'Randevu Al'}</h3>{bookingPhase > 1 && (<button onClick={() => { if(selectedShop?.category === 'Bar & Club' && bookingPhase === 2){setBookingPhase(1); setBookingData({...bookingData, selectedEvent:null});} else {setBookingPhase(bookingPhase - 1);} }} className="text-[10px] font-black uppercase text-slate-500 hover:text-[#E8622A] bg-slate-100 hover:bg-orange-50 px-4 py-2 rounded-xl flex items-center border-none cursor-pointer transition-colors tracking-widest"><ChevronLeft size={14} className="mr-1"/> {text?.booking?.back || 'Geri'}</button>)}</div>
-
-                  {bookingPhase === 1 && (<div className="flex-1 flex flex-col items-center justify-center text-center p-10">{selectedShop?.category === 'Bar & Club' ? <><div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6"><Music size={40} className="text-slate-300"/></div><p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed">{text?.booking?.startEvent || 'Etkinlik Seçin'}</p></> : <><div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6"><Scissors size={40} className="text-slate-300"/></div><p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed">{text?.booking?.startSrv || 'Hizmet Seçin'}</p></>}</div>)}
                   
-                  {bookingPhase > 1 && (
-                      <div className="mb-8 bg-slate-50 p-6 rounded-3xl border border-slate-200 flex flex-col gap-4 shadow-inner">
-                          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{text?.booking?.srv || 'Seçim'}</span><span className="font-black text-[#2D1B4E] text-sm md:text-base">{bookingData?.selectedShopService?.name}</span></div>
-                          {bookingPhase > 2 && bookingData?.selectedStaff && selectedShop?.category !== 'Bar & Club' && (<div className="flex flex-col sm:flex-row justify-between sm:items-center border-t border-slate-200 pt-4 gap-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{text?.booking?.staff || 'Uzman'}</span><span className="font-bold text-[#2D1B4E] text-xs uppercase bg-white px-3 py-1.5 rounded-lg border border-slate-100">{bookingData?.selectedStaff?.name}</span></div>)}
-                          {bookingPhase > 3 && bookingData?.time && selectedShop?.category !== 'Bar & Club' && (<div className="flex flex-col sm:flex-row justify-between sm:items-center border-t border-slate-200 pt-4 gap-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{text?.booking?.time || 'Zaman'}</span><span className="font-bold text-[#E8622A] text-xs bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100">{bookingData?.date} | {bookingData?.time}</span></div>)}
-                          <div className="flex flex-col sm:flex-row justify-between sm:items-center border-t border-slate-200 pt-4 mt-2 gap-2"><span className="text-[10px] font-black text-[#2D1B4E] uppercase tracking-widest">{text?.booking?.total || 'Toplam'}</span><span className="font-black text-[#E8622A] text-2xl">{bookingData?.selectedShopService?.price || '0'} TL</span></div>
-                      </div>
-                  )}
+                  {isTattooShop ? (
+                      /* DÖVME KATEGORİSİ İSE ÖZEL FORMU GÖSTER */
+                      <TattooBriefForm shopId={selectedShop?.id} />
+                  ) : (
+                      /* DEĞİLSE MEVCUT KLASİK RANDEVU AKIŞINI GÖSTER */
+                      <>
+                        <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-6"><h3 className="text-xl font-black uppercase text-[#2D1B4E] tracking-tight">{text?.booking?.title || 'Randevu Al'}</h3>{bookingPhase > 1 && (<button onClick={() => { if(selectedShop?.category === 'Bar & Club' && bookingPhase === 2){setBookingPhase(1); setBookingData({...bookingData, selectedEvent:null});} else {setBookingPhase(bookingPhase - 1);} }} className="text-[10px] font-black uppercase text-slate-500 hover:text-[#E8622A] bg-slate-100 hover:bg-orange-50 px-4 py-2 rounded-xl flex items-center border-none cursor-pointer transition-colors tracking-widest"><ChevronLeft size={14} className="mr-1"/> {text?.booking?.back || 'Geri'}</button>)}</div>
 
-                  {bookingPhase === 2 && selectedShop?.category !== 'Bar & Club' && (
-                      <div className="flex-1 animate-in fade-in duration-300"><p className="text-[11px] font-black uppercase text-[#2D1B4E] mb-6 tracking-widest border-l-4 border-[#E8622A] pl-3">{text?.booking?.selectStaff || 'Uzman Seçin'}</p><div className="grid grid-cols-2 sm:grid-cols-3 gap-4"><div onClick={() => { setBookingData({...bookingData, selectedStaff: { name: text?.booking?.any || 'Fark Etmez' }}); setBookingPhase(3); }} className="flex flex-col items-center gap-3 cursor-pointer p-4 md:p-6 rounded-3xl border border-slate-200 hover:border-[#E8622A] bg-white transition-all hover:shadow-md group"><div className="w-14 h-14 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-orange-50 group-hover:text-[#E8622A] transition-colors"><Users size={24}/></div><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">{text?.booking?.any || 'Fark Etmez'}</span></div>{Array.isArray(selectedShop?.staff) && selectedShop.staff.map(person => (<div key={person?.id || Math.random()} onClick={() => { setBookingData({...bookingData, selectedStaff: person}); setBookingPhase(3); }} className="flex flex-col items-center gap-3 cursor-pointer p-4 md:p-6 rounded-3xl border border-slate-200 hover:border-[#E8622A] bg-white transition-all hover:shadow-md group"><div className="w-14 h-14 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center font-black text-lg group-hover:bg-[#E8622A] group-hover:text-white transition-colors">{(person?.name || 'U').charAt(0)}</div><span className="text-[10px] font-black text-[#2D1B4E] uppercase truncate w-full text-center px-1 tracking-widest">{person?.name || 'Uzman'}</span></div>))}</div></div>
-                  )}
+                        {bookingPhase === 1 && (<div className="flex-1 flex flex-col items-center justify-center text-center p-10">{selectedShop?.category === 'Bar & Club' ? <><div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6"><Music size={40} className="text-slate-300"/></div><p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed">{text?.booking?.startEvent || 'Etkinlik Seçin'}</p></> : <><div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6"><Scissors size={40} className="text-slate-300"/></div><p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed">{text?.booking?.startSrv || 'Hizmet Seçin'}</p></>}</div>)}
+                        
+                        {bookingPhase > 1 && (
+                            <div className="mb-8 bg-slate-50 p-6 rounded-3xl border border-slate-200 flex flex-col gap-4 shadow-inner">
+                                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{text?.booking?.srv || 'Seçim'}</span><span className="font-black text-[#2D1B4E] text-sm md:text-base">{bookingData?.selectedShopService?.name}</span></div>
+                                {bookingPhase > 2 && bookingData?.selectedStaff && selectedShop?.category !== 'Bar & Club' && (<div className="flex flex-col sm:flex-row justify-between sm:items-center border-t border-slate-200 pt-4 gap-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{text?.booking?.staff || 'Uzman'}</span><span className="font-bold text-[#2D1B4E] text-xs uppercase bg-white px-3 py-1.5 rounded-lg border border-slate-100">{bookingData?.selectedStaff?.name}</span></div>)}
+                                {bookingPhase > 3 && bookingData?.time && selectedShop?.category !== 'Bar & Club' && (<div className="flex flex-col sm:flex-row justify-between sm:items-center border-t border-slate-200 pt-4 gap-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{text?.booking?.time || 'Zaman'}</span><span className="font-bold text-[#E8622A] text-xs bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100">{bookingData?.date} | {bookingData?.time}</span></div>)}
+                                <div className="flex flex-col sm:flex-row justify-between sm:items-center border-t border-slate-200 pt-4 mt-2 gap-2"><span className="text-[10px] font-black text-[#2D1B4E] uppercase tracking-widest">{text?.booking?.total || 'Toplam'}</span><span className="font-black text-[#E8622A] text-2xl">{bookingData?.selectedShopService?.price || '0'} TL</span></div>
+                            </div>
+                        )}
 
-                  {bookingPhase === 3 && selectedShop?.category !== 'Bar & Club' && (
-                      <div className="flex-1 flex flex-col gap-6 animate-in fade-in duration-300">
-                        <input type="date" min={new Date().toISOString().split('T')[0]} value={bookingData?.date} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] shadow-sm cursor-pointer" onChange={(e) => setBookingData({...bookingData, date: e.target.value, time: ''})} />
-                        {bookingData?.date && ( isShopClosedToday ? (
-                          <div className="py-12 text-center text-red-500 font-bold uppercase text-xs bg-red-50 rounded-3xl border border-red-100 flex flex-col items-center justify-center gap-3"><CalendarOff size={32}/> {text?.booking?.closed || 'Kapalı'}</div>
-                        ) : (
-                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-                            {currentAvailableSlots.map((slot, idx) => { 
-                              const needed = getRequiredSlots(bookingData?.selectedShopService?.duration || '30'); 
-                              const check = currentAvailableSlots.slice(idx, idx + needed); 
-                              
-                              let isUnavail = check.length < needed || check.some(s => closedSlots.includes(s)); 
-                              
-                              if (!isUnavail && !isClub) {
-                                  const staffName = bookingData?.selectedStaff?.name;
-                                  const staffList = Array.isArray(selectedShop?.staff) ? selectedShop.staff : [];
-                                  
-                                  const isSlotBusy = check.some(checkSlot => {
-                                      if (staffName && staffName !== 'Fark Etmez' && staffName !== 'Any Staff') {
-                                          return appointments.some(a => a.status !== 'İptal' && a.staff_name === staffName && (a.occupied_slots?.includes(checkSlot) || a.appointment_time === checkSlot));
-                                      } else {
-                                          if (staffList.length === 0) {
-                                              return appointments.some(a => a.status !== 'İptal' && (a.occupied_slots?.includes(checkSlot) || a.appointment_time === checkSlot));
-                                          }
-                                          const busyStaffs = appointments.filter(a => a.status !== 'İptal' && (a.occupied_slots?.includes(checkSlot) || a.appointment_time === checkSlot)).map(a => a.staff_name);
-                                          const uniqueBusyStaffs = [...new Set(busyStaffs)];
-                                          return uniqueBusyStaffs.length >= staffList.length;
-                                      }
-                                  });
-                                  isUnavail = isUnavail || isSlotBusy;
-                              }
+                        {bookingPhase === 2 && selectedShop?.category !== 'Bar & Club' && (
+                            <div className="flex-1 animate-in fade-in duration-300"><p className="text-[11px] font-black uppercase text-[#2D1B4E] mb-6 tracking-widest border-l-4 border-[#E8622A] pl-3">{text?.booking?.selectStaff || 'Uzman Seçin'}</p><div className="grid grid-cols-2 sm:grid-cols-3 gap-4"><div onClick={() => { setBookingData({...bookingData, selectedStaff: { name: text?.booking?.any || 'Fark Etmez' }}); setBookingPhase(3); }} className="flex flex-col items-center gap-3 cursor-pointer p-4 md:p-6 rounded-3xl border border-slate-200 hover:border-[#E8622A] bg-white transition-all hover:shadow-md group"><div className="w-14 h-14 rounded-full bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-orange-50 group-hover:text-[#E8622A] transition-colors"><Users size={24}/></div><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">{text?.booking?.any || 'Fark Etmez'}</span></div>{Array.isArray(selectedShop?.staff) && selectedShop.staff.map(person => (<div key={person?.id || Math.random()} onClick={() => { setBookingData({...bookingData, selectedStaff: person}); setBookingPhase(3); }} className="flex flex-col items-center gap-3 cursor-pointer p-4 md:p-6 rounded-3xl border border-slate-200 hover:border-[#E8622A] bg-white transition-all hover:shadow-md group"><div className="w-14 h-14 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center font-black text-lg group-hover:bg-[#E8622A] group-hover:text-white transition-colors">{(person?.name || 'U').charAt(0)}</div><span className="text-[10px] font-black text-[#2D1B4E] uppercase truncate w-full text-center px-1 tracking-widest">{person?.name || 'Uzman'}</span></div>))}</div></div>
+                        )}
 
-                              return (
-                                <button key={slot} onClick={() => { if(isUnavail) { setWaitlistTime(slot); setShowWaitlistModal(true); } else { setBookingData({...bookingData, time: slot}); setBookingPhase(4); } }} className={`py-4 rounded-2xl flex flex-col items-center justify-center text-xs font-bold border cursor-pointer transition-all ${isUnavail ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60 hover:border-[#E8622A] hover:text-[#E8622A]' : bookingData?.time === slot ? 'bg-[#E8622A] text-white border-[#E8622A] shadow-md scale-105' : 'bg-white border-slate-200 text-[#2D1B4E] hover:border-[#E8622A] hover:text-[#E8622A] shadow-sm'}`}>
-                                  <span>{slot}</span> {isUnavail && <span className="text-[8px] font-black uppercase mt-1 tracking-widest text-[#E8622A]">Dolu</span>}
-                                </button>
-                              ); 
-                            })}
-                          </div>
-                        ) )}
-                      </div>
-                  )}
+                        {bookingPhase === 3 && selectedShop?.category !== 'Bar & Club' && (
+                            <div className="flex-1 flex flex-col gap-6 animate-in fade-in duration-300">
+                              <input type="date" min={new Date().toISOString().split('T')[0]} value={bookingData?.date} className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 font-bold text-[#2D1B4E] outline-none focus:border-[#E8622A] shadow-sm cursor-pointer" onChange={(e) => setBookingData({...bookingData, date: e.target.value, time: ''})} />
+                              {bookingData?.date && ( isShopClosedToday ? (
+                                <div className="py-12 text-center text-red-500 font-bold uppercase text-xs bg-red-50 rounded-3xl border border-red-100 flex flex-col items-center justify-center gap-3"><CalendarOff size={32}/> {text?.booking?.closed || 'Kapalı'}</div>
+                              ) : (
+                                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                                  {currentAvailableSlots.map((slot, idx) => { 
+                                    const needed = getRequiredSlots(bookingData?.selectedShopService?.duration || '30'); 
+                                    const check = currentAvailableSlots.slice(idx, idx + needed); 
+                                    
+                                    let isUnavail = check.length < needed || check.some(s => closedSlots.includes(s)); 
+                                    
+                                    if (!isUnavail && !isClub) {
+                                        const staffName = bookingData?.selectedStaff?.name;
+                                        const staffList = Array.isArray(selectedShop?.staff) ? selectedShop.staff : [];
+                                        
+                                        const isSlotBusy = check.some(checkSlot => {
+                                            if (staffName && staffName !== 'Fark Etmez' && staffName !== 'Any Staff') {
+                                                return appointments.some(a => a.status !== 'İptal' && a.staff_name === staffName && (a.occupied_slots?.includes(checkSlot) || a.appointment_time === checkSlot));
+                                            } else {
+                                                if (staffList.length === 0) {
+                                                    return appointments.some(a => a.status !== 'İptal' && (a.occupied_slots?.includes(checkSlot) || a.appointment_time === checkSlot));
+                                                }
+                                                const busyStaffs = appointments.filter(a => a.status !== 'İptal' && (a.occupied_slots?.includes(checkSlot) || a.appointment_time === checkSlot)).map(a => a.staff_name);
+                                                const uniqueBusyStaffs = [...new Set(busyStaffs)];
+                                                return uniqueBusyStaffs.length >= staffList.length;
+                                            }
+                                        });
+                                        isUnavail = isUnavail || isSlotBusy;
+                                    }
 
-                  {(bookingPhase === 4 || (selectedShop?.category === 'Bar & Club' && bookingPhase === 3)) && (
-                      <form onSubmit={handleBooking} className="flex flex-col gap-4 flex-1 mt-auto animate-in fade-in duration-300">
-                        <div className="flex flex-col sm:flex-row gap-4 w-full">
-                          <input required placeholder={text?.booking?.name || 'Adınız'} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
-                          <input required placeholder={text?.booking?.surname || 'Soyadınız'} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm" value={formData.surname} onChange={(e) => setFormData({...formData, surname: e.target.value})} />
-                        </div>
-                        <div className="flex gap-3 w-full">
-                          <select className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm w-24 cursor-pointer" value={formData.phoneCode} onChange={e => setFormData({...formData, phoneCode: e.target.value})}><option value="+90">TR</option></select>
-                          <input required type="tel" placeholder={text?.booking?.phone || 'Telefon'} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
-                        </div>
-                        <input required type="email" placeholder={text?.booking?.email || 'E-posta'} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm" value={formData.email} onChange={handleBookingEmailChange} />
+                                    return (
+                                      <button key={slot} onClick={() => { if(isUnavail) { setWaitlistTime(slot); setShowWaitlistModal(true); } else { setBookingData({...bookingData, time: slot}); setBookingPhase(4); } }} className={`py-4 rounded-2xl flex flex-col items-center justify-center text-xs font-bold border cursor-pointer transition-all ${isUnavail ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60 hover:border-[#E8622A] hover:text-[#E8622A]' : bookingData?.time === slot ? 'bg-[#E8622A] text-white border-[#E8622A] shadow-md scale-105' : 'bg-white border-slate-200 text-[#2D1B4E] hover:border-[#E8622A] hover:text-[#E8622A] shadow-sm'}`}>
+                                        <span>{slot}</span> {isUnavail && <span className="text-[8px] font-black uppercase mt-1 tracking-widest text-[#E8622A]">Dolu</span>}
+                                      </button>
+                                    ); 
+                                  })}
+                                </div>
+                              ) )}
+                            </div>
+                        )}
 
-                        <div className="flex items-start gap-3 mt-4 mb-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                          <input
-                            type="checkbox"
-                            id="customer-terms"
-                            checked={isTermsAccepted}
-                            onChange={(e) => setIsTermsAccepted(e.target.checked)}
-                            className="mt-0.5 w-5 h-5 text-[#E8622A] border-slate-300 rounded focus:ring-[#E8622A] cursor-pointer shrink-0"
-                          />
-                          <label htmlFor="customer-terms" className="text-[11px] text-slate-500 leading-relaxed cursor-pointer text-left">
-                            Bookcy <a href="/yasal/sartlar" target="_blank" className="text-[#E8622A] font-bold hover:underline">Kullanıcı Hizmet Sözleşmesi</a>'ni okudum. Bookcy'nin yalnızca bir aracı platform olduğunu; hizmet kalitesi, ücretlendirme, iptal işlemleri veya işletmede yaşanacak her türlü uyuşmazlıkta tek muhatabımın randevu aldığım işletme olduğunu kabul ediyorum.
-                          </label>
-                        </div>
+                        {(bookingPhase === 4 || (selectedShop?.category === 'Bar & Club' && bookingPhase === 3)) && (
+                            <form onSubmit={handleBooking} className="flex flex-col gap-4 flex-1 mt-auto animate-in fade-in duration-300">
+                              <div className="flex flex-col sm:flex-row gap-4 w-full">
+                                <input required placeholder={text?.booking?.name || 'Adınız'} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
+                                <input required placeholder={text?.booking?.surname || 'Soyadınız'} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm" value={formData.surname} onChange={(e) => setFormData({...formData, surname: e.target.value})} />
+                              </div>
+                              <div className="flex gap-3 w-full">
+                                <select className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm w-24 cursor-pointer" value={formData.phoneCode} onChange={e => setFormData({...formData, phoneCode: e.target.value})}><option value="+90">TR</option></select>
+                                <input required type="tel" placeholder={text?.booking?.phone || 'Telefon'} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+                              </div>
+                              <input required type="email" placeholder={text?.booking?.email || 'E-posta'} className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-5 font-bold text-sm outline-none focus:border-[#E8622A] focus:bg-white shadow-sm" value={formData.email} onChange={handleBookingEmailChange} />
 
-                        <button 
-                          type="submit" 
-                          disabled={!isTermsAccepted} 
-                          className={`w-full py-5 rounded-2xl mt-2 uppercase font-black text-sm tracking-[0.2em] border-none transition-all shadow-lg hover:shadow-xl ${!isTermsAccepted ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#E8622A] text-white hover:bg-orange-600 hover:-translate-y-1 cursor-pointer'}`}
-                        >
-                          {text?.booking?.confirm || 'Onayla ve Bitir'}
-                        </button>
-                      </form>
+                              <div className="flex items-start gap-3 mt-4 mb-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <input
+                                  type="checkbox"
+                                  id="customer-terms"
+                                  checked={isTermsAccepted}
+                                  onChange={(e) => setIsTermsAccepted(e.target.checked)}
+                                  className="mt-0.5 w-5 h-5 text-[#E8622A] border-slate-300 rounded focus:ring-[#E8622A] cursor-pointer shrink-0"
+                                />
+                                <label htmlFor="customer-terms" className="text-[11px] text-slate-500 leading-relaxed cursor-pointer text-left">
+                                  Bookcy <a href="/yasal/sartlar" target="_blank" className="text-[#E8622A] font-bold hover:underline">Kullanıcı Hizmet Sözleşmesi</a>'ni okudum. Bookcy'nin yalnızca bir aracı platform olduğunu; hizmet kalitesi, ücretlendirme, iptal işlemleri veya işletmede yaşanacak her türlü uyuşmazlıkta tek muhatabımın randevu aldığım işletme olduğunu kabul ediyorum.
+                                </label>
+                              </div>
+
+                              <button 
+                                type="submit" 
+                                disabled={!isTermsAccepted} 
+                                className={`w-full py-5 rounded-2xl mt-2 uppercase font-black text-sm tracking-[0.2em] border-none transition-all shadow-lg hover:shadow-xl ${!isTermsAccepted ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#E8622A] text-white hover:bg-orange-600 hover:-translate-y-1 cursor-pointer'}`}
+                              >
+                                {text?.booking?.confirm || 'Onayla ve Bitir'}
+                              </button>
+                            </form>
+                        )}
+                      </>
                   )}
               </div>
           </div>
