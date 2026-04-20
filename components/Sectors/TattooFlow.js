@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { MapPin, Clock, Scissors, Users, CalendarOff, CheckCircle2, Phone, Mail, Link, Instagram, Facebook } from 'lucide-react';
+import { MapPin, Clock, Scissors, Users, CalendarOff, CheckCircle2, Phone, Mail, Link } from 'lucide-react';
 import TattooBriefForm from '../TattooBriefForm';
 
 export default function TattooFlow({ shop, bookingHelpers, currentAvailableSlots }) {
@@ -57,7 +57,7 @@ export default function TattooFlow({ shop, bookingHelpers, currentAvailableSlots
                         </div>
                     )}
 
-                    {/* HAKKINDA (Veri Sorunları Çözüldü) */}
+                    {/* HAKKINDA */}
                     {profileTab === 'about' && (
                         <div className="flex flex-col gap-8 animate-in slide-in-from-bottom duration-500">
                             <div className="bg-white border border-slate-200 p-8 md:p-10 rounded-[40px] shadow-sm">
@@ -69,8 +69,8 @@ export default function TattooFlow({ shop, bookingHelpers, currentAvailableSlots
                                     <h3 className="text-sm font-black uppercase tracking-widest text-[#2D1B4E] mb-2 border-b pb-4">İletişim & Sosyal Medya</h3>
                                     <div className="flex items-center gap-3 text-slate-600 font-bold"><Phone size={18} className="text-[#E8622A]"/> {shopPhone}</div>
                                     <div className="flex items-center gap-3 text-slate-600 font-bold"><Mail size={18} className="text-[#E8622A]"/> {shopEmail}</div>
-                                    {shopInsta && <a href={shopInsta.includes('http') ? shopInsta : `https://instagram.com/${shopInsta.replace('@','')}`} target="_blank" className="flex items-center gap-3 text-[#E1306C] font-bold"><Instagram size={18} /> Instagram</a>}
-                                    {shopFb && <a href={shopFb.includes('http') ? shopFb : `https://facebook.com/${shopFb}`} target="_blank" className="flex items-center gap-3 text-[#1877F2] font-bold"><Facebook size={18} /> Facebook</a>}
+                                    {shopInsta && <a href={shopInsta.includes('http') ? shopInsta : `https://instagram.com/${shopInsta.replace('@','')}`} target="_blank" className="flex items-center gap-3 text-[#E1306C] font-bold"><Link size={18} /> Instagram Hesabımız</a>}
+                                    {shopFb && <a href={shopFb.includes('http') ? shopFb : `https://facebook.com/${shopFb}`} target="_blank" className="flex items-center gap-3 text-[#1877F2] font-bold"><Link size={18} /> Facebook Sayfamız</a>}
                                 </div>
                                 <div className="bg-white border border-slate-200 p-8 rounded-[40px] shadow-sm">
                                     <h3 className="text-sm font-black uppercase tracking-widest text-[#2D1B4E] mb-6 border-b pb-4">Çalışma Saatleri</h3>
@@ -80,7 +80,7 @@ export default function TattooFlow({ shop, bookingHelpers, currentAvailableSlots
                                                 <span className="text-slate-500">{h.day}</span>
                                                 {h.isClosed ? <span className="text-red-500">Kapalı</span> : <span className="text-[#2D1B4E]">{h.open} - {h.close}</span>}
                                             </div>
-                                        )) : <p className="text-xs text-slate-400">Çalışma saatleri belirtilmemiş.</p>}
+                                        )) : <p className="text-xs text-slate-400 font-bold uppercase">Vitrin ayarlarından kontrol ediniz.</p>}
                                     </div>
                                 </div>
                             </div>
