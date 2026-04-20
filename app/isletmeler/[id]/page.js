@@ -5,7 +5,7 @@ import { MapPin, ChevronLeft, Gem, CheckCircle2 } from 'lucide-react';
 import { useAppContext } from '../../providers';
 import { supabase } from '../../../lib/supabase';
 
-// Sektör Bileşenleri
+// MODÜL YOLLARI DÜZELTİLDİ (Vercel Hatası Almazsın)
 import TattooFlow from '../../../components/Sectors/TattooFlow';
 import BarClubFlow from '../../../components/Sectors/BarClubFlow';
 import StandardFlow from '../../../components/Sectors/StandardFlow';
@@ -27,7 +27,7 @@ export default function ShopDetail() {
     }
   }, [shops, params?.id]);
 
-  if (!selectedShop) return <div className="p-20 text-center font-bold text-slate-400">Yükleniyor...</div>;
+  if (!selectedShop) return <div className="p-20 text-center font-bold text-slate-400 uppercase tracking-widest">Yükleniyor...</div>;
 
   const handleBooking = async (e) => {
     e.preventDefault();
@@ -40,36 +40,37 @@ export default function ShopDetail() {
         service_name: bookingData.selectedShopService?.name || bookingData.selectedEvent?.name || 'Rezervasyon'
     }]);
     if (!error) setBookingPhase('success');
+    else alert("Hata: " + error.message);
   };
 
   if (bookingPhase === 'success') {
-      return ( <div className="w-full min-h-screen flex items-center justify-center bg-[#FAF7F2]"><div className="text-center bg-white p-20 rounded-[40px] shadow-2xl"><CheckCircle2 size={80} className="text-green-500 mx-auto mb-6"/><h2 className="text-4xl font-black uppercase">Tamamlandı!</h2><button onClick={() => router.push('/')} className="mt-10 bg-[#E8622A] text-white px-12 py-5 rounded-full font-black cursor-pointer uppercase shadow-lg">Ana Sayfa</button></div></div> );
+      return ( <div className="w-full min-h-screen flex items-center justify-center bg-[#FAF7F2]"><div className="text-center bg-white p-20 rounded-[40px] shadow-2xl animate-in zoom-in"><CheckCircle2 size={80} className="text-green-500 mx-auto mb-6"/><h2 className="text-4xl font-black uppercase">Tamamlandı!</h2><p className="text-slate-500 mt-2 font-bold">Randevu talebiniz işletmeye iletildi.</p><button onClick={() => router.push('/')} className="mt-10 bg-[#E8622A] text-white px-12 py-5 rounded-full font-black cursor-pointer uppercase shadow-lg hover:scale-105 transition-all">Ana Sayfa</button></div></div> );
   }
 
-  // --- TRAFİK POLİSİ MANTIĞI ---
+  // Randevu Saatleri
+  const timeSlots = ["09:00","10:00","11:00","12:00","14:00","15:00","16:00","17:00","18:00"];
+
   const renderSectorFlow = () => {
     const helpers = { bookingPhase, setBookingPhase, bookingData, setBookingData, formData, setFormData, handleBooking };
     const cat = selectedShop.category;
 
-    if (['Dövme', 'Tattoo', 'Tattoo Studio'].includes(cat)) {
-        return <TattooFlow shop={selectedShop} bookingHelpers={helpers} />;
+    if (['Dövme', 'Tattoo', 'Tattoo Studio', 'Dövme Stüdyosu'].includes(cat)) {
+        return <TattooFlow shop={selectedShop} bookingHelpers={helpers} currentAvailableSlots={timeSlots} />;
     } else if (cat === 'Bar & Club') {
         return <BarClubFlow shop={selectedShop} bookingHelpers={helpers} />;
     } else {
-        // Kuaför, Berber, Güzellik vb.
-        return <StandardFlow shop={selectedShop} bookingHelpers={helpers} currentAvailableSlots={["09:00","10:00","11:00","12:00","14:00","15:00","16:00"]} />;
+        return <StandardFlow shop={selectedShop} bookingHelpers={helpers} currentAvailableSlots={timeSlots} />;
     }
   };
 
   return (
     <div className="w-full bg-[#FAF7F2] max-w-7xl mx-auto pt-10 md:pt-24 px-4 md:px-8 pb-20 min-h-screen relative">
-      <button onClick={() => router.push('/isletmeler')} className="flex items-center text-slate-400 hover:text-[#E8622A] mb-6 text-[10px] font-black uppercase tracking-[0.2em] bg-transparent border-none cursor-pointer"><ChevronLeft size={16} className="mr-2"/> GERİ DÖN</button>
+      <button onClick={() => router.push('/isletmeler')} className="flex items-center text-slate-400 hover:text-[#E8622A] mb-6 text-[10px] font-black uppercase tracking-[0.2em] bg-transparent border-none cursor-pointer transition-colors"><ChevronLeft size={16} className="mr-2"/> GERİ DÖN</button>
       
-      {/* ÜST KAPAK & LOGO */}
       <div className="w-full h-[200px] md:h-[300px] rounded-[32px] overflow-hidden relative mb-20 border border-slate-200 bg-slate-50 shadow-sm">
-          {selectedShop?.cover_url && <img src={selectedShop.cover_url} className="w-full h-full object-cover" />}
+          {selectedShop?.cover_url && <img src={selectedShop.cover_url} className="w-full h-full object-cover" alt="cover" />}
           <div className="absolute -bottom-10 left-6 md:left-12 w-24 h-24 md:w-32 md:h-32 rounded-[24px] bg-white border-4 border-white shadow-lg flex items-center justify-center text-[#E8622A] font-black z-10 overflow-hidden">
-              {selectedShop?.logo_url ? <img src={selectedShop.logo_url} className="w-full h-full object-cover" /> : "LOGO"}
+              {selectedShop?.logo_url ? <img src={selectedShop.logo_url} className="w-full h-full object-cover" alt="logo" /> : "LOGO"}
           </div>
       </div>
       
