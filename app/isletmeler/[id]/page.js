@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-// DİKKAT: Instagram ve Globe ikonları kaldırıldı, yerine Link ikonu eklendi.
 import { MapPin, Star, ChevronLeft, Calendar, Clock, Music, Scissors, UserCircle, Users, CalendarOff, CheckCircle2, Gem, Phone, Mail, Link } from 'lucide-react';
 import { useAppContext } from '../../providers';
 import { supabase } from '../../../lib/supabase';
@@ -62,9 +61,8 @@ export default function ShopDetail() {
       const shop = shops.find(s => String(s.id) === String(params.id));
       if (shop) {
         setSelectedShop(shop);
-        // Kategoriye Göre Varsayılan Sekme Ayarlama
         if (['Dövme', 'Tattoo', 'Dövme Stüdyosu', 'Tattoo Studio'].includes(shop.category)) {
-            setProfileTab('quote'); // Dövme ise formu aç
+            setProfileTab('quote'); // Varsayılan Dövme (Teklif)
         } else if (shop.category === 'Bar & Club') {
             setProfileTab('events');
         } else {
@@ -154,7 +152,6 @@ export default function ShopDetail() {
       return ( <div className="w-full bg-[#FAF7F2] min-h-screen pt-10"><div className="text-center py-20"><div className="w-32 h-32 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-10"><CheckCircle2 size={64}/></div><h2 className="text-4xl font-black text-[#2D1B4E] uppercase mb-4 tracking-tight">Başarılı!</h2><button onClick={() => router.push('/')} className="bg-[#E8622A] text-white px-12 py-5 rounded-full font-black uppercase text-sm border-none cursor-pointer">Ana Sayfa</button></div></div> );
   }
 
-  // Çalışma saatlerini güvenle parse etme (Hakkında sekmesi için)
   let parsedWorkingHours = defaultWorkingHours;
   if (Array.isArray(selectedShop?.working_hours)) parsedWorkingHours = selectedShop.working_hours;
   else if (typeof selectedShop?.working_hours === 'string') { try { parsedWorkingHours = JSON.parse(selectedShop.working_hours); } catch(e){} }
@@ -163,60 +160,60 @@ export default function ShopDetail() {
     <div className="w-full bg-[#FAF7F2] max-w-7xl mx-auto pt-10 md:pt-24 px-4 md:px-8 pb-20 min-h-screen relative">
       <button onClick={() => router.push('/isletmeler')} className="flex items-center text-slate-400 hover:text-[#E8622A] mb-6 text-[10px] font-black uppercase tracking-[0.2em] bg-transparent border-none cursor-pointer transition-colors"><ChevronLeft size={16} className="mr-2"/> {text?.shops?.back || 'Geri'}</button>
       
-      {/* Kapak & Logo */}
       <div className="w-full h-[200px] md:h-[300px] rounded-[32px] overflow-hidden relative mb-20 border border-slate-200 bg-slate-50 shadow-sm">
           {selectedShop?.cover_url && <img loading="lazy" src={selectedShop.cover_url} className="w-full h-full object-cover" />}
           <div className="absolute -bottom-10 md:-bottom-12 left-6 md:left-12 w-24 h-24 md:w-32 md:h-32 rounded-[24px] bg-white border-4 border-white shadow-lg overflow-hidden flex items-center justify-center text-[#E8622A] font-black relative z-10">{(selectedShop?.package === 'Premium Paket' || selectedShop?.package === 'Premium') && <div className="absolute inset-0 border-4 border-yellow-400 rounded-[20px]"></div>}{selectedShop?.logo_url ? <img src={selectedShop.logo_url} className="w-full h-full object-cover" /> : "LOGO"}</div>
       </div>
       
-      {/* İsim ve Başlık */}
       <div className="mb-10 border-b border-slate-200 pb-8 px-2 md:px-6"><div className="flex flex-wrap items-center gap-3 mb-3"><h1 className="text-2xl md:text-4xl font-black uppercase text-[#2D1B4E] tracking-tight">{selectedShop?.name}</h1>{(selectedShop?.package === 'Premium Paket' || selectedShop?.package === 'Premium') && <Gem size={28} className="text-yellow-500 fill-yellow-500"/>}</div><div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest"><span className="text-[#E8622A] px-3 py-1.5 bg-orange-50 rounded-lg">{selectedShop?.category || 'İşletme'}</span><span className="flex items-center gap-1"><MapPin size={14}/> {selectedShop?.address || (typeof selectedShop?.location === 'string' ? selectedShop.location : '')}</span></div></div>
       
-      {/* Tab Menüsü (Dövme için özel menü) */}
       <div className="flex gap-6 md:gap-10 border-b border-slate-200 mb-10 overflow-x-auto custom-scrollbar px-2 md:px-6">
           {!isTattooShop && <button onClick={() => setProfileTab(selectedShop?.category === 'Bar & Club' ? 'events' : 'services')} className={`pb-4 text-sm md:text-base font-black uppercase whitespace-nowrap bg-transparent border-none cursor-pointer border-b-4 transition-colors ${(profileTab === 'services' || profileTab === 'events') ? 'border-[#E8622A] text-[#E8622A]' : 'border-transparent text-slate-400 hover:text-[#2D1B4E]'}`}>{selectedShop?.category === 'Bar & Club' ? (text?.profile?.events || 'Etkinlikler') : (text?.profile?.services || 'Hizmetler')}</button>}
-          {isTattooShop && <button onClick={() => setProfileTab('quote')} className={`pb-4 text-sm md:text-base font-black uppercase whitespace-nowrap bg-transparent border-none cursor-pointer border-b-4 transition-colors ${profileTab === 'quote' ? 'border-[#E8622A] text-[#E8622A]' : 'border-transparent text-slate-400 hover:text-[#2D1B4E]'}`}>TEKLİF İSTE</button>}
+          
+          {/* Dövme Stüdyosu Özel Sekmeleri */}
+          {isTattooShop && <button onClick={() => setProfileTab('quote')} className={`pb-4 text-sm md:text-base font-black uppercase whitespace-nowrap bg-transparent border-none cursor-pointer border-b-4 transition-colors ${profileTab === 'quote' ? 'border-[#E8622A] text-[#E8622A]' : 'border-transparent text-slate-400 hover:text-[#2D1B4E]'}`}>DÖVME</button>}
+          {isTattooShop && <button onClick={() => setProfileTab('piercing')} className={`pb-4 text-sm md:text-base font-black uppercase whitespace-nowrap bg-transparent border-none cursor-pointer border-b-4 transition-colors ${profileTab === 'piercing' ? 'border-[#E8622A] text-[#E8622A]' : 'border-transparent text-slate-400 hover:text-[#2D1B4E]'}`}>PIERCING</button>}
           
           <button onClick={() => setProfileTab('gallery')} className={`pb-4 text-sm md:text-base font-black uppercase whitespace-nowrap bg-transparent border-none cursor-pointer border-b-4 transition-colors ${profileTab === 'gallery' ? 'border-[#E8622A] text-[#E8622A]' : 'border-transparent text-slate-400 hover:text-[#2D1B4E]'}`}>{text?.profile?.gallery || 'Galeri'}</button>
           <button onClick={() => setProfileTab('about')} className={`pb-4 text-sm md:text-base font-black uppercase whitespace-nowrap bg-transparent border-none cursor-pointer border-b-4 transition-colors ${profileTab === 'about' ? 'border-[#E8622A] text-[#E8622A]' : 'border-transparent text-slate-400 hover:text-[#2D1B4E]'}`}>{text?.profile?.about || 'Hakkında'}</button>
       </div>
 
-      {/* Grid Yapısı (Dövme ise tek sütun, değilse çift sütun) */}
-      <div className={isTattooShop ? "w-full max-w-5xl mx-auto px-2 md:px-6" : "grid grid-cols-1 lg:grid-cols-12 gap-10"}>
+      <div className={(profileTab === 'quote' || profileTab === 'services' || profileTab === 'piercing') && isTattooShop ? "w-full max-w-5xl mx-auto px-2 md:px-6" : "grid grid-cols-1 lg:grid-cols-12 gap-10"}>
           
-          <div className={isTattooShop ? "w-full" : "lg:col-span-7 px-2 md:px-6"}>
+          <div className={(profileTab === 'quote' || profileTab === 'services' || profileTab === 'piercing') && isTattooShop ? "w-full" : "lg:col-span-7 px-2 md:px-6"}>
               
-              {/* KLASİK HİZMETLER (SADECE DÖVMECİ DEĞİLSE) */}
-              {(profileTab === 'services' || profileTab === 'events') && !isTattooShop && (
-                  <div className="flex flex-col gap-4">
-                      {Array.isArray(selectedShop?.services) && selectedShop.services.map(srv => (<div key={srv?.id || Math.random()} onClick={() => { setBookingData({...bookingData, selectedShopService: srv, selectedStaff: null, time: ''}); setBookingPhase(2); }} className={`p-6 md:p-8 bg-white rounded-[32px] border cursor-pointer flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-all shadow-sm hover:shadow-md ${bookingData?.selectedShopService?.id === srv?.id ? 'border-[#E8622A]' : 'border-slate-200 hover:border-[#E8622A]'}`}><div><h4 className="font-black text-lg md:text-xl text-[#2D1B4E] mb-2">{srv?.name}</h4><div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1 w-fit bg-slate-50 px-2 py-1 rounded"><Clock size={12}/> {srv?.duration || '30'} Dk</div></div><div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto"><span className="font-black text-xl md:text-2xl text-[#2D1B4E]">{srv?.price || '0'} TL</span><button className={`px-8 py-3 rounded-xl font-black text-xs border-none cursor-pointer transition-colors tracking-widest ${bookingData?.selectedShopService?.id === srv?.id ? 'bg-[#E8622A] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>{text?.profile?.select || 'Seç'}</button></div></div>))}
-                      {(!Array.isArray(selectedShop?.services) || selectedShop.services.length === 0) && <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest border border-slate-200 rounded-[32px]">{text?.profile?.emptySrv || 'Hizmet bulunamadı'}</div>}
-                  </div>
-              )}
-
-              {/* DÖVME FORMU (MERKEZE YERLEŞİR) */}
+              {/* DÖVME FORMU (TEKLİF) */}
               {profileTab === 'quote' && isTattooShop && (
                   <TattooBriefForm shopId={selectedShop?.id} />
               )}
 
-              {/* GALERİ */}
-              {profileTab === 'gallery' && (
-                  <div className={isTattooShop ? "grid grid-cols-2 md:grid-cols-4 gap-4" : "grid grid-cols-2 md:grid-cols-3 gap-4"}>
-                      {Array.isArray(selectedShop?.gallery) && selectedShop.gallery.map((img, idx) => (<div key={idx} className="h-64 rounded-3xl overflow-hidden border border-slate-200 bg-slate-50 shadow-sm"><img src={img} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" /></div>))} 
-                      {(!Array.isArray(selectedShop?.gallery) || selectedShop.gallery.length === 0) && <div className="col-span-full p-10 text-center text-slate-400 font-bold uppercase tracking-widest border border-slate-200 rounded-[32px]">{text?.profile?.emptyGal || 'Galeri boş'}</div>}
+              {/* PIERCING LİSTESİ (HİZMETLER) */}
+              {profileTab === 'piercing' && isTattooShop && (
+                   <div className="flex flex-col gap-4">
+                   {Array.isArray(selectedShop?.services) && selectedShop.services.map(srv => (<div key={srv?.id || Math.random()} onClick={() => { setBookingData({...bookingData, selectedShopService: srv, selectedStaff: null, time: ''}); setBookingPhase(2); }} className={`p-6 md:p-8 bg-white rounded-[32px] border cursor-pointer flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-all shadow-sm hover:shadow-md ${bookingData?.selectedShopService?.id === srv?.id ? 'border-[#E8622A]' : 'border-slate-200 hover:border-[#E8622A]'}`}><div><h4 className="font-black text-lg md:text-xl text-[#2D1B4E] mb-2">{srv?.name}</h4><div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1 w-fit bg-slate-50 px-2 py-1 rounded"><Clock size={12}/> {srv?.duration || '30'} Dk</div></div><div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto"><span className="font-black text-xl md:text-2xl text-[#2D1B4E]">{srv?.price || '0'} TL</span><button className={`px-8 py-3 rounded-xl font-black text-xs border-none cursor-pointer transition-colors tracking-widest ${bookingData?.selectedShopService?.id === srv?.id ? 'bg-[#E8622A] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>{text?.profile?.select || 'Seç'}</button></div></div>))}
+                   {(!Array.isArray(selectedShop?.services) || selectedShop.services.length === 0) && <div className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest border border-slate-200 rounded-[32px]">Henüz piercing hizmeti eklenmemiş.</div>}
+               </div>
+              )}
+
+              {/* DÖVMECİ DIŞI NORMAL HİZMETLER */}
+              {(profileTab === 'services' || profileTab === 'events') && !isTattooShop && (
+                  <div className="flex flex-col gap-4">
+                      {Array.isArray(selectedShop?.services) && selectedShop.services.map(srv => (<div key={srv?.id || Math.random()} onClick={() => { setBookingData({...bookingData, selectedShopService: srv, selectedStaff: null, time: ''}); setBookingPhase(2); }} className={`p-6 md:p-8 bg-white rounded-[32px] border cursor-pointer flex flex-col sm:flex-row justify-between sm:items-center gap-4 transition-all shadow-sm hover:shadow-md ${bookingData?.selectedShopService?.id === srv?.id ? 'border-[#E8622A]' : 'border-slate-200 hover:border-[#E8622A]'}`}><div><h4 className="font-black text-lg md:text-xl text-[#2D1B4E] mb-2">{srv?.name}</h4><div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1 w-fit bg-slate-50 px-2 py-1 rounded"><Clock size={12}/> {srv?.duration || '30'} Dk</div></div><div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto"><span className="font-black text-xl md:text-2xl text-[#2D1B4E]">{srv?.price || '0'} TL</span><button className={`px-8 py-3 rounded-xl font-black text-xs border-none cursor-pointer transition-colors tracking-widest ${bookingData?.selectedShopService?.id === srv?.id ? 'bg-[#E8622A] text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>{text?.profile?.select || 'Seç'}</button></div></div>))}
                   </div>
               )}
 
-              {/* HAKKINDA (VİTRİN BİLGİLERİYLE ZENGİNLEŞTİRİLDİ) */}
+              {profileTab === 'gallery' && (
+                  <div className={isTattooShop ? "grid grid-cols-2 md:grid-cols-4 gap-4" : "grid grid-cols-2 md:grid-cols-3 gap-4"}>
+                      {Array.isArray(selectedShop?.gallery) && selectedShop.gallery.map((img, idx) => (<div key={idx} className="h-64 rounded-3xl overflow-hidden border border-slate-200 bg-slate-50 shadow-sm"><img src={img} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" /></div>))} 
+                  </div>
+              )}
+
               {profileTab === 'about' && (
                   <div className="flex flex-col gap-8">
-                      {/* Açıklama */}
                       <div className="bg-white border border-slate-200 p-8 md:p-10 rounded-[32px] shadow-sm">
                           <h3 className="text-sm font-black uppercase tracking-widest text-[#2D1B4E] mb-4">Hakkımızda</h3>
                           <p className="text-slate-600 text-sm md:text-base font-medium whitespace-pre-wrap leading-relaxed">{selectedShop?.description || 'Henüz açıklama eklenmemiş.'}</p>
                       </div>
-
-                      {/* İletişim Bilgileri Grid */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="bg-white border border-slate-200 p-8 rounded-[32px] shadow-sm flex flex-col gap-5">
                               <h3 className="text-sm font-black uppercase tracking-widest text-[#2D1B4E] mb-2 border-b border-slate-100 pb-4">İletişim</h3>
@@ -224,7 +221,6 @@ export default function ShopDetail() {
                               {selectedShop?.email && <div className="flex items-center gap-3 text-slate-600 font-bold"><Mail size={18} className="text-[#E8622A]"/> {selectedShop.email}</div>}
                               {selectedShop?.instagram && <a href={selectedShop.instagram} target="_blank" className="flex items-center gap-3 text-slate-600 font-bold hover:text-[#E8622A]"><Link size={18} className="text-[#E8622A]"/> Instagram Hesabımız</a>}
                           </div>
-
                           <div className="bg-white border border-slate-200 p-8 rounded-[32px] shadow-sm">
                               <h3 className="text-sm font-black uppercase tracking-widest text-[#2D1B4E] mb-6 border-b border-slate-100 pb-4">Çalışma Saatleri</h3>
                               <div className="flex flex-col gap-3">
@@ -241,18 +237,18 @@ export default function ShopDetail() {
               )}
           </div>
 
-          {/* SAĞ SÜTUN - RANDEVU (DÖVMECİ İSE GİZLENİR) */}
-          {!isTattooShop && (
+          {/* SAĞ SÜTUN - RANDEVU (DÖVME/PIERCING DURUMUNA GÖRE MOD DEĞİŞTİRİR) */}
+          {(profileTab === 'piercing' || !isTattooShop) && (
               <div className="lg:col-span-5 relative mt-10 lg:mt-0">
                   <div className="lg:sticky lg:top-28 bg-white border border-slate-200 rounded-[40px] p-6 md:p-10 flex flex-col min-h-[450px] shadow-xl mb-10 lg:mb-0">
                       
-                      <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-6"><h3 className="text-xl font-black uppercase text-[#2D1B4E] tracking-tight">{text?.booking?.title || 'Randevu Al'}</h3>{bookingPhase > 1 && (<button onClick={() => { if(selectedShop?.category === 'Bar & Club' && bookingPhase === 2){setBookingPhase(1); setBookingData({...bookingData, selectedEvent:null});} else {setBookingPhase(bookingPhase - 1);} }} className="text-[10px] font-black uppercase text-slate-500 hover:text-[#E8622A] bg-slate-100 hover:bg-orange-50 px-4 py-2 rounded-xl flex items-center border-none cursor-pointer transition-colors tracking-widest"><ChevronLeft size={14} className="mr-1"/> {text?.booking?.back || 'Geri'}</button>)}</div>
+                      <div className="flex justify-between items-center mb-8 border-b border-slate-100 pb-6"><h3 className="text-xl font-black uppercase text-[#2D1B4E] tracking-tight">{bookingPhase === 1 ? 'Seçim Bekleniyor' : 'Randevu Al'}</h3>{bookingPhase > 1 && (<button onClick={() => setBookingPhase(bookingPhase - 1)} className="text-[10px] font-black uppercase text-slate-500 hover:text-[#E8622A] bg-slate-100 hover:bg-orange-50 px-4 py-2 rounded-xl flex items-center border-none cursor-pointer transition-colors tracking-widest"><ChevronLeft size={14} className="mr-1"/> Geri</button>)}</div>
 
-                      {bookingPhase === 1 && (<div className="flex-1 flex flex-col items-center justify-center text-center p-10"><div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6"><Scissors size={40} className="text-slate-300"/></div><p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed">Hizmet Seçin</p></div>)}
+                      {bookingPhase === 1 && (<div className="flex-1 flex flex-col items-center justify-center text-center p-10"><div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6"><Scissors size={40} className="text-slate-300"/></div><p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed">{isTattooShop ? 'Piercing Türü Seçin' : 'Hizmet Seçin'}</p></div>)}
                       
                       {bookingPhase > 1 && (
                           <div className="mb-8 bg-slate-50 p-6 rounded-3xl border border-slate-200 flex flex-col gap-4 shadow-inner">
-                              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Seçim</span><span className="font-black text-[#2D1B4E] text-sm md:text-base">{bookingData?.selectedShopService?.name}</span></div>
+                              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Hizmet</span><span className="font-black text-[#2D1B4E] text-sm md:text-base">{bookingData?.selectedShopService?.name}</span></div>
                               {bookingPhase > 3 && bookingData?.time && (<div className="flex flex-col sm:flex-row justify-between sm:items-center border-t border-slate-200 pt-4 gap-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Zaman</span><span className="font-bold text-[#E8622A] text-xs bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100">{bookingData?.date} | {bookingData?.time}</span></div>)}
                               <div className="flex flex-col sm:flex-row justify-between sm:items-center border-t border-slate-200 pt-4 mt-2 gap-2"><span className="text-[10px] font-black text-[#2D1B4E] uppercase tracking-widest">Toplam</span><span className="font-black text-[#E8622A] text-2xl">{bookingData?.selectedShopService?.price || '0'} TL</span></div>
                           </div>
@@ -274,7 +270,7 @@ export default function ShopDetail() {
                                   const check = currentAvailableSlots.slice(idx, idx + needed); 
                                   let isUnavail = check.length < needed || check.some(s => closedSlots.includes(s)); 
                                   return (
-                                    <button key={slot} onClick={() => { if(isUnavail) { setWaitlistTime(slot); setShowWaitlistModal(true); } else { setBookingData({...bookingData, time: slot}); setBookingPhase(4); } }} className={`py-4 rounded-2xl flex flex-col items-center justify-center text-xs font-bold border cursor-pointer transition-all ${isUnavail ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60' : bookingData?.time === slot ? 'bg-[#E8622A] text-white border-[#E8622A] shadow-md scale-105' : 'bg-white border-slate-200 text-[#2D1B4E] hover:border-[#E8622A] shadow-sm'}`}>
+                                    <button key={slot} onClick={() => { if(!isUnavail) { setBookingData({...bookingData, time: slot}); setBookingPhase(4); } }} className={`py-4 rounded-2xl flex flex-col items-center justify-center text-xs font-bold border cursor-pointer transition-all ${isUnavail ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60' : bookingData?.time === slot ? 'bg-[#E8622A] text-white border-[#E8622A] shadow-md scale-105' : 'bg-white border-slate-200 text-[#2D1B4E] hover:border-[#E8622A] shadow-sm'}`}>
                                       <span>{slot}</span>
                                     </button>
                                   ); 
