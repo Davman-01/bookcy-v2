@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { MapPin, ChevronLeft, Gem, X } from 'lucide-react'; // X ikonunu ekledik
 import { useAppContext } from '../providers';
 import { categories, cyprusRegions } from '../../lib/constants';
-import TattooBriefForm from '@/components/TattooBriefForm';
+import TattooBriefForm from '../../components/TattooBriefForm';
 
 function ShopList() {
   const router = useRouter();

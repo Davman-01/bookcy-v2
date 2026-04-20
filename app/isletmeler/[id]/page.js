@@ -5,7 +5,7 @@ import { MapPin, Star, ChevronLeft, Calendar, Clock, Music, Scissors, UserCircle
 import { useAppContext } from '../../providers';
 import { supabase } from '../../../lib/supabase';
 import { getNewBookingShopTemplate, getBookingConfirmationTemplate } from '../../../lib/emailTemplates';
-import TattooBriefForm from '@/components/TattooBriefForm';
+import TattooBriefForm from '../../../components/TattooBriefForm';
 
 function parseDuration(d) { const m = (d||'').match(/\d+/); return m ? parseInt(m[0]) : 30; }
 function getRequiredSlots(d) { return Math.ceil(parseDuration(d) / 30); }
