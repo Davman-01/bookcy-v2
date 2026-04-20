@@ -5,7 +5,7 @@ import { MapPin, ChevronLeft, Gem, CheckCircle2 } from 'lucide-react';
 import { useAppContext } from '../../providers';
 import { supabase } from '../../../lib/supabase';
 
-// MODÜL YOLLARI DÜZELTİLDİ (Vercel Hatası Almazsın)
+// Sektör Bileşenleri
 import TattooFlow from '../../../components/Sectors/TattooFlow';
 import BarClubFlow from '../../../components/Sectors/BarClubFlow';
 import StandardFlow from '../../../components/Sectors/StandardFlow';
@@ -40,20 +40,17 @@ export default function ShopDetail() {
         service_name: bookingData.selectedShopService?.name || bookingData.selectedEvent?.name || 'Rezervasyon'
     }]);
     if (!error) setBookingPhase('success');
-    else alert("Hata: " + error.message);
   };
 
   if (bookingPhase === 'success') {
-      return ( <div className="w-full min-h-screen flex items-center justify-center bg-[#FAF7F2]"><div className="text-center bg-white p-20 rounded-[40px] shadow-2xl animate-in zoom-in"><CheckCircle2 size={80} className="text-green-500 mx-auto mb-6"/><h2 className="text-4xl font-black uppercase">Tamamlandı!</h2><p className="text-slate-500 mt-2 font-bold">Randevu talebiniz işletmeye iletildi.</p><button onClick={() => router.push('/')} className="mt-10 bg-[#E8622A] text-white px-12 py-5 rounded-full font-black cursor-pointer uppercase shadow-lg hover:scale-105 transition-all">Ana Sayfa</button></div></div> );
+      return ( <div className="w-full min-h-screen flex items-center justify-center bg-[#FAF7F2]"><div className="text-center bg-white p-20 rounded-[40px] shadow-2xl animate-in zoom-in"><CheckCircle2 size={80} className="text-green-500 mx-auto mb-6"/><h2 className="text-4xl font-black uppercase">Tamamlandı!</h2><button onClick={() => router.push('/')} className="mt-10 bg-[#E8622A] text-white px-12 py-5 rounded-full font-black cursor-pointer uppercase shadow-lg hover:scale-105 transition-all">Ana Sayfa</button></div></div> );
   }
 
-  // Randevu Saatleri
   const timeSlots = ["09:00","10:00","11:00","12:00","14:00","15:00","16:00","17:00","18:00"];
 
   const renderSectorFlow = () => {
     const helpers = { bookingPhase, setBookingPhase, bookingData, setBookingData, formData, setFormData, handleBooking };
     const cat = selectedShop.category;
-
     if (['Dövme', 'Tattoo', 'Tattoo Studio', 'Dövme Stüdyosu'].includes(cat)) {
         return <TattooFlow shop={selectedShop} bookingHelpers={helpers} currentAvailableSlots={timeSlots} />;
     } else if (cat === 'Bar & Club') {
@@ -69,8 +66,9 @@ export default function ShopDetail() {
       
       <div className="w-full h-[200px] md:h-[300px] rounded-[32px] overflow-hidden relative mb-20 border border-slate-200 bg-slate-50 shadow-sm">
           {selectedShop?.cover_url && <img src={selectedShop.cover_url} className="w-full h-full object-cover" alt="cover" />}
-          <div className="absolute -bottom-10 left-6 md:left-12 w-24 h-24 md:w-32 md:h-32 rounded-[24px] bg-white border-4 border-white shadow-lg flex items-center justify-center text-[#E8622A] font-black z-10 overflow-hidden">
-              {selectedShop?.logo_url ? <img src={selectedShop.logo_url} className="w-full h-full object-cover" alt="logo" /> : "LOGO"}
+          {/* LOGO DÜZELTME: object-contain eklendi, logo kesilmez */}
+          <div className="absolute -bottom-10 left-6 md:left-12 w-24 h-24 md:w-32 md:h-32 rounded-[24px] bg-white border-4 border-white shadow-lg flex items-center justify-center z-10 overflow-hidden">
+              {selectedShop?.logo_url ? <img src={selectedShop.logo_url} className="w-full h-full object-contain" alt="logo" /> : <div className="text-[#E8622A] font-black">LOGO</div>}
           </div>
       </div>
       
