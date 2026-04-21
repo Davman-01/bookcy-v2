@@ -8,14 +8,32 @@ import { categories, cyprusRegions } from '../lib/constants';
 // --- KATEGORİLER İÇİN OTOMATİK KURUMSAL FOTOĞRAF ATAYICI ---
 const getCategoryImage = (name) => {
   const lowerName = name?.toLowerCase() || '';
-  if (lowerName.includes('berber') || lowerName.includes('barber') || lowerName.includes('erkek')) return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=800&auto=format&fit=crop';
+
+  // 1. Veteriner (Doktor köpeğe bakarken)
+  if (lowerName.includes('vet') || lowerName.includes('veteriner')) return 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=80&w=800&auto=format&fit=crop';
+  
+  // 2. Pet Kuaför (Köpek yıkanırken/tüyleri kesilirken) -> Kuaförden ÖNCE olmalı!
+  if (lowerName.includes('pet') || lowerName.includes('köpek') || lowerName.includes('kedi')) return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800&auto=format&fit=crop';
+  
+  // 3. Kişisel Bakım / Tırnak (Tırnak yapılan detaylı fotoğraf)
+  if (lowerName.includes('tırnak') || lowerName.includes('nail') || lowerName.includes('manikür') || lowerName.includes('bakım') || lowerName.includes('güzellik')) return 'https://images.unsplash.com/photo-1604654894610-df490982570d?q=80&w=800&auto=format&fit=crop';
+  
+  // 4. Kuaför (Saç yapılan profesyonel fotoğraf)
   if (lowerName.includes('kuaför') || lowerName.includes('hair') || lowerName.includes('saç')) return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800&auto=format&fit=crop';
-  if (lowerName.includes('spa') || lowerName.includes('masaj')) return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop';
-  if (lowerName.includes('dövme') || lowerName.includes('tattoo')) return 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?q=80&w=800&auto=format&fit=crop';
+  
+  // 5. Berber (Erkek saç/sakal)
+  if (lowerName.includes('berber') || lowerName.includes('barber') || lowerName.includes('erkek')) return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=800&auto=format&fit=crop';
+  
+  // 6. Bar & Club (Gece Kulübü)
   if (lowerName.includes('bar') || lowerName.includes('pub') || lowerName.includes('club') || lowerName.includes('loca')) return 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format&fit=crop';
-  if (lowerName.includes('güzellik') || lowerName.includes('beauty') || lowerName.includes('estetik') || lowerName.includes('cilt')) return 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=800&auto=format&fit=crop';
-  if (lowerName.includes('tırnak') || lowerName.includes('nail') || lowerName.includes('manikür')) return 'https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=800&auto=format&fit=crop';
-  if (lowerName.includes('makyaj') || lowerName.includes('makeup')) return 'https://images.unsplash.com/photo-1596462502278-27bf85033e5a?q=80&w=800&auto=format&fit=crop';
+  
+  // 7. Dövme (Tattoo)
+  if (lowerName.includes('dövme') || lowerName.includes('tattoo')) return 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?q=80&w=800&auto=format&fit=crop';
+  
+  // 8. Spa / Masaj
+  if (lowerName.includes('spa') || lowerName.includes('masaj')) return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop';
+  
+  // 9. Klinik / Sağlık
   if (lowerName.includes('klinik') || lowerName.includes('diş') || lowerName.includes('sağlık')) return 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=800&auto=format&fit=crop';
   
   // Eşleşmezse varsayılan premium mekan fotoğrafı
