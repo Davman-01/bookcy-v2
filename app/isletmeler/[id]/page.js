@@ -8,6 +8,7 @@ import { supabase } from '../../../lib/supabase';
 // Sektör Bileşenleri
 import TattooFlow from '../../../components/Sectors/TattooFlow';
 import StandardFlow from '../../../components/Sectors/StandardFlow';
+import BarClubFlow from '../../../components/Sectors/BarClubFlow'; // BAR CLUB EKLENDİ
 
 // Yarım saatlik randevu saatleri (Ortak)
 const timeSlots = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00"];
@@ -19,8 +20,9 @@ export default function ShopDetail() {
   
   const [selectedShop, setSelectedShop] = useState(null);
   const [bookingPhase, setBookingPhase] = useState(1);
-  const [formData, setFormData] = useState({ name: '', surname: '', phone: '', email: '' }); 
-  const [bookingData, setBookingData] = useState({ date: new Date().toISOString().split('T')[0], time: '', selectedShopService: null, selectedStaff: null });
+  // Not alanı buraya eklendi
+  const [formData, setFormData] = useState({ name: '', surname: '', phone: '', email: '', note: '' }); 
+  const [bookingData, setBookingData] = useState({ date: new Date().toISOString().split('T')[0], time: '', selectedShopService: null, selectedStaff: null, selectedEvent: null });
 
   useEffect(() => {
     if (shops?.length > 0 && params?.id) {
@@ -31,22 +33,27 @@ export default function ShopDetail() {
 
   if (!selectedShop) return <div className="p-20 text-center font-bold text-slate-400 uppercase tracking-widest">Yükleniyor...</div>;
 
+  const isBarClub = ['Bar & Club', 'Gece Kulübü', 'Bar', 'Club'].includes(selectedShop.category);
+
   const handleBooking = async (e) => {
     e.preventDefault();
     if(!bookingData.time) return alert("Saat seçmelisiniz.");
-    if(!bookingData.selectedStaff) return alert("Uzman seçmelisiniz.");
+    // Eğer mekan Bar/Club değilse uzman seçimi zorunludur
+    if(!bookingData.selectedStaff && !isBarClub) return alert("Uzman seçmelisiniz.");
 
     const { error } = await supabase.from('appointments').insert([{ 
         shop_id: selectedShop.id, 
         customer_name: formData.name + " " + formData.surname, 
         customer_phone: formData.phone,
         customer_email: formData.email,
+        customer_note: formData.note || '', // NOT (AÇIKLAMA) VERİTABANINA GÖNDERİLİYOR
         appointment_date: bookingData.date,
         appointment_time: bookingData.time,
         staff_name: bookingData.selectedStaff?.name || 'Fark Etmez',
-        service_name: bookingData.selectedShopService?.name || 'Randevu',
+        service_name: bookingData.selectedShopService?.name || bookingData.selectedEvent?.name || 'Rezervasyon',
         status: 'Bekliyor'
     }]);
+    
     if (!error) {
         setBookingPhase('success');
         window.scrollTo(0,0);
@@ -55,7 +62,7 @@ export default function ShopDetail() {
   };
 
   if (bookingPhase === 'success') {
-      return ( <div className="w-full min-h-screen flex items-center justify-center bg-[#FAF7F2] p-4"><div className="text-center bg-white p-12 md:p-20 rounded-[40px] shadow-2xl animate-in zoom-in"><CheckCircle2 size={80} className="text-green-500 mx-auto mb-6"/><h2 className="text-3xl md:text-4xl font-black uppercase">BAŞARILI!</h2><p className="text-slate-500 mt-2 font-bold">Randevu talebiniz iletildi. İşletme sizinle iletişime geçecektir.</p><button onClick={() => router.push('/')} className="mt-10 bg-[#E8622A] text-white px-12 py-5 rounded-full font-black cursor-pointer uppercase shadow-lg hover:scale-105 transition-all">Ana Sayfa</button></div></div> );
+      return ( <div className="w-full min-h-screen flex items-center justify-center bg-[#FAF7F2] p-4"><div className="text-center bg-white p-12 md:p-20 rounded-[40px] shadow-2xl animate-in zoom-in"><CheckCircle2 size={80} className="text-green-500 mx-auto mb-6"/><h2 className="text-3xl md:text-4xl font-black uppercase">BAŞARILI!</h2><p className="text-slate-500 mt-2 font-bold">Talebiniz başarıyla iletildi. İşletme sizinle iletişime geçecektir.</p><button onClick={() => router.push('/')} className="mt-10 bg-[#E8622A] text-white px-12 py-5 rounded-full font-black cursor-pointer uppercase shadow-lg hover:scale-105 transition-all">Ana Sayfa</button></div></div> );
   }
 
   const bookingHelpers = { bookingPhase, setBookingPhase, bookingData, setBookingData, formData, setFormData, handleBooking };
@@ -87,8 +94,11 @@ export default function ShopDetail() {
       <div className="max-w-7xl mx-auto relative z-10">
           {['Dövme', 'Tattoo', 'Tattoo Studio', 'Dövme Stüdyosu'].includes(selectedShop.category) ? (
               <TattooFlow shop={selectedShop} bookingHelpers={bookingHelpers} currentAvailableSlots={timeSlots} />
+          ) : isBarClub ? (
+              // BAR & CLUB YÖNLENDİRMESİ
+              <BarClubFlow shop={selectedShop} bookingHelpers={bookingHelpers} />
           ) : (
-              // Berberler, Kuaförler, Güzellik Merkezleri buraya düşer
+              // Berberler, Kuaförler, Güzellik Merkezleri
               <StandardFlow shop={selectedShop} bookingHelpers={bookingHelpers} currentAvailableSlots={timeSlots} />
           )}
       </div>
