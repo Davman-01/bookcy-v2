@@ -12,11 +12,11 @@ const getCategoryImage = (name) => {
   // 1. Veteriner (Doktor köpeğe bakarken)
   if (lowerName.includes('vet') || lowerName.includes('veteriner')) return 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=80&w=800&auto=format&fit=crop';
   
-  // 2. Pet Kuaför (Köpek yıkanırken/tüyleri kesilirken) -> Kuaförden ÖNCE olmalı!
+  // 2. Pet Kuaför (Köpek yıkanırken/tüyleri kesilirken)
   if (lowerName.includes('pet') || lowerName.includes('köpek') || lowerName.includes('kedi')) return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800&auto=format&fit=crop';
   
-  // 3. Kişisel Bakım / Tırnak (Tırnak yapılan detaylı fotoğraf)
-  if (lowerName.includes('tırnak') || lowerName.includes('nail') || lowerName.includes('manikür') || lowerName.includes('bakım') || lowerName.includes('güzellik')) return 'https://images.unsplash.com/photo-1604654894610-df490982570d?q=80&w=800&auto=format&fit=crop';
+  // 3. Kişisel Bakım / Tırnak (YENİ VE KESİN ÇALIŞAN GÖRSEL)
+  if (lowerName.includes('tırnak') || lowerName.includes('nail') || lowerName.includes('manikür') || lowerName.includes('bakım') || lowerName.includes('güzellik')) return 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop';
   
   // 4. Kuaför (Saç yapılan profesyonel fotoğraf)
   if (lowerName.includes('kuaför') || lowerName.includes('hair') || lowerName.includes('saç')) return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800&auto=format&fit=crop';
