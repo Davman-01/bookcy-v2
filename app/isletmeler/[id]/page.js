@@ -7,8 +7,9 @@ import { supabase } from '../../../lib/supabase';
 
 // Sektör Bileşenleri
 import TattooFlow from '../../../components/Sectors/TattooFlow';
+import StandardFlow from '../../../components/Sectors/StandardFlow';
 
-// Yarım saatlik randevu saatleri
+// Yarım saatlik randevu saatleri (Ortak)
 const timeSlots = ["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00"];
 
 export default function ShopDetail() {
@@ -54,7 +55,7 @@ export default function ShopDetail() {
   };
 
   if (bookingPhase === 'success') {
-      return ( <div className="w-full min-h-screen flex items-center justify-center bg-[#FAF7F2] p-4"><div className="text-center bg-white p-12 md:p-20 rounded-[40px] shadow-2xl animate-in zoom-in"><CheckCircle2 size={80} className="text-green-500 mx-auto mb-6"/><h2 className="text-3xl md:text-4xl font-black uppercase">BAŞARILI!</h2><p className="text-slate-500 mt-2 font-bold">Randevu talebiniz iletildi. Sizinle iletişime geçeceğiz.</p><button onClick={() => router.push('/')} className="mt-10 bg-[#E8622A] text-white px-12 py-5 rounded-full font-black cursor-pointer uppercase shadow-lg hover:scale-105 transition-all">Ana Sayfa</button></div></div> );
+      return ( <div className="w-full min-h-screen flex items-center justify-center bg-[#FAF7F2] p-4"><div className="text-center bg-white p-12 md:p-20 rounded-[40px] shadow-2xl animate-in zoom-in"><CheckCircle2 size={80} className="text-green-500 mx-auto mb-6"/><h2 className="text-3xl md:text-4xl font-black uppercase">BAŞARILI!</h2><p className="text-slate-500 mt-2 font-bold">Randevu talebiniz iletildi. İşletme sizinle iletişime geçecektir.</p><button onClick={() => router.push('/')} className="mt-10 bg-[#E8622A] text-white px-12 py-5 rounded-full font-black cursor-pointer uppercase shadow-lg hover:scale-105 transition-all">Ana Sayfa</button></div></div> );
   }
 
   const bookingHelpers = { bookingPhase, setBookingPhase, bookingData, setBookingData, formData, setFormData, handleBooking };
@@ -63,10 +64,9 @@ export default function ShopDetail() {
     <div className="w-full bg-[#FAF7F2] pt-10 md:pt-24 px-4 md:px-8 pb-20 min-h-screen relative overflow-hidden">
       <button onClick={() => router.push('/isletmeler')} className="flex items-center text-slate-400 hover:text-[#E8622A] mb-6 text-[10px] font-black uppercase tracking-[0.2em] bg-transparent border-none cursor-pointer transition-colors relative z-10"><ChevronLeft size={16} className="mr-2"/> GERİ DÖN</button>
       
-      {/* ÜST KAPAK & LOGO (LOGO KESİLMEME DÜZELTMESİ) */}
+      {/* ÜST KAPAK & LOGO */}
       <div className="w-full max-w-7xl mx-auto h-[200px] md:h-[300px] rounded-[32px] overflow-hidden relative mb-20 border border-slate-200 bg-slate-50 shadow-sm relative z-10">
           {selectedShop?.cover_url && <img src={selectedShop.cover_url} className="w-full h-full object-cover" alt="cover" />}
-          {/* Logo container'a p-2 ve img'ye object-contain verildi */}
           <div className="absolute -bottom-10 left-6 md:left-12 w-28 h-28 md:w-36 md:h-36 rounded-[24px] bg-white border-4 border-white shadow-lg flex items-center justify-center z-10 overflow-hidden p-2">
               {selectedShop?.logo_url ? <img src={selectedShop.logo_url} className="w-full h-full object-contain" alt="logo" /> : <div className="text-[#E8622A] font-black">LOGO</div>}
           </div>
@@ -83,15 +83,13 @@ export default function ShopDetail() {
           </div>
       </div>
 
+      {/* Sektör Yönlendirmesi (Trafik Polisi) */}
       <div className="max-w-7xl mx-auto relative z-10">
           {['Dövme', 'Tattoo', 'Tattoo Studio', 'Dövme Stüdyosu'].includes(selectedShop.category) ? (
-              <TattooFlow 
-                shop={selectedShop} 
-                bookingHelpers={bookingHelpers}
-                currentAvailableSlots={timeSlots}
-              />
+              <TattooFlow shop={selectedShop} bookingHelpers={bookingHelpers} currentAvailableSlots={timeSlots} />
           ) : (
-              <div className="p-10 text-center bg-white rounded-[40px] border">Bu sektör için özel akış yakında eklenecek.</div>
+              // Berberler, Kuaförler, Güzellik Merkezleri buraya düşer
+              <StandardFlow shop={selectedShop} bookingHelpers={bookingHelpers} currentAvailableSlots={timeSlots} />
           )}
       </div>
     </div>
