@@ -1,84 +1,89 @@
 "use client";
 import React from 'react';
 import { CheckCircle2, Crown } from 'lucide-react';
+import { useAppContext } from '../providers';
 
-export default function PackagesSection() {
-    return (
-        <div className="w-full bg-[#FAF7F2] py-20 px-4">
-            {/* BAŞLIK ALANI */}
-            <div className="max-w-5xl mx-auto text-center mb-16">
-                <span className="text-[#E8622A] text-xs font-black uppercase tracking-widest">SİZE UYGUN PLANI SEÇİN</span>
-                <h2 className="text-4xl md:text-5xl font-black uppercase text-[#2D1B4E] mt-2">İŞLETME PAKETLERİ</h2>
-            </div>
+export default function About() {
+  const { lang = 'TR', t } = useAppContext();
+  const text = t?.[lang]?.aboutPage;
 
-            {/* PAKETLER */}
-            <div className="flex flex-col lg:flex-row justify-center items-stretch gap-8 max-w-5xl mx-auto">
-                
-                {/* 1. STANDART PAKET */}
-                <div className="bg-white rounded-[40px] p-8 md:p-10 w-full lg:w-1/2 shadow-xl border-2 border-transparent hover:border-[#E8622A] transition-all relative overflow-hidden flex flex-col">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -z-0"></div>
-                    <div className="relative z-10 flex-1 flex flex-col">
-                        <h3 className="text-2xl font-black uppercase text-[#2D1B4E] tracking-tight">STANDART PAKET</h3>
-                        <div className="mt-4 mb-8 flex items-end gap-2">
-                            <span className="text-5xl font-black text-[#E8622A]">60 STG</span>
-                            <span className="text-slate-400 font-bold text-sm mb-1 uppercase tracking-widest">/ Aylık</span>
-                        </div>
-                        
-                        {/* Özellikler */}
-                        <div className="flex flex-col gap-4 flex-1">
-                            <FeatureItem text="Sınırsız 7/24 Randevu Alma" />
-                            <FeatureItem text="Sektörel Standart Akış (Berber/Kuaför)" />
-                            <FeatureItem text="İşletme Takip ve Yönetim Paneli" />
-                            <FeatureItem text="Galeri ve İletişim Vitrini" />
-                            <FeatureItem text="Müşteri Notları ve Bildirimler" />
-                            <FeatureItem text="İşletme Rotası (Harita Entegrasyonu)" />
-                        </div>
-                        
-                        <button className="w-full mt-10 bg-slate-100 text-[#2D1B4E] hover:bg-slate-200 py-4 rounded-2xl font-black uppercase tracking-widest transition-colors cursor-pointer">Standart ile Başla</button>
-                    </div>
-                </div>
+  if (!text) return null;
 
-                {/* 2. PREMIUM PAKET */}
-                <div className="bg-[#2D1B4E] rounded-[40px] p-8 md:p-10 w-full lg:w-1/2 shadow-2xl relative lg:scale-105 border-4 border-[#2D1B4E] flex flex-col mt-10 lg:mt-0">
-                    {/* Rozet */}
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#E8622A] text-white text-[10px] font-black uppercase tracking-widest px-6 py-2 rounded-full shadow-lg whitespace-nowrap">
-                        EN ÇOK TERCİH EDİLEN
-                    </div>
-                    
-                    <h3 className="text-2xl font-black uppercase text-white tracking-tight flex items-center gap-2">
-                        <Crown size={24} className="text-[#E8622A]" /> PREMİUM PAKET
-                    </h3>
-                    <div className="mt-4 mb-8 flex items-end gap-2">
-                        <span className="text-5xl font-black text-[#E8622A]">100 STG</span>
-                        <span className="text-white/50 font-bold text-sm mb-1 uppercase tracking-widest">/ Aylık</span>
-                    </div>
-                    
-                    {/* Özellikler */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1">
-                        <FeatureItem text="Standart Paketteki Her Şey" isPremium />
-                        <FeatureItem text="Arama Sonuçlarında En Üst Sıra" isPremium />
-                        <FeatureItem text="Premium Çerçeve (Altın Rozet)" isPremium />
-                        <FeatureItem text="Özel Sektör Akışları (Dövme Formu, VIP Loca)" isPremium />
-                        <FeatureItem text="Sponsorlu Reklam ve Story Box" isPremium />
-                        <FeatureItem text="Sosyal Medya Yönetim Desteği" isPremium />
-                        <FeatureItem text="Personel Performans Optimizasyonu" isPremium />
-                        <FeatureItem text="Detaylı Raporlama ve İstatistik" isPremium />
-                        <FeatureItem text="7/24 Öncelikli Destek Hattı" isPremium />
-                    </div>
-                    
-                    <button className="w-full mt-10 bg-[#E8622A] hover:bg-[#d65520] text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-[0_0_20px_rgba(232,98,42,0.3)] transition-all hover:-translate-y-1 cursor-pointer">Premium'a Geç</button>
-                </div>
-            </div>
+  return (
+    <div className="w-full bg-[#FAF7F2] pb-24 pt-10 md:pt-16">
+      <div className="bg-[#2D1B4E] pt-20 md:pt-24 pb-24 md:pb-32 px-6 text-center">
+        <span className="bg-white/10 text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/20 mb-8 inline-block">
+          {text.tag}
+        </span>
+        <h1 className="text-3xl md:text-6xl font-black text-white mb-8 tracking-tight">
+          {text.title1}<br/>
+          <span className="text-[#E8622A]">{text.title2}</span>
+        </h1>
+        <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto font-medium leading-relaxed px-4">
+          {text.sub}
+        </p>
+      </div>
+      
+      <div className="max-w-[1200px] mx-auto px-6 -mt-10 md:-mt-16">
+        <div className="bg-white p-8 md:p-16 rounded-[40px] shadow-2xl border border-slate-200 mb-16 md:mb-20 text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-orange-50 rounded-bl-full -z-10"></div>
+          <h2 className="text-sm font-black text-[#E8622A] uppercase tracking-[0.3em] mb-6 relative z-10">{text.wTag}</h2>
+          <p className="text-xl md:text-3xl text-[#2D1B4E] font-black leading-tight mb-8 relative z-10">{text.w1}</p>
+          <p className="text-base md:text-lg text-slate-500 font-medium mb-12 max-w-4xl mx-auto relative z-10 leading-relaxed">{text.w2}</p>
+          <div className="bg-[#2D1B4E] text-white p-6 md:p-10 rounded-[32px] inline-block font-bold text-lg md:text-2xl shadow-2xl relative z-10 border border-slate-700 leading-relaxed">
+            {text.w3} <br/>
+            <span className="text-[#E8622A]">{text.w4}</span>
+          </div>
         </div>
-    );
-}
 
-// Özellikleri listelemek için kullandığımız küçük bileşen
-function FeatureItem({ text, isPremium }) {
-    return (
-        <div className="flex items-start gap-3">
-            <CheckCircle2 size={18} className={`shrink-0 mt-0.5 ${isPremium ? 'text-[#E8622A]' : 'text-[#E8622A]'}`} />
-            <span className={`text-xs font-bold leading-relaxed ${isPremium ? 'text-white/90' : 'text-slate-600'}`}>{text}</span>
+        <div className="mt-16 md:mt-24 text-center mb-12 md:mb-16">
+          <h2 className="text-sm font-black text-[#E8622A] uppercase tracking-[0.3em] mb-4">{text.pTag}</h2>
+          <h3 className="text-3xl md:text-5xl font-black text-[#2D1B4E] uppercase tracking-tight">{text.pTitle}</h3>
         </div>
-    );
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 text-left max-w-5xl mx-auto">
+          {/* Standart Paket */}
+          <div className="bg-white p-8 md:p-12 rounded-[40px] border border-slate-200 shadow-xl relative overflow-hidden group hover:border-[#E8622A] transition-colors">
+            <div className="absolute -right-10 -top-10 w-40 h-40 bg-slate-50 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+            <div className="relative z-10">
+              <h3 className="text-2xl font-black text-[#2D1B4E] uppercase tracking-widest mb-2">{text.std}</h3>
+              <p className="text-4xl md:text-5xl font-black text-[#E8622A] mb-10">60 STG <span className="text-sm text-slate-400 font-bold uppercase tracking-widest">{text.mo}</span></p>
+              <ul className="space-y-5 mb-14">
+                <li className="flex items-start gap-4 text-sm md:text-base font-bold text-slate-600"><CheckCircle2 size={24} className="text-[#E8622A] shrink-0"/> Sınırsız 7/24 Randevu Alma</li>
+                <li className="flex items-start gap-4 text-sm md:text-base font-bold text-slate-600"><CheckCircle2 size={24} className="text-[#E8622A] shrink-0"/> Standart Sektör Akışı (Berber vb.)</li>
+                <li className="flex items-start gap-4 text-sm md:text-base font-bold text-slate-600"><CheckCircle2 size={24} className="text-[#E8622A] shrink-0"/> İşletme Takip ve Yönetim Paneli</li>
+                <li className="flex items-start gap-4 text-sm md:text-base font-bold text-slate-600"><CheckCircle2 size={24} className="text-[#E8622A] shrink-0"/> Galeri ve İletişim Vitrini</li>
+                <li className="flex items-start gap-4 text-sm md:text-base font-bold text-slate-600"><CheckCircle2 size={24} className="text-[#E8622A] shrink-0"/> Personel Randevu Takibi</li>
+                <li className="flex items-start gap-4 text-sm md:text-base font-bold text-slate-600"><CheckCircle2 size={24} className="text-[#E8622A] shrink-0"/> İşletme Rotası (Harita)</li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Premium Paket */}
+          <div className="bg-[#2D1B4E] p-8 md:p-12 rounded-[40px] border border-[#3E296A] relative text-white shadow-2xl overflow-hidden md:scale-105 z-10">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#E8622A] to-purple-600 rounded-bl-full opacity-20 blur-3xl"></div>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#E8622A] to-orange-500 text-white px-8 py-2 rounded-b-xl text-[10px] font-black uppercase tracking-widest shadow-lg w-max">
+              {text.pop}
+            </div>
+            <div className="relative z-10 mt-6">
+              <h3 className="text-2xl font-black text-white uppercase tracking-widest mb-2 flex items-center gap-3">
+                <Crown size={28} className="text-yellow-500"/> {text.pr}
+              </h3>
+              <p className="text-4xl md:text-5xl font-black text-[#E8622A] mb-10">100 STG <span className="text-sm text-slate-400 font-bold uppercase tracking-widest">{text.mo}</span></p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 mb-14">
+                <li className="flex items-start gap-3 text-sm md:text-base font-bold text-slate-200"><CheckCircle2 size={20} className="text-[#E8622A] shrink-0"/> Standart Paketteki Her Şey</li>
+                <li className="flex items-start gap-3 text-sm md:text-base font-bold text-slate-200"><CheckCircle2 size={20} className="text-[#E8622A] shrink-0"/> Özel Akışlar (Dövme Formu, VIP Loca)</li>
+                <li className="flex items-start gap-3 text-sm md:text-base font-bold text-slate-200"><CheckCircle2 size={20} className="text-[#E8622A] shrink-0"/> Arama Sonuçlarında Üst Sıra</li>
+                <li className="flex items-start gap-3 text-sm md:text-base font-bold text-slate-200"><CheckCircle2 size={20} className="text-[#E8622A] shrink-0"/> Premium Çerçeve (Altın Rozet)</li>
+                <li className="flex items-start gap-3 text-sm md:text-base font-bold text-slate-200"><CheckCircle2 size={20} className="text-[#E8622A] shrink-0"/> Sponsorlu Reklam & Story Box</li>
+                <li className="flex items-start gap-3 text-sm md:text-base font-bold text-slate-200"><CheckCircle2 size={20} className="text-[#E8622A] shrink-0"/> Sosyal Medya Yönetim Desteği</li>
+                <li className="flex items-start gap-3 text-sm md:text-base font-bold text-slate-200"><CheckCircle2 size={20} className="text-[#E8622A] shrink-0"/> Personel Optimizasyonu & Raporlama</li>
+                <li className="flex items-start gap-3 text-sm md:text-base font-bold text-slate-200"><CheckCircle2 size={20} className="text-[#E8622A] shrink-0"/> 7/24 Öncelikli Destek Hattı</li>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
