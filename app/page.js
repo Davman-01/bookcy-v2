@@ -39,7 +39,6 @@ export default function Home() {
 
   return (
     <div className="w-full">
-      {/* SİNEMATİK ANİMASYON CSS'İ */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes slowPan {
           0% { transform: scale(1.05) translate(0, 0); }
@@ -51,54 +50,53 @@ export default function Home() {
         }
       `}} />
 
-      {/* HERO BÖLÜMÜ - "Tost Etkisi" Kaldırıldı, Doğal Merkeze Alındı */}
-      <section className="relative w-full min-h-[100dvh] flex flex-col items-center justify-center pt-[100px] md:pt-[120px] pb-10 md:pb-16 bg-[#1a0f2e] overflow-hidden">
+      {/* HERO BÖLÜMÜ - "justify-center" Kaldırıldı, Navbar altından güvenli boşluk eklendi (pt-[140px]) */}
+      <section className="relative w-full min-h-screen flex flex-col items-center justify-start pt-[110px] md:pt-[150px] pb-12 md:pb-20 bg-[#1a0f2e] overflow-hidden">
         
-        {/* KENDİ VİDEONU YAPANA KADAR: Gerçek İnsan (Berber) Sinematik Animasyonu */}
         <img 
           src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=2000&auto=format&fit=crop" 
           alt="Barber"
           className="absolute inset-0 w-full h-full object-cover z-0 opacity-40 ken-burns-bg pointer-events-none"
         />
 
-        {/* MOR KARARTMA OVERLAY */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#2D1B4E]/80 via-[#2D1B4E]/60 to-[#2D1B4E]/95 z-10 pointer-events-none"></div>
 
-        {/* KUMLANMA (NOISE) EFEKTİ */}
         <div 
           className="absolute inset-0 pointer-events-none opacity-30 z-10 mix-blend-overlay" 
           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E")` }}
         ></div>
         
-        {/* ANA İÇERİK - EKRANIN ORTASINDA KENDİ BOŞLUĞUYLA DURUR */}
-        <div className="relative z-20 flex flex-col items-center justify-center w-full max-w-[900px] mx-auto px-4 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-[10px] md:text-xs font-bold text-white/90 uppercase tracking-widest mb-4 md:mb-6 backdrop-blur-md shadow-lg">
+        {/* ANA İÇERİK - Yukarıdan aşağı doğal akış */}
+        <div className="relative z-20 flex flex-col items-center w-full max-w-[850px] mx-auto px-4 text-center">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-[10px] md:text-xs font-bold text-white/90 uppercase tracking-widest mb-6 backdrop-blur-md shadow-lg">
             <div className="w-2 h-2 rounded-full bg-[#E8622A] animate-pulse"></div>
             {text.hero?.eyebrow}
           </div>
           
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tight mb-4 md:mb-6 leading-[1.1] drop-shadow-xl">
+          {/* YAZI BOYUTU LAPTOPLAR İÇİN UYGUN HALE GETİRİLDİ (text-[56px] max) */}
+          <h1 className="text-3xl md:text-5xl lg:text-[56px] font-black text-white tracking-tight mb-5 leading-[1.1] drop-shadow-xl">
             {text.hero?.title1} <span className="text-[#E8622A]">{text.hero?.title2}</span><br/>
             {text.hero?.title3} <span className="text-[#E8622A]">{text.hero?.title4}</span>
           </h1>
           
-          <p className="text-xs md:text-base lg:text-lg text-white/80 mb-6 md:mb-8 max-w-xl mx-auto font-medium drop-shadow-md leading-relaxed px-2">
+          <p className="text-sm md:text-base lg:text-lg text-white/80 mb-8 md:mb-10 max-w-xl mx-auto font-medium drop-shadow-md leading-relaxed px-2">
             {text.hero?.sub}
           </p>
           
-          <form className="w-full bg-white rounded-[24px] md:rounded-[50px] p-1.5 md:p-2 shadow-2xl flex flex-col md:flex-row gap-2 mx-auto max-w-[700px] mb-6 md:mb-8 relative z-30" onSubmit={handleHeroSearch}>
-              <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-2xl md:rounded-none px-4 py-3 md:py-4 md:border-r border-slate-200">
-                  <Search size={22} className="text-slate-400 mr-3 shrink-0" />
+          {/* ARAMA KUTUSU PADDINGLERİ (İç Boşlukları) DÜZELTİLDİ */}
+          <form className="w-full bg-white rounded-[24px] md:rounded-[50px] p-1.5 md:p-2 shadow-2xl flex flex-col md:flex-row gap-2 mx-auto max-w-[700px] mb-8 relative z-30" onSubmit={handleHeroSearch}>
+              <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-2xl md:rounded-none px-4 py-2 md:py-3 md:border-r border-slate-200">
+                  <Search size={20} className="text-slate-400 mr-3 shrink-0" />
                   <input type="text" className="w-full bg-transparent font-bold text-sm md:text-base outline-none text-[#2D1B4E]" placeholder={text.hero?.searchPlace} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
               </div>
-              <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-2xl md:rounded-none px-4 py-3 md:py-4">
-                  <MapPin size={22} className="text-slate-400 mr-3 shrink-0" />
+              <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-2xl md:rounded-none px-4 py-2 md:py-3">
+                  <MapPin size={20} className="text-slate-400 mr-3 shrink-0" />
                   <select className="w-full bg-transparent font-bold text-sm md:text-base outline-none text-[#2D1B4E] cursor-pointer appearance-none" value={filterRegion} onChange={(e) => setFilterRegion(e.target.value)}>
                       <option value="All">{text.hero?.searchLoc}</option>
                       {(cyprusRegions || []).map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
               </div>
-              <button type="submit" className="bg-[#E8622A] text-white rounded-[16px] md:rounded-[40px] px-8 py-3.5 md:py-4 font-black text-sm md:text-base hover:bg-[#d4561f] transition-colors w-full md:w-auto border-none cursor-pointer uppercase tracking-wider shadow-lg hover:-translate-y-1">
+              <button type="submit" className="bg-[#E8622A] text-white rounded-[16px] md:rounded-[40px] px-8 py-3.5 md:py-3 font-black text-sm md:text-base hover:bg-[#d4561f] transition-colors w-full md:w-auto border-none cursor-pointer uppercase tracking-wider shadow-lg hover:-translate-y-1">
                 {text.hero?.btn}
               </button>
           </form>
@@ -113,24 +111,24 @@ export default function Home() {
           </div>
         </div>
         
-        {/* İSTATİSTİKLER - DOĞAL BOŞLUKLA AŞAĞI YERLEŞTİRİLDİ */}
-        <div className="w-full relative z-20 px-4 mt-8 md:mt-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 border-t border-white/10 pt-6 md:pt-8 max-w-[900px] mx-auto backdrop-blur-sm bg-white/5 rounded-[32px] pb-6 px-4 md:px-8">
+        {/* İSTATİSTİKLER - DOĞAL MARJİNLER İLE AŞAĞIYA EKLENDİ */}
+        <div className="w-full relative z-20 px-4 mt-12 md:mt-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 border-t border-white/10 pt-6 md:pt-8 max-w-[850px] mx-auto backdrop-blur-sm bg-white/5 rounded-[32px] pb-6 px-4 md:px-8">
               <div className="text-center md:border-r border-white/10 last:border-0">
-                <div className="text-2xl md:text-4xl font-black text-white mb-1 drop-shadow-lg">{approvedShops.length}</div>
-                <div className="text-[9px] md:text-[11px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat1}</div>
+                <div className="text-3xl md:text-4xl font-black text-white mb-1 drop-shadow-lg">{approvedShops.length}</div>
+                <div className="text-[10px] md:text-[11px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat1}</div>
               </div>
               <div className="text-center md:border-r border-white/10 last:border-0">
-                <div className="text-2xl md:text-4xl font-black text-white mb-1 drop-shadow-lg">{new Set((globalAppointments || []).map(a => a?.customer_phone)).size}</div>
-                <div className="text-[9px] md:text-[11px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat2}</div>
+                <div className="text-3xl md:text-4xl font-black text-white mb-1 drop-shadow-lg">{new Set((globalAppointments || []).map(a => a?.customer_phone)).size}</div>
+                <div className="text-[10px] md:text-[11px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat2}</div>
               </div>
               <div className="text-center md:border-r border-white/10 last:border-0">
-                <div className="text-2xl md:text-4xl font-black text-white mb-1 drop-shadow-lg">{(globalAppointments || []).length}</div>
-                <div className="text-[9px] md:text-[11px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat3}</div>
+                <div className="text-3xl md:text-4xl font-black text-white mb-1 drop-shadow-lg">{(globalAppointments || []).length}</div>
+                <div className="text-[10px] md:text-[11px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat3}</div>
               </div>
               <div className="text-center last:border-0">
-                <div className="text-2xl md:text-4xl font-black text-white mb-1 drop-shadow-lg">%98</div>
-                <div className="text-[9px] md:text-[11px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat4}</div>
+                <div className="text-3xl md:text-4xl font-black text-white mb-1 drop-shadow-lg">%98</div>
+                <div className="text-[10px] md:text-[11px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat4}</div>
               </div>
           </div>
         </div>
