@@ -9,34 +9,16 @@ import { categories, cyprusRegions } from '../lib/constants';
 const getCategoryImage = (name) => {
   const lowerName = name?.toLowerCase() || '';
 
-  // 1. Veteriner (Doktor köpeğe bakarken)
   if (lowerName.includes('vet') || lowerName.includes('veteriner')) return 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=80&w=800&auto=format&fit=crop';
-  
-  // 2. Pet Kuaför (Köpek yıkanırken/tüyleri kesilirken)
   if (lowerName.includes('pet') || lowerName.includes('köpek') || lowerName.includes('kedi')) return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800&auto=format&fit=crop';
-  
-  // 3. Kişisel Bakım / Tırnak 
   if (lowerName.includes('tırnak') || lowerName.includes('nail') || lowerName.includes('manikür') || lowerName.includes('bakım') || lowerName.includes('güzellik')) return 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop';
-  
-  // 4. Kuaför (Saç yapılan profesyonel fotoğraf)
   if (lowerName.includes('kuaför') || lowerName.includes('hair') || lowerName.includes('saç')) return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800&auto=format&fit=crop';
-  
-  // 5. Berber (Erkek saç/sakal)
   if (lowerName.includes('berber') || lowerName.includes('barber') || lowerName.includes('erkek')) return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=800&auto=format&fit=crop';
-  
-  // 6. Bar & Club (Gece Kulübü)
   if (lowerName.includes('bar') || lowerName.includes('pub') || lowerName.includes('club') || lowerName.includes('loca')) return 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format&fit=crop';
-  
-  // 7. Dövme (Tattoo)
   if (lowerName.includes('dövme') || lowerName.includes('tattoo')) return 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?q=80&w=800&auto=format&fit=crop';
-  
-  // 8. Spa / Masaj
   if (lowerName.includes('spa') || lowerName.includes('masaj')) return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop';
-  
-  // 9. Klinik / Sağlık
   if (lowerName.includes('klinik') || lowerName.includes('diş') || lowerName.includes('sağlık')) return 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=800&auto=format&fit=crop';
   
-  // Eşleşmezse varsayılan premium mekan fotoğrafı
   return 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&auto=format&fit=crop'; 
 };
 
@@ -64,23 +46,27 @@ export default function Home() {
   return (
     <div className="w-full">
       
-      {/* HERO BÖLÜMÜ (HAREKETLİ ARKA PLAN İLE GÜNCELLENDİ) */}
+      {/* HERO BÖLÜMÜ (MP4 VİDEO ARKAPLAN) */}
       <section className="relative min-h-[90vh] bg-[#2D1B4E] overflow-hidden flex flex-col items-center justify-center pt-24 pb-20">
         
-        {/* 1. ARKA PLAN GIF / VİDEO */}
-        <img 
-          src="https://cdn.dribbble.com/users/32512/screenshots/5332024/media/c08fbbfdc49bfd5d713cdaaaecbdf1d5.gif" 
-          alt="Hero Background"
-          className="absolute inset-0 w-full h-full object-cover z-0 opacity-60 mix-blend-luminosity"
-        />
+        {/* 1. ARKA PLAN VİDEOSU */}
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          className="absolute inset-0 w-full h-full object-cover z-0 opacity-60 mix-blend-screen pointer-events-none"
+        >
+          <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-video-of-a-purple-liquid-42900-large.mp4" type="video/mp4" />
+        </video>
 
         {/* 2. MOR KARARTMA (Yazıların okunması için şart) */}
-        <div className="absolute inset-0 bg-[#2D1B4E]/80 z-0"></div>
+        <div className="absolute inset-0 bg-[#2D1B4E]/60 z-0"></div>
 
         {/* 3. KUMLANMA (NOISE) EFEKTİ */}
         <div 
-          className="absolute inset-0 pointer-events-none opacity-30 z-0" 
-          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E")` }}
+          className="absolute inset-0 pointer-events-none opacity-30 z-0 mix-blend-overlay" 
+          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E")` }}
         ></div>
         
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto w-full mt-4">
@@ -171,22 +157,16 @@ export default function Home() {
               onClick={() => router.push(`/isletmeler?c=${c.dbName}`)} 
               className="relative w-full aspect-[4/5] rounded-[24px] overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group border-none cursor-pointer text-left bg-[#111]"
             >
-              {/* Arkaplan Resmi */}
               <img 
                 src={c.image || getCategoryImage(c.dbName)} 
                 alt={c.dbName} 
                 className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
               />
-              
-              {/* Karartma (Gradient) Efekti */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#111]/90 via-[#111]/30 to-transparent pointer-events-none"></div>
-              
-              {/* İçerik */}
               <div className="absolute inset-0 p-5 flex flex-col justify-end z-10">
                 <span className="text-white font-black uppercase tracking-widest text-sm md:text-base leading-tight drop-shadow-md">
                   {c.dbName}
                 </span>
-                {/* Turuncu Vurgu Çizgisi */}
                 <span className="w-6 h-1 bg-[#E8622A] mt-3 rounded-full transition-all duration-300 group-hover:w-12"></span>
               </div>
             </button>
