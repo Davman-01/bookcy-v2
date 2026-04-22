@@ -15,7 +15,7 @@ const getCategoryImage = (name) => {
   // 2. Pet Kuaför (Köpek yıkanırken/tüyleri kesilirken)
   if (lowerName.includes('pet') || lowerName.includes('köpek') || lowerName.includes('kedi')) return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800&auto=format&fit=crop';
   
-  // 3. Kişisel Bakım / Tırnak (YENİ VE KESİN ÇALIŞAN GÖRSEL)
+  // 3. Kişisel Bakım / Tırnak 
   if (lowerName.includes('tırnak') || lowerName.includes('nail') || lowerName.includes('manikür') || lowerName.includes('bakım') || lowerName.includes('güzellik')) return 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop';
   
   // 4. Kuaför (Saç yapılan profesyonel fotoğraf)
@@ -62,7 +62,7 @@ export default function Home() {
   if (!text) return null;
 
   return (
-    <div className="w-full font-['DM_Sans']">
+    <div className="w-full">
       {/* HERO BÖLÜMÜ */}
       <section className="relative min-h-[90vh] bg-[#2D1B4E] overflow-hidden flex flex-col items-center justify-center pt-24 pb-20">
         <div 
@@ -76,7 +76,7 @@ export default function Home() {
             {text.hero?.eyebrow}
           </div>
           
-          <h1 className="font-['Plus_Jakarta_Sans'] text-5xl md:text-7xl font-black text-white tracking-tight mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight mb-6 leading-tight">
             {text.hero?.title1} <span className="text-[#E8622A]">{text.hero?.title2}</span><br/>
             {text.hero?.title3} <span className="text-[#E8622A]">{text.hero?.title4}</span>
           </h1>
@@ -119,19 +119,19 @@ export default function Home() {
         {/* İSTATİSTİKLER */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-16 border-t border-white/10 pt-10 w-full max-w-[900px] mx-auto relative z-10 px-6">
             <div className="text-center md:border-r border-white/10 last:border-0 pb-4 md:pb-0">
-              <div className="font-['Plus_Jakarta_Sans'] text-3xl md:text-4xl font-black text-white mb-2">{approvedShops.length}</div>
+              <div className="text-3xl md:text-4xl font-black text-white mb-2">{approvedShops.length}</div>
               <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{text.hero?.stat1}</div>
             </div>
             <div className="text-center md:border-r border-white/10 last:border-0 pb-4 md:pb-0">
-              <div className="font-['Plus_Jakarta_Sans'] text-3xl md:text-4xl font-black text-white mb-2">{new Set((globalAppointments || []).map(a => a?.customer_phone)).size}</div>
+              <div className="text-3xl md:text-4xl font-black text-white mb-2">{new Set((globalAppointments || []).map(a => a?.customer_phone)).size}</div>
               <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{text.hero?.stat2}</div>
             </div>
             <div className="text-center md:border-r border-white/10 last:border-0 pt-4 md:pt-0 border-t md:border-t-0 border-white/10">
-              <div className="font-['Plus_Jakarta_Sans'] text-3xl md:text-4xl font-black text-white mb-2">{(globalAppointments || []).length}</div>
+              <div className="text-3xl md:text-4xl font-black text-white mb-2">{(globalAppointments || []).length}</div>
               <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{text.hero?.stat3}</div>
             </div>
             <div className="text-center last:border-0 pt-4 md:pt-0 border-t md:border-t-0 border-white/10">
-              <div className="font-['Plus_Jakarta_Sans'] text-3xl md:text-4xl font-black text-white mb-2">%98</div>
+              <div className="text-3xl md:text-4xl font-black text-white mb-2">%98</div>
               <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{text.hero?.stat4}</div>
             </div>
         </div>

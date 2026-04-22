@@ -121,7 +121,8 @@ export default function Navbar() {
                   <div className="h-10 w-10 bg-white p-1 rounded-lg border border-slate-100 flex items-center justify-center overflow-hidden">
                     <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
                   </div>
-                  <span className="text-xl font-black tracking-tighter text-[#2D1B4E] font-['Plus_Jakarta_Sans'] uppercase">BOOKCY<span className="text-[#E8622A]">.</span></span>
+                  {/* MOBİL LOGO FONTU: DM SANS OLARAK SABİTLENDİ */}
+                  <span className="text-xl font-black tracking-tighter text-[#2D1B4E] uppercase" style={{fontFamily: "'DM Sans', sans-serif"}}>BOOKCY<span className="text-[#E8622A]">.</span></span>
                 </Link>
                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-500 bg-slate-50 rounded-full border-none cursor-pointer"><X size={24}/></button>
             </div>
@@ -168,7 +169,8 @@ export default function Navbar() {
           <div className="h-12 w-12 md:h-14 md:w-14 bg-white p-1.5 rounded-xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
             <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
           </div>
-          <span className="text-2xl md:text-3xl font-black tracking-tighter text-[#2D1B4E] font-['Plus_Jakarta_Sans'] uppercase">
+          {/* MASAÜSTÜ LOGO FONTU: DM SANS OLARAK SABİTLENDİ */}
+          <span className="text-2xl md:text-3xl font-black tracking-tighter text-[#2D1B4E] uppercase" style={{fontFamily: "'DM Sans', sans-serif"}}>
             BOOKCY<span className="text-[#E8622A]">.</span>
           </span>
         </Link>
