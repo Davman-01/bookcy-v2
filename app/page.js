@@ -63,27 +63,40 @@ export default function Home() {
 
   return (
     <div className="w-full">
-      {/* HERO BÖLÜMÜ */}
+      
+      {/* HERO BÖLÜMÜ (HAREKETLİ ARKA PLAN İLE GÜNCELLENDİ) */}
       <section className="relative min-h-[90vh] bg-[#2D1B4E] overflow-hidden flex flex-col items-center justify-center pt-24 pb-20">
+        
+        {/* 1. ARKA PLAN GIF / VİDEO */}
+        <img 
+          src="https://cdn.dribbble.com/users/32512/screenshots/5332024/media/c08fbbfdc49bfd5d713cdaaaecbdf1d5.gif" 
+          alt="Hero Background"
+          className="absolute inset-0 w-full h-full object-cover z-0 opacity-60 mix-blend-luminosity"
+        />
+
+        {/* 2. MOR KARARTMA (Yazıların okunması için şart) */}
+        <div className="absolute inset-0 bg-[#2D1B4E]/80 z-0"></div>
+
+        {/* 3. KUMLANMA (NOISE) EFEKTİ */}
         <div 
-          className="absolute inset-0 pointer-events-none opacity-40" 
+          className="absolute inset-0 pointer-events-none opacity-30 z-0" 
           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E")` }}
         ></div>
         
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto w-full">
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-bold text-white/80 uppercase tracking-widest mb-8">
-            <div className="w-2 h-2 rounded-full bg-[#E8622A]"></div>
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto w-full mt-4">
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-bold text-white/90 uppercase tracking-widest mb-8 backdrop-blur-md shadow-lg">
+            <div className="w-2 h-2 rounded-full bg-[#E8622A] animate-pulse"></div>
             {text.hero?.eyebrow}
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight mb-6 leading-tight drop-shadow-lg">
             {text.hero?.title1} <span className="text-[#E8622A]">{text.hero?.title2}</span><br/>
             {text.hero?.title3} <span className="text-[#E8622A]">{text.hero?.title4}</span>
           </h1>
           
-          <p className="text-lg text-white/70 mb-12 max-w-2xl mx-auto">{text.hero?.sub}</p>
+          <p className="text-lg text-white/80 mb-12 max-w-2xl mx-auto font-medium drop-shadow-md">{text.hero?.sub}</p>
           
-          <form className="w-full bg-white rounded-[24px] md:rounded-[50px] p-2 md:p-3 shadow-2xl flex flex-col md:flex-row gap-2 mx-auto max-w-[800px] mb-8" onSubmit={handleHeroSearch}>
+          <form className="w-full bg-white rounded-[24px] md:rounded-[50px] p-2 md:p-3 shadow-2xl flex flex-col md:flex-row gap-2 mx-auto max-w-[800px] mb-8 relative z-20" onSubmit={handleHeroSearch}>
               <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-2xl md:rounded-none px-4 py-3 md:py-2 md:border-r border-slate-200">
                   <Search size={20} className="text-slate-400 mr-3 shrink-0" />
                   <input type="text" className="w-full bg-transparent font-bold text-sm outline-none text-[#2D1B4E]" placeholder={text.hero?.searchPlace} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
@@ -95,44 +108,44 @@ export default function Home() {
                       {(cyprusRegions || []).map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
               </div>
-              <button type="submit" className="bg-[#E8622A] text-white rounded-[16px] md:rounded-[40px] px-8 py-4 font-black text-sm hover:bg-[#d4561f] transition-colors w-full md:w-auto border-none cursor-pointer uppercase tracking-wider">
+              <button type="submit" className="bg-[#E8622A] text-white rounded-[16px] md:rounded-[40px] px-8 py-4 font-black text-sm hover:bg-[#d4561f] transition-colors w-full md:w-auto border-none cursor-pointer uppercase tracking-wider shadow-lg hover:-translate-y-1">
                 {text.hero?.btn}
               </button>
           </form>
           
-          {/* GÜNCELLENEN POPÜLER ARAMALAR BÖLÜMÜ */}
-          <div className="flex items-center justify-center flex-wrap gap-3 text-white/60 text-xs font-bold uppercase tracking-widest mt-6">
-             <span className="mr-2">{text.hero?.pop}</span>
+          {/* POPÜLER ARAMALAR BÖLÜMÜ */}
+          <div className="flex items-center justify-center flex-wrap gap-3 text-white/80 text-xs font-bold uppercase tracking-widest mt-6">
+             <span className="mr-2 drop-shadow-md">{text.hero?.pop}</span>
              {(categories || []).slice(0,4).map(c => (
                <button 
                  key={c.key} 
                  type="button" 
                  onClick={() => router.push(`/isletmeler?c=${c.dbName}`)} 
-                 className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full border border-white/20 transition-colors cursor-pointer text-white font-bold"
+                 className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 transition-all cursor-pointer text-white font-bold hover:-translate-y-0.5"
                >
-                 <span>{c.dbName}</span>
+                 <span className="drop-shadow-md">{c.dbName}</span>
                </button>
              ))}
           </div>
         </div>
         
         {/* İSTATİSTİKLER */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-16 border-t border-white/10 pt-10 w-full max-w-[900px] mx-auto relative z-10 px-6">
-            <div className="text-center md:border-r border-white/10 last:border-0 pb-4 md:pb-0">
-              <div className="text-3xl md:text-4xl font-black text-white mb-2">{approvedShops.length}</div>
-              <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{text.hero?.stat1}</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-16 border-t border-white/10 pt-10 w-full max-w-[900px] mx-auto relative z-10 px-6 backdrop-blur-sm bg-white/5 rounded-3xl pb-4 md:pb-10">
+            <div className="text-center md:border-r border-white/10 last:border-0 pb-4 md:pb-0 mt-6 md:mt-0">
+              <div className="text-3xl md:text-4xl font-black text-white mb-2 drop-shadow-lg">{approvedShops.length}</div>
+              <div className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat1}</div>
             </div>
-            <div className="text-center md:border-r border-white/10 last:border-0 pb-4 md:pb-0">
-              <div className="text-3xl md:text-4xl font-black text-white mb-2">{new Set((globalAppointments || []).map(a => a?.customer_phone)).size}</div>
-              <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{text.hero?.stat2}</div>
+            <div className="text-center md:border-r border-white/10 last:border-0 pb-4 md:pb-0 mt-6 md:mt-0">
+              <div className="text-3xl md:text-4xl font-black text-white mb-2 drop-shadow-lg">{new Set((globalAppointments || []).map(a => a?.customer_phone)).size}</div>
+              <div className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat2}</div>
             </div>
             <div className="text-center md:border-r border-white/10 last:border-0 pt-4 md:pt-0 border-t md:border-t-0 border-white/10">
-              <div className="text-3xl md:text-4xl font-black text-white mb-2">{(globalAppointments || []).length}</div>
-              <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{text.hero?.stat3}</div>
+              <div className="text-3xl md:text-4xl font-black text-white mb-2 drop-shadow-lg">{(globalAppointments || []).length}</div>
+              <div className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat3}</div>
             </div>
             <div className="text-center last:border-0 pt-4 md:pt-0 border-t md:border-t-0 border-white/10">
-              <div className="text-3xl md:text-4xl font-black text-white mb-2">%98</div>
-              <div className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{text.hero?.stat4}</div>
+              <div className="text-3xl md:text-4xl font-black text-white mb-2 drop-shadow-lg">%98</div>
+              <div className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat4}</div>
             </div>
         </div>
       </section>
