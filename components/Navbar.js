@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { ChevronDown, ChevronRight, Menu, X, UserCircle, CheckCircle2, Lock, Upload, MessageCircle, Gift } from 'lucide-react';
-// --- DÜZELTİLMİŞ IMPORT YOLLARI ---
 import { useAppContext } from '../app/providers';
 import { supabase } from '../lib/supabase';
 import { getRegistrationTemplate } from '../lib/emailTemplates';
@@ -37,16 +36,13 @@ export default function Navbar() {
   const [phoneValid, setPhoneValid] = useState(null); 
   const [adminEmailValid, setAdminEmailValid] = useState(null);
 
-  // --- MÜŞTERİ OTURUM (SESSION) RADARI EKLENDİ ---
   const [customerSession, setCustomerSession] = useState(null);
 
   useEffect(() => {
-    // Sayfa yüklendiğinde Google/Supabase girişi var mı kontrol et
     supabase.auth.getSession().then(({ data: { session } }) => {
       setCustomerSession(session);
     });
 
-    // Giriş/Çıkış yapıldığı an sayfayı yenilemeden üst menüyü güncelle
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setCustomerSession(session);
     });
@@ -59,7 +55,6 @@ export default function Navbar() {
     setCustomerSession(null);
     router.push('/');
   };
-  // ------------------------------------------------
 
   const text = t?.[lang] || t?.['TR'] || {};
 
@@ -121,7 +116,6 @@ export default function Navbar() {
                   <div className="h-10 w-10 bg-white p-1 rounded-lg border border-slate-100 flex items-center justify-center overflow-hidden">
                     <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
                   </div>
-                  {/* MOBİL LOGO FONTU: DM SANS OLARAK SABİTLENDİ */}
                   <span className="text-xl font-black tracking-tighter text-[#2D1B4E] uppercase" style={{fontFamily: "'DM Sans', sans-serif"}}>BOOKCY<span className="text-[#E8622A]">.</span></span>
                 </Link>
                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-500 bg-slate-50 rounded-full border-none cursor-pointer"><X size={24}/></button>
@@ -134,7 +128,6 @@ export default function Navbar() {
                 <Link href="/hakkimizda" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.about}</Link>
                 <Link href="/iletisim" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.contact}</Link>
                 
-                {/* MÜŞTERİ GİRİŞ YAPTIYSA MOBİLDE PROFİLİM GÖZÜKSÜN */}
                 <Link href={customerSession ? "/profilim" : "/randevu-sorgula"} onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#E8622A] py-4 border-b border-slate-50 text-decoration-none block uppercase">
                   {customerSession ? 'PROFİLİM' : text.nav?.myAppts}
                 </Link>
@@ -163,28 +156,29 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* MASAÜSTÜ NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur-md border-b border-slate-100 h-[76px] px-6 md:px-10 flex items-center justify-between transition-all">
-        <Link href="/" className="flex items-center gap-3 text-decoration-none group">
-          <div className="h-12 w-12 md:h-14 md:w-14 bg-white p-1.5 rounded-xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
+      {/* MASAÜSTÜ NAVBAR - DİNAMİK YAPILDI (CSS Override Edildi) */}
+      <nav className="fixed top-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur-md border-b border-slate-100 !h-[70px] lg:!h-[76px] !px-4 md:!px-6 lg:!px-10 flex items-center justify-between transition-all">
+        
+        <Link href="/" className="flex items-center gap-2 lg:gap-3 text-decoration-none group">
+          <div className="h-9 w-9 md:h-10 md:w-10 lg:h-14 lg:w-14 bg-white p-1.5 rounded-xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
             <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
           </div>
-          {/* MASAÜSTÜ LOGO FONTU: DM SANS OLARAK SABİTLENDİ */}
-          <span className="text-2xl md:text-3xl font-black tracking-tighter text-[#2D1B4E] uppercase" style={{fontFamily: "'DM Sans', sans-serif"}}>
+          <span className="text-lg md:text-xl lg:text-3xl font-black tracking-tighter text-[#2D1B4E] uppercase" style={{fontFamily: "'DM Sans', sans-serif"}}>
             BOOKCY<span className="text-[#E8622A]">.</span>
           </span>
         </Link>
 
-        <ul className="nav-links hidden md:flex items-center gap-8 list-none m-0 p-0">
-          <li><Link href="/isletmeler" className={`nav-main-btn text-decoration-none uppercase ${pathname === '/isletmeler' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.places}</Link></li>
+        {/* MENÜ LİNKLERİ (Laptoplar için boşluklar ve font küçültüldü) */}
+        <ul className="hidden md:flex items-center !gap-3 lg:!gap-8 list-none m-0 p-0">
+          <li><Link href="/isletmeler" className={`!text-[11px] lg:!text-[14px] font-bold text-decoration-none uppercase ${pathname === '/isletmeler' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.places}</Link></li>
           
           <li style={{height:'100%', display:'flex', alignItems:'center'}}>
               <div className="relative h-full flex items-center group" onMouseEnter={() => setShowFeaturesMenu(true)} onMouseLeave={() => setShowFeaturesMenu(false)}>
-                  <Link href="/ozellikler" className={`nav-main-btn flex items-center gap-1 transition-colors h-full text-decoration-none uppercase ${pathname?.includes('/ozellikler') ? 'active text-[#E8622A]' : 'text-slate-600'}`}>
+                  <Link href="/ozellikler" className={`flex items-center gap-1 transition-colors h-full text-decoration-none uppercase !text-[11px] lg:!text-[14px] font-bold ${pathname?.includes('/ozellikler') ? 'active text-[#E8622A]' : 'text-slate-600'}`}>
                       {text.nav?.features} <ChevronDown size={14} className={`transition-transform duration-200 ${showFeaturesMenu ? 'rotate-180' : ''}`} />
                   </Link>
                   {showFeaturesMenu && (
-                      <div className="absolute top-[76px] left-1/2 -translate-x-1/2 w-screen bg-white text-[#2D1B4E] shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-t border-slate-200 cursor-default animate-in slide-in-from-top-2 duration-200 z-50">
+                      <div className="absolute top-[70px] lg:top-[76px] left-1/2 -translate-x-1/2 w-screen bg-white text-[#2D1B4E] shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-t border-slate-200 cursor-default animate-in slide-in-from-top-2 duration-200 z-50">
                           <div className="max-w-[1100px] mx-auto py-12 px-8">
                               <div className="grid grid-cols-4 gap-8 mb-10 text-left text-decoration-none">
                                   <div>
@@ -221,20 +215,20 @@ export default function Navbar() {
               </div>
           </li>
 
-          <li><Link href="/neden-bookcy" className={`nav-main-btn text-decoration-none uppercase ${pathname === '/neden-bookcy' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.why}</Link></li>
-          <li><Link href="/hakkimizda" className={`nav-main-btn text-decoration-none uppercase ${pathname === '/hakkimizda' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.about}</Link></li>
-          <li><Link href="/iletisim" className={`nav-main-btn text-decoration-none uppercase ${pathname === '/iletisim' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.contact}</Link></li>
+          <li><Link href="/neden-bookcy" className={`!text-[11px] lg:!text-[14px] font-bold text-decoration-none uppercase ${pathname === '/neden-bookcy' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.why}</Link></li>
+          <li><Link href="/hakkimizda" className={`!text-[11px] lg:!text-[14px] font-bold text-decoration-none uppercase ${pathname === '/hakkimizda' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.about}</Link></li>
+          <li><Link href="/iletisim" className={`!text-[11px] lg:!text-[14px] font-bold text-decoration-none uppercase ${pathname === '/iletisim' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.contact}</Link></li>
           
-          {/* MÜŞTERİ GİRİŞ YAPTIYSA MASAÜSTÜNDE PROFİLİM GÖZÜKSÜN */}
           <li>
-            <Link href={customerSession ? "/profilim" : "/randevu-sorgula"} className={`nav-main-btn text-decoration-none uppercase text-[#E8622A] font-black ${pathname === '/randevu-sorgula' || pathname === '/profilim' ? 'active' : ''}`}>
+            <Link href={customerSession ? "/profilim" : "/randevu-sorgula"} className={`!text-[11px] lg:!text-[14px] text-decoration-none uppercase text-[#E8622A] font-black ${pathname === '/randevu-sorgula' || pathname === '/profilim' ? 'active' : ''}`}>
               {customerSession ? 'PROFİLİM' : text.nav?.myAppts}
             </Link>
           </li>
         </ul>
 
-        <div className="flex items-center gap-4">
-          <div className="lang-pills hidden lg:flex gap-1">
+        {/* SAĞ TARAF (Laptoplar için butonların iç boşlukları daraltıldı) */}
+        <div className="flex items-center gap-2 lg:gap-4">
+          <div className="hidden lg:flex gap-1">
              {['TR', 'EN', 'RU'].map(l => (
                <button key={l} onClick={()=>setLang(l)} className={`px-3 py-1 rounded-full text-[10px] font-black border transition-all cursor-pointer ${lang===l ? 'bg-[#2D1B4E] text-white border-[#2D1B4E]' : 'bg-transparent text-slate-400 border-slate-200 hover:border-slate-400'}`}>{l}</button>
              ))}
@@ -242,18 +236,22 @@ export default function Navbar() {
 
           {loggedInShop ? (
              <div className="flex gap-2">
-                <button onClick={handleLogout} className="hidden md:block bg-slate-100 text-slate-600 px-5 py-2.5 rounded-full font-black text-xs uppercase border-none cursor-pointer hover:bg-slate-200">{text.nav?.logout}</button>
-                <Link href="/dashboard" className="flex items-center gap-2 bg-[#E8622A] text-white px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest text-decoration-none shadow-md hover:bg-[#d5521b] transition-all"><UserCircle size={18}/> {text.nav?.panel}</Link>
+                <button onClick={handleLogout} className="hidden md:block bg-slate-100 text-slate-600 !px-3 !py-1.5 lg:!px-5 lg:!py-2.5 rounded-full font-black !text-[10px] lg:!text-xs uppercase border-none cursor-pointer hover:bg-slate-200">{text.nav?.logout}</button>
+                <Link href="/dashboard" className="flex items-center gap-2 bg-[#E8622A] text-white !px-4 !py-1.5 lg:!px-6 lg:!py-2.5 rounded-full font-black !text-[10px] lg:!text-xs uppercase tracking-widest text-decoration-none shadow-md hover:bg-[#d5521b] transition-all"><UserCircle size={18}/> {text.nav?.panel}</Link>
              </div>
           ) : customerSession ? (
              <div className="flex gap-2">
-                <button onClick={handleCustomerLogout} className="hidden md:block bg-slate-100 text-slate-600 px-5 py-2.5 rounded-full font-black text-xs uppercase border-none cursor-pointer hover:bg-slate-200 hover:text-red-500 transition-colors">ÇIKIŞ</button>
-                <Link href="/profilim" className="flex items-center gap-2 bg-[#E8622A] text-white px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest text-decoration-none shadow-md hover:bg-[#d5521b] transition-all"><UserCircle size={18}/> PROFİLİM</Link>
+                <button onClick={handleCustomerLogout} className="hidden md:block bg-slate-100 text-slate-600 !px-3 !py-1.5 lg:!px-5 lg:!py-2.5 rounded-full font-black !text-[10px] lg:!text-xs uppercase border-none cursor-pointer hover:bg-slate-200 hover:text-red-500 transition-colors">ÇIKIŞ</button>
+                <Link href="/profilim" className="flex items-center gap-2 bg-[#E8622A] text-white !px-4 !py-1.5 lg:!px-6 lg:!py-2.5 rounded-full font-black !text-[10px] lg:!text-xs uppercase tracking-widest text-decoration-none shadow-md hover:bg-[#d5521b] transition-all"><UserCircle size={18}/> PROFİLİM</Link>
              </div>
           ) : (
-             <div className="flex gap-2">
-                <button onClick={() => setShowRegister(true)} className="hidden md:block border-2 border-[#2D1B4E] text-[#2D1B4E] px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest hover:bg-[#2D1B4E] hover:text-white transition-all cursor-pointer">{text.nav?.addShop}</button>
-                <button onClick={() => setShowLogin(true)} className="hidden md:flex items-center gap-2 bg-[#E8622A] text-white px-6 py-2.5 rounded-full font-black text-xs uppercase tracking-widest border-none cursor-pointer shadow-md hover:bg-[#d5521b] transition-all"><UserCircle size={18}/> {text.nav?.login}</button>
+             <div className="flex gap-1 lg:gap-2">
+                <button onClick={() => setShowRegister(true)} className="hidden md:block border-2 border-[#2D1B4E] text-[#2D1B4E] !px-3 !py-1.5 lg:!px-6 lg:!py-2.5 rounded-full font-black !text-[10px] lg:!text-xs uppercase tracking-widest hover:bg-[#2D1B4E] hover:text-white transition-all cursor-pointer">{text.nav?.addShop}</button>
+                <button onClick={() => setShowLogin(true)} className="hidden md:flex items-center gap-1 lg:gap-2 bg-[#E8622A] text-white !px-4 !py-2 lg:!px-6 lg:!py-2.5 rounded-full font-black !text-[10px] lg:!text-xs uppercase tracking-widest border-none cursor-pointer shadow-md hover:bg-[#d5521b] transition-all">
+                  <UserCircle size={16}/> 
+                  <span className="hidden lg:inline">{text.nav?.login}</span>
+                  <span className="lg:hidden">GİRİŞ</span>
+                </button>
              </div>
           )}
 
