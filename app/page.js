@@ -5,10 +5,8 @@ import { Search, MapPin, CheckCircle2, Calendar, Scissors } from 'lucide-react';
 import { useAppContext } from './providers';
 import { categories, cyprusRegions } from '../lib/constants';
 
-// --- KATEGORİLER İÇİN OTOMATİK KURUMSAL FOTOĞRAF ATAYICI ---
 const getCategoryImage = (name) => {
   const lowerName = name?.toLowerCase() || '';
-
   if (lowerName.includes('vet') || lowerName.includes('veteriner')) return 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=80&w=800&auto=format&fit=crop';
   if (lowerName.includes('pet') || lowerName.includes('köpek') || lowerName.includes('kedi')) return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800&auto=format&fit=crop';
   if (lowerName.includes('tırnak') || lowerName.includes('nail') || lowerName.includes('manikür') || lowerName.includes('bakım') || lowerName.includes('güzellik')) return 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop';
@@ -46,30 +44,27 @@ export default function Home() {
   return (
     <div className="w-full">
       
-      {/* HERO BÖLÜMÜ (MP4 VİDEO ARKAPLAN) */}
+      {/* HERO BÖLÜMÜ */}
       <section className="relative min-h-[90vh] bg-[#2D1B4E] overflow-hidden flex flex-col items-center justify-center pt-24 pb-20">
         
-        {/* 1. ARKA PLAN VİDEOSU */}
-        <video 
-          autoPlay 
-          loop 
-          muted 
-          playsInline 
-          className="absolute inset-0 w-full h-full object-cover z-0 opacity-60 mix-blend-screen pointer-events-none"
-        >
-          <source src="https://assets.mixkit.co/videos/preview/mixkit-abstract-video-of-a-purple-liquid-42900-large.mp4" type="video/mp4" />
-        </video>
+        {/* 1. ARKA PLAN GIF'İ (Açık ve kesin çalışan CDN linki) */}
+        <img 
+          src="https://i.pinimg.com/originals/7a/df/77/7adf7726ce4fe2b2f5bde68bc5b4bd08.gif" 
+          alt="Hero Background Fluid"
+          className="absolute inset-0 w-full h-full object-cover z-0 opacity-40"
+        />
 
-        {/* 2. MOR KARARTMA (Yazıların okunması için şart) */}
-        <div className="absolute inset-0 bg-[#2D1B4E]/60 z-0"></div>
+        {/* 2. MOR KARARTMA OVERLAY (Yazıların okunması için şart) */}
+        <div className="absolute inset-0 bg-[#2D1B4E]/70 z-10"></div>
 
         {/* 3. KUMLANMA (NOISE) EFEKTİ */}
         <div 
-          className="absolute inset-0 pointer-events-none opacity-30 z-0 mix-blend-overlay" 
+          className="absolute inset-0 pointer-events-none opacity-30 z-10 mix-blend-overlay" 
           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E")` }}
         ></div>
         
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto w-full mt-4">
+        {/* 4. İÇERİK (z-20 ile en üste aldık ki arka planda kalmasın) */}
+        <div className="relative z-20 text-center px-4 max-w-4xl mx-auto w-full mt-4">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-xs font-bold text-white/90 uppercase tracking-widest mb-8 backdrop-blur-md shadow-lg">
             <div className="w-2 h-2 rounded-full bg-[#E8622A] animate-pulse"></div>
             {text.hero?.eyebrow}
@@ -82,7 +77,7 @@ export default function Home() {
           
           <p className="text-lg text-white/80 mb-12 max-w-2xl mx-auto font-medium drop-shadow-md">{text.hero?.sub}</p>
           
-          <form className="w-full bg-white rounded-[24px] md:rounded-[50px] p-2 md:p-3 shadow-2xl flex flex-col md:flex-row gap-2 mx-auto max-w-[800px] mb-8 relative z-20" onSubmit={handleHeroSearch}>
+          <form className="w-full bg-white rounded-[24px] md:rounded-[50px] p-2 md:p-3 shadow-2xl flex flex-col md:flex-row gap-2 mx-auto max-w-[800px] mb-8 relative z-30" onSubmit={handleHeroSearch}>
               <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-2xl md:rounded-none px-4 py-3 md:py-2 md:border-r border-slate-200">
                   <Search size={20} className="text-slate-400 mr-3 shrink-0" />
                   <input type="text" className="w-full bg-transparent font-bold text-sm outline-none text-[#2D1B4E]" placeholder={text.hero?.searchPlace} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
@@ -116,7 +111,7 @@ export default function Home() {
         </div>
         
         {/* İSTATİSTİKLER */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-16 border-t border-white/10 pt-10 w-full max-w-[900px] mx-auto relative z-10 px-6 backdrop-blur-sm bg-white/5 rounded-3xl pb-4 md:pb-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-16 border-t border-white/10 pt-10 w-full max-w-[900px] mx-auto relative z-20 px-6 backdrop-blur-sm bg-white/5 rounded-3xl pb-4 md:pb-10">
             <div className="text-center md:border-r border-white/10 last:border-0 pb-4 md:pb-0 mt-6 md:mt-0">
               <div className="text-3xl md:text-4xl font-black text-white mb-2 drop-shadow-lg">{approvedShops.length}</div>
               <div className="text-[10px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat1}</div>
