@@ -3,18 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, Store, Users, CheckCircle, Clock, Search, Mail, 
-  ShieldCheck, XCircle, LogOut, Download, CheckCircle2, ChevronRight,
-  TrendingUp, Trash2, AlertCircle, FileSpreadsheet, MapPin, Crown, 
-  Activity, CalendarCheck, Check, Lock, Phone, Star, MessageSquare, BarChart3,
-  CreditCard, Send, Eye, EyeOff, Filter, Scissors, Loader2
+  ShieldCheck, XCircle, LogOut, CheckCircle2,
+  Trash2, AlertCircle, MapPin, CreditCard, Star, BarChart3, CalendarCheck
 } from 'lucide-react';
 import AdminTrialControl from '../../components/AdminTrialControl';
 import { supabase } from '../../lib/supabase';
 import { getActivationTemplate, getRegistrationTemplate } from '../../lib/emailTemplates';
-
-const InstagramIcon = ({ size = 24, className = "" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-);
 
 const timeAgo = (dateString) => {
   if (!dateString) return 'Bilinmiyor';
@@ -33,7 +27,6 @@ const timeAgo = (dateString) => {
 export default function SuperAdmin() {
   const router = useRouter();
   
-  // -- KİMLİK DOĞRULAMA STATELERİ --
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminEmail, setAdminEmail] = useState('');
   const [adminPass, setAdminPass] = useState('');
@@ -49,23 +42,11 @@ export default function SuperAdmin() {
   const [customerSearch, setCustomerSearch] = useState('');
 
   const [isSendingMail, setIsSendingMail] = useState(false);
-  const [showPasswords, setShowPasswords] = useState({});
-
-  // -- GLOBAL CRM STATELERİ --
-  const [crmUsers, setCrmUsers] = useState([]);
-  const [crmSearchQuery, setCrmSearchQuery] = useState('');
-  const [filterRegion, setFilterRegion] = useState('Tümü');
-  const [filterService, setFilterService] = useState('');
-
-  // -- TOPLU MAİL MODAL STATELERİ --
-  const [showMailModal, setShowMailModal] = useState(false);
-  const [mailSubject, setMailSubject] = useState('');
-  const [mailContent, setMailContent] = useState('');
-  const [isSendingBulk, setIsSendingBulk] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      // NOT: Kendi mailini buraya yazmalısın
       if (session && session.user.email === 'dogukandavman01@gmail.com') {
         setIsAuthenticated(true);
         fetchData(); 
@@ -109,9 +90,7 @@ export default function SuperAdmin() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsAuthenticated(false);
-    setShops([]);
-    setAppointments([]);
-    setReviews([]);
+    setShops([]); setAppointments([]); setReviews([]);
     router.push('/');
   };
 
@@ -133,98 +112,6 @@ export default function SuperAdmin() {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    if (!appointments.length || !shops.length) return;
-
-    const userMap = new Map();
-    appointments.forEach(a => {
-      const shop = shops.find(s => s.id === a.shop_id);
-      const key = a.customer_email || a.customer_phone || `${a.customer_name}_${a.customer_surname}`;
-      
-      if (!userMap.has(key)) {
-        userMap.set(key, {
-          name: `${a.customer_name} ${a.customer_surname}`.toUpperCase(),
-          phone: a.customer_phone,
-          email: a.customer_email || 'Belirtilmemiş',
-          total_bookings: 0,
-          shops_visited: new Set(),
-          regions_visited: new Set(),
-          services_received: new Set(),
-          last_visit: a.appointment_date,
-        });
-      }
-
-      const u = userMap.get(key);
-      u.total_bookings += 1;
-      if (shop?.name) u.shops_visited.add(shop.name);
-      if (shop?.region) u.regions_visited.add(shop.region);
-      if (a.service_name) u.services_received.add(a.service_name);
-      
-      if (new Date(a.appointment_date) > new Date(u.last_visit)) {
-        u.last_visit = a.appointment_date;
-      }
-    });
-
-    const processedUsers = Array.from(userMap.values()).map(u => ({
-      ...u,
-      shops_visited: Array.from(u.shops_visited),
-      regions_visited: Array.from(u.regions_visited),
-      services_received: Array.from(u.services_received),
-    }));
-
-    setCrmUsers(processedUsers);
-  }, [appointments, shops]);
-
-  // -- FİLTRELENMİŞ KULLANICILAR (Global CRM) --
-  const filteredCrmUsers = crmUsers.filter(u => {
-    const matchesSearch = u.name.includes(crmSearchQuery.toUpperCase()) || (u.phone && u.phone.includes(crmSearchQuery)) || u.email.toLowerCase().includes(crmSearchQuery.toLowerCase());
-    const matchesRegion = filterRegion === 'Tümü' || u.regions_visited.includes(filterRegion);
-    const matchesService = filterService === '' || u.services_received.some(s => s.toLowerCase().includes(filterService.toLowerCase()));
-    return matchesSearch && matchesRegion && matchesService;
-  });
-
-  const handleBulkEmailSubmit = async (e) => {
-    e.preventDefault();
-    
-    const targetEmails = filteredCrmUsers.map(u => u.email).filter(email => email && email !== 'Belirtilmemiş' && email.includes('@'));
-    
-    if (targetEmails.length === 0) {
-      return alert("Seçili kitlede geçerli bir e-posta adresi bulunamadı!");
-    }
-
-    const isConfirmed = window.confirm(`Bu mail ${targetEmails.length} kişiye gönderilecek. Onaylıyor musunuz?`);
-    if (!isConfirmed) return;
-
-    setIsSendingBulk(true);
-    try {
-      // DİKKAT: Adres klasör yapına göre /api/email/bulk-email olarak güncellendi!
-      const res = await fetch('/api/email/bulk-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: targetEmails,
-          subject: mailSubject,
-          html: mailContent
-        })
-      });
-
-      const data = await res.json();
-      
-      if (res.ok) {
-        alert("🎉 Mailler başarıyla kuyruğa alındı ve gönderimi başladı!");
-        setShowMailModal(false);
-        setMailSubject('');
-        setMailContent('');
-      } else {
-        alert("Hata oluştu: " + (data.error || "Bilinmeyen hata"));
-      }
-    } catch (error) {
-      alert("Sunucuya bağlanırken bir hata oluştu.");
-    } finally {
-      setIsSendingBulk(false);
-    }
-  };
 
   const approveShop = async (shop) => {
     const isConfirmed = window.confirm(`${shop.name} işletmesini ONAYLAMAK istediğinize emin misiniz?`);
@@ -276,26 +163,6 @@ export default function SuperAdmin() {
       });
       alert("Hatırlatma maili başarıyla gönderildi!");
     } catch (err) { alert("Mail hatası."); } finally { setIsSendingMail(false); }
-  };
-
-  const sendReminderMailAbonelik = (shop) => { alert(`${shop.name} işletmesine abonelik yenileme hatırlatması başarıyla gönderildi.`); };
-
-  const togglePassword = (id) => { setShowPasswords(prev => ({ ...prev, [id]: !prev[id] })); };
-
-  const exportToExcel = () => {
-    if(appointments.length === 0) return alert("Dışa aktarılacak veri bulunmuyor.");
-    let csvContent = '\uFEFF';
-    csvContent += "Musteri Ad Soyad,Telefon,E-Posta,Islem Yaptigi Mekan,Tarih,Saat,Hizmet,Atanan Uzman,Durum\n";
-    appointments.forEach(a => {
-      const shop = shops.find(s => s.id === a.shop_id);
-      const shopName = shop ? shop.name.replace(/,/g, ' ') : 'Bilinmeyen Mekan';
-      csvContent += `${a.customer_name} ${a.customer_surname},${a.customer_phone},${a.customer_email},${shopName},${a.appointment_date},${a.appointment_time},${a.service_name},${a.staff_name},${a.status}\n`;
-    });
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.setAttribute("download", "bookcy_musteri_datasi.csv");
-    link.click();
   };
 
   const pendingShops = shops.filter(s => s.status === 'pending');
@@ -364,7 +231,12 @@ export default function SuperAdmin() {
           <button onClick={() => setActiveTab('overview')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'overview' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><LayoutDashboard size={18}/> Özet Panel</button>
           <button onClick={() => setActiveTab('pending')} className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'pending' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><span className="flex items-center gap-3"><Clock size={18}/> Yeni Başvurular</span> {pendingShops.length > 0 && <span className="bg-white text-[#E8622A] text-xs px-2 rounded-full font-black">{pendingShops.length}</span>}</button>
           <button onClick={() => setActiveTab('active')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'active' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><Store size={18}/> Aktif İşletmeler</button>
-          <button onClick={() => setActiveTab('crm')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'crm' ? 'bg-[#E8622A] text-white shadow-md' : 'bg-transparent text-slate-400 hover:text-white'}`}><ShieldCheck size={18}/> Global CRM</button>
+          
+          {/* DİKKAT: ARTIK BU BUTON BİZİ YENİ CRM SAYFASINA ATIYOR */}
+          <button onClick={() => router.push('/admin/crm')} className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left bg-transparent text-slate-400 hover:bg-white/5 hover:text-white">
+            <ShieldCheck size={18}/> Global CRM
+          </button>
+          
           <button onClick={() => setActiveTab('appointments')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'appointments' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><CalendarCheck size={18} /> Randevular</button>
           <button onClick={() => setActiveTab('customers')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'customers' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><Users size={18}/> Temel Müşteriler</button>
           <button onClick={() => setActiveTab('billing')} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm border-none cursor-pointer text-left ${activeTab === 'billing' ? 'bg-[#E8622A] text-white' : 'bg-transparent text-slate-400 hover:text-white'}`}><CreditCard size={18} /> Abonelik</button>
@@ -407,92 +279,6 @@ export default function SuperAdmin() {
               </div>
             )}
 
-            {/* --- GLOBAL CRM SEKMESİ --- */}
-            {activeTab === 'crm' && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex justify-between items-center mb-8 border-b border-slate-200 pb-6">
-                  <div>
-                    <h1 className="text-3xl font-black text-[#2D1B4E] uppercase tracking-tight">Global Müşteri Ağı (CRM)</h1>
-                    <p className="text-sm font-bold text-slate-500 mt-2">Platformdaki tüm işletmelerin ve müşterilerin birleşik veri tabanı.</p>
-                  </div>
-                  <button onClick={exportToExcel} className="bg-[#2D1B4E] hover:bg-[#1a0f2e] text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 border-none cursor-pointer shadow-lg transition-colors">
-                    <Download size={16}/> Veriyi İndir
-                  </button>
-                </div>
-
-                <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm mb-8">
-                  <h3 className="font-black text-sm text-[#2D1B4E] uppercase tracking-widest mb-4 flex items-center gap-2"><Filter size={16} className="text-[#E8622A]"/> Dinamik Segmentasyon Filtreleri</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="relative">
-                      <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
-                      <input type="text" placeholder="İsim, Telefon veya Mail..." value={crmSearchQuery} onChange={(e)=>setCrmSearchQuery(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 font-bold text-sm outline-none focus:border-[#E8622A]"/>
-                    </div>
-                    <div className="relative">
-                      <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
-                      <select value={filterRegion} onChange={(e)=>setFilterRegion(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 font-bold text-sm outline-none focus:border-[#E8622A] appearance-none cursor-pointer">
-                        <option value="Tümü">Tüm Bölgeler</option>
-                        <option value="Girne">Girne</option>
-                        <option value="Lefkoşa">Lefkoşa</option>
-                        <option value="Mağusa">Mağusa</option>
-                        <option value="İskele">İskele</option>
-                      </select>
-                    </div>
-                    <div className="relative md:col-span-2">
-                      <Scissors size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"/>
-                      <input type="text" placeholder="Hizmet Adı (Örn: Tattoo, Saç Kesimi)" value={filterService} onChange={(e)=>setFilterService(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-10 pr-4 font-bold text-sm outline-none focus:border-[#E8622A]"/>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
-                    <p className="text-xs font-bold text-slate-500">Filtrelenen: <span className="font-black text-[#E8622A]">{filteredCrmUsers.length}</span> müşteri</p>
-                    <button onClick={() => setShowMailModal(true)} className="bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-colors border-none cursor-pointer">
-                      <Send size={14}/> Toplu Mail At
-                    </button>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden w-full">
-                  <div className="overflow-x-auto w-full">
-                    <table className="w-full text-left border-collapse">
-                      <thead className="bg-slate-50">
-                        <tr className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                          <th className="px-6 py-5 border-b border-slate-100">Müşteri</th>
-                          <th className="px-6 py-5 border-b border-slate-100">Gittiği Bölgeler</th>
-                          <th className="px-6 py-5 border-b border-slate-100">Aldığı Hizmetler</th>
-                          <th className="px-6 py-5 border-b border-slate-100 text-center">Toplam İşlem</th>
-                          <th className="px-6 py-5 border-b border-slate-100 text-center">Son Ziyaret</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredCrmUsers.map((u, i) => (
-                          <tr key={i} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                            <td className="px-6 py-4">
-                              <div className="font-black text-sm text-[#2D1B4E]">{u.name}</div>
-                              <div className="text-[10px] font-bold text-slate-400 mt-1 flex gap-2"><span>{u.phone}</span> • <span>{u.email}</span></div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex flex-wrap gap-1">
-                                {u.regions_visited.map((r, idx) => (<span key={idx} className="bg-orange-50 text-[#E8622A] px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest">{r}</span>))}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4">
-                              <div className="flex flex-wrap gap-1 max-w-xs">
-                                {u.services_received.slice(0, 3).map((s, idx) => (<span key={idx} className="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-1 rounded text-[9px] font-bold">{s}</span>))}
-                                {u.services_received.length > 3 && <span className="text-[9px] font-bold text-slate-400 mt-1">+{u.services_received.length - 3} daha</span>}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 text-center font-black text-lg text-[#2D1B4E]">{u.total_bookings}</td>
-                            <td className="px-6 py-4 text-center"><span className="font-bold text-sm text-[#E8622A]">{u.last_visit}</span></td>
-                          </tr>
-                        ))}
-                        {filteredCrmUsers.length === 0 && <tr><td colSpan="5" className="text-center p-10 text-slate-400 font-bold uppercase tracking-widest">Filtrelere uygun müşteri bulunamadı.</td></tr>}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            )}
-            
             {activeTab === 'pending' && (
               <div className="bg-white border border-slate-200 rounded-[32px] overflow-hidden shadow-sm">
                 <div className="p-8 border-b border-slate-100 flex items-center gap-3 bg-slate-50">
@@ -570,12 +356,7 @@ export default function SuperAdmin() {
                           </td>
                           <td className="px-8 py-6">
                             <div className="font-bold text-sm text-slate-700">K.Adı: {shop.admin_username}</div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-mono text-slate-400">{showPasswords[shop.id] ? shop.admin_password : '******'}</span>
-                              <button onClick={() => togglePassword(shop.id)} className="bg-transparent border-none cursor-pointer text-slate-400 hover:text-orange-500">
-                                {showPasswords[shop.id] ? <EyeOff size={14}/> : <Eye size={14}/>}
-                              </button>
-                            </div>
+                            <div className="text-xs text-slate-400 font-mono mt-1">Şifre: {shop.admin_password}</div>
                           </td>
                           <td className="px-8 py-6">
                             <span className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-slate-200">{shop.package}</span>
@@ -685,7 +466,6 @@ export default function SuperAdmin() {
                           <p className="text-[9px] font-black text-slate-300 uppercase mb-1">Kalan</p>
                           <p className={`text-sm font-black ${sub.remaining < 5 ? 'text-red-500' : 'text-[#00c48c]'}`}>{sub.remaining} Gün</p>
                         </div>
-                        <button onClick={() => sendReminderMailAbonelik(shop)} className="bg-indigo-50 text-indigo-600 px-6 py-3 rounded-2xl border-none font-black text-[10px] uppercase cursor-pointer hover:bg-indigo-600 hover:text-white transition-all tracking-widest shadow-sm">HATIRLAT</button>
                       </div>
                     </div>
                   )
@@ -734,39 +514,6 @@ export default function SuperAdmin() {
           </div>
         )}
       </main>
-
-      {/* --- TOPLU MAİL MODALI --- */}
-      {showMailModal && (
-        <div className="fixed inset-0 bg-[#2D1B4E]/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-[600px] rounded-[32px] p-8 relative shadow-2xl animate-in zoom-in-95">
-            <button onClick={() => setShowMailModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-black bg-transparent border-none cursor-pointer"><XCircle size={24}/></button>
-            
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><Mail size={24}/></div>
-              <div>
-                <h2 className="text-xl font-black text-[#2D1B4E] uppercase">Toplu Mail Gönderimi</h2>
-                <p className="text-xs font-bold text-slate-500">Hedef Kitle: <span className="text-[#E8622A]">{filteredCrmUsers.filter(u => u.email && u.email !== 'Belirtilmemiş' && u.email.includes('@')).length}</span> Kişi</p>
-              </div>
-            </div>
-
-            <form onSubmit={handleBulkEmailSubmit} className="space-y-4">
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Mail Konusu (Subject)</label>
-                <input required type="text" value={mailSubject} onChange={e => setMailSubject(e.target.value)} placeholder="Örn: Hafta sonuna özel tüm hizmetlerde %20 indirim!" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 font-bold text-sm outline-none focus:border-blue-500"/>
-              </div>
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Mail İçeriği (HTML Destekler)</label>
-                <textarea required rows="6" value={mailContent} onChange={e => setMailContent(e.target.value)} placeholder="Merhaba,&#10;Sizi tekrar aramızda görmek isteriz..." className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 font-bold text-sm outline-none focus:border-blue-500 resize-none"></textarea>
-              </div>
-              <button type="submit" disabled={isSendingBulk} className={`w-full text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 border-none cursor-pointer transition-colors shadow-lg mt-4 ${isSendingBulk ? 'bg-slate-400' : 'bg-blue-600 hover:bg-blue-700'}`}>
-                {isSendingBulk ? <Loader2 className="animate-spin" size={16}/> : <Send size={16}/>} 
-                {isSendingBulk ? 'GÖNDERİLİYOR...' : 'KAMPANYAYI BAŞLAT'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }
