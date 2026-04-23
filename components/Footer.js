@@ -15,6 +15,11 @@ const FacebookIcon = ({ size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
 );
 
+// TIKTOK İKONU EKLENDİ
+const TiktokIcon = ({ size = 24 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5v3a8 8 0 0 1-8-8v15a4 4 0 0 1-4-4Z"></path></svg>
+);
+
 export default function Footer() {
   const { lang, t } = useAppContext();
   const [cookieConsent, setCookieConsent] = useState(true);
@@ -71,9 +76,11 @@ export default function Footer() {
             </div>
             <p className="mb-6 md:mb-8 leading-relaxed font-medium text-white/70">{text.footer?.desc}</p>
             <div className="flex gap-4">
-              <a href="https://instagram.com/bookcy" target="_blank" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-[#E1306C] transition-all hover:-translate-y-1"><InstagramIcon size={20}/></a>
-              <a href="https://facebook.com/bookcy" target="_blank" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-[#1877F2] transition-all hover:-translate-y-1"><FacebookIcon size={20}/></a>
-              <a href="https://wa.me/905555555555" target="_blank" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-[#25D366] transition-all hover:-translate-y-1"><MessageCircle size={20}/></a>
+              {/* RESMİ SOSYAL MEDYA LİNKLERİ BURAYA EKLENDİ */}
+              <a href="https://www.instagram.com/getbookcy?igsh=d3phYWh2cmg2MHE4&utm_source=qr" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-[#E1306C] transition-all hover:-translate-y-1"><InstagramIcon size={20}/></a>
+              <a href="https://www.tiktok.com/@bookcy0?_r=1&_t=ZN-95n1SNa8PGp" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-[#000000] transition-all hover:-translate-y-1"><TiktokIcon size={20}/></a>
+              <a href="https://www.facebook.com/share/17xxmB1UDv/?mibextid=wwXIfr" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-[#1877F2] transition-all hover:-translate-y-1"><FacebookIcon size={20}/></a>
+              <a href="https://wa.me/905555555555" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white hover:bg-[#25D366] transition-all hover:-translate-y-1"><MessageCircle size={20}/></a>
             </div>
           </div>
 
@@ -85,7 +92,6 @@ export default function Footer() {
             <Link href="/neden-bookcy" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.why}?</Link>
             <Link href="/hakkimizda" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.about}</Link>
             <Link href="/iletisim" className="block mb-4 text-white/60 hover:text-white font-medium transition-colors text-decoration-none">{text.nav?.contact}</Link>
-            {/* YENİ EKLENEN RANDEVULARIM LİNKİ */}
             <Link href="/randevu-sorgula" className="block mb-4 text-[#E8622A] font-bold hover:text-[#ff7a40] transition-colors text-decoration-none">{text.nav?.myAppts || "Randevularım"}</Link>
           </div>
 
