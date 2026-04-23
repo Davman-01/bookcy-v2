@@ -42,11 +42,9 @@ export default function Navbar() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setCustomerSession(session);
     });
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setCustomerSession(session);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -57,7 +55,6 @@ export default function Navbar() {
   };
 
   const text = t?.[lang] || t?.['TR'] || {};
-
   const handleEmailChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, email: val})); setEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
   const handleAdminEmailChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, contactEmail: val})); setAdminEmailValid(val === '' ? null : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)); };
   const handlePhoneChange = (e) => { const val = e.target.value; setNewShop(prev => ({...prev, contactPhone: val})); setPhoneValid(val === '' ? null : val.replace(/\s/g, '').length >= 7); };
@@ -100,14 +97,109 @@ export default function Navbar() {
     } catch (err) { alert(err.message); } finally { setIsUploading(false); }
   };
 
-  const goToFeature = (key) => {
-      setShowFeaturesMenu(false);
-      setIsMobileMenuOpen(false);
-      router.push('/ozellikler/' + key);
-  };
+  const goToFeature = (key) => { setShowFeaturesMenu(false); setIsMobileMenuOpen(false); router.push('/ozellikler/' + key); };
 
   return (
     <>
+      {/* MASAÜSTÜ NAVBAR - DAHA ZARİF VE KÜÇÜK YAZILAR */}
+      <nav className="fixed top-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur-md border-b border-slate-100 h-[70px] px-4 md:px-6 xl:px-8 flex items-center justify-between whitespace-nowrap flex-nowrap transition-all">
+        
+        <Link href="/" className="flex items-center gap-2 shrink-0 text-decoration-none group">
+          <div className="h-8 w-8 md:h-9 md:w-9 bg-white p-1 rounded-xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
+            <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
+          </div>
+          <span className="text-lg md:text-xl font-black tracking-tighter text-[#2D1B4E] uppercase" style={{fontFamily: "'DM Sans', sans-serif"}}>
+            BOOKCY<span className="text-[#E8622A]">.</span>
+          </span>
+        </Link>
+
+        {/* LİNKLER KÜÇÜLTÜLDÜ: text-[10px] xl:text-[11px] */}
+        <ul className="hidden lg:flex items-center gap-4 xl:gap-8 list-none m-0 p-0 shrink-0">
+          <li><Link href="/isletmeler" className={`text-[10px] xl:text-[11px] font-bold text-decoration-none uppercase transition-colors hover:text-[#E8622A] ${pathname === '/isletmeler' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.places}</Link></li>
+          <li style={{height:'100%', display:'flex', alignItems:'center'}}>
+              <div className="relative h-full flex items-center group" onMouseEnter={() => setShowFeaturesMenu(true)} onMouseLeave={() => setShowFeaturesMenu(false)}>
+                  <Link href="/ozellikler" className={`flex items-center gap-1 transition-colors h-full text-decoration-none uppercase text-[10px] xl:text-[11px] font-bold hover:text-[#E8622A] ${pathname?.includes('/ozellikler') ? 'active text-[#E8622A]' : 'text-slate-600'}`}>
+                      {text.nav?.features} <ChevronDown size={14} className={`transition-transform duration-200 ${showFeaturesMenu ? 'rotate-180' : ''}`} />
+                  </Link>
+                  {showFeaturesMenu && (
+                      <div className="absolute top-[70px] left-1/2 -translate-x-1/2 w-screen max-w-[100vw] bg-white text-[#2D1B4E] shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-t border-slate-200 cursor-default animate-in slide-in-from-top-2 duration-200 z-50">
+                          <div className="max-w-[1000px] mx-auto py-10 px-8">
+                              <div className="grid grid-cols-4 gap-6 mb-8 text-left text-decoration-none">
+                                  <div>
+                                    <h4 className="font-black text-[10px] uppercase tracking-widest mb-4 text-[#E8622A]">{text.mega?.setup || "Kurulum"}</h4>
+                                    <ul className="space-y-3 font-bold text-slate-600 capitalize text-sm list-none p-0">
+                                      {['profile', 'market', 'team'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0 font-bold uppercase text-[11px]"><ChevronRight size={14} className="text-[#E8622A]"/> {text.featNames?.[key]}</button></li>)}
+                                    </ul>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-black text-[10px] uppercase tracking-widest mb-4 text-[#E8622A]">{text.mega?.engage || "Etkileşim"}</h4>
+                                    <ul className="space-y-3 font-bold text-slate-600 capitalize text-sm list-none p-0">
+                                      {['booking', 'app'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0 font-bold uppercase text-[11px]"><ChevronRight size={14} className="text-[#E8622A]"/> {text.featNames?.[key]}</button></li>)}
+                                    </ul>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-black text-[10px] uppercase tracking-widest mb-4 text-[#E8622A]">{text.mega?.manage || "Yönetim"}</h4>
+                                    <ul className="space-y-3 font-bold text-slate-600 capitalize text-sm list-none p-0">
+                                      {['marketing', 'calendar', 'crm'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0 font-bold uppercase text-[11px]"><ChevronRight size={14} className="text-[#E8622A]"/> {text.featNames?.[key]}</button></li>)}
+                                    </ul>
+                                  </div>
+                                  <div>
+                                    <h4 className="font-black text-[10px] uppercase tracking-widest mb-4 text-[#E8622A]">{text.mega?.grow || "Büyüme"}</h4>
+                                    <ul className="space-y-3 font-bold text-slate-600 capitalize text-sm list-none p-0">
+                                      {['boost', 'stats'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0 font-bold uppercase text-[11px]"><ChevronRight size={14} className="text-[#E8622A]"/> {text.featNames?.[key]}</button></li>)}
+                                    </ul>
+                                  </div>
+                              </div>
+                              <div className="flex justify-center border-t border-slate-100 pt-6">
+                                <button onClick={() => { setShowFeaturesMenu(false); router.push('/ozellikler'); }} className="bg-slate-50 border border-slate-200 text-[#2D1B4E] px-6 py-2.5 rounded-xl font-black hover:bg-slate-100 transition-colors cursor-pointer text-[10px] uppercase tracking-widest">{text.mega?.btn || "Tüm Özellikler"}</button>
+                              </div>
+                          </div>
+                      </div>
+                  )}
+              </div>
+          </li>
+          <li><Link href="/neden-bookcy" className={`text-[10px] xl:text-[11px] font-bold text-decoration-none uppercase transition-colors hover:text-[#E8622A] ${pathname === '/neden-bookcy' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.why}</Link></li>
+          <li><Link href="/hakkimizda" className={`text-[10px] xl:text-[11px] font-bold text-decoration-none uppercase transition-colors hover:text-[#E8622A] ${pathname === '/hakkimizda' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.about}</Link></li>
+          <li><Link href="/iletisim" className={`text-[10px] xl:text-[11px] font-bold text-decoration-none uppercase transition-colors hover:text-[#E8622A] ${pathname === '/iletisim' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.contact}</Link></li>
+          <li>
+            <Link href={customerSession ? "/profilim" : "/randevu-sorgula"} className={`text-[10px] xl:text-[11px] text-decoration-none uppercase text-[#E8622A] hover:text-[#d5521b] transition-colors font-black ${pathname === '/randevu-sorgula' || pathname === '/profilim' ? 'active' : ''}`}>
+              {customerSession ? 'PROFİLİM' : text.nav?.myAppts}
+            </Link>
+          </li>
+        </ul>
+
+        {/* SAĞ TARAF BUTONLARI KÜÇÜLTÜLDÜ */}
+        <div className="flex items-center gap-2 xl:gap-3 shrink-0">
+          <div className="hidden xl:flex gap-1">
+             {['TR', 'EN', 'RU'].map(l => (
+               <button key={l} onClick={()=>setLang(l)} className={`px-2 py-0.5 rounded-full text-[9px] font-black border transition-all cursor-pointer ${lang===l ? 'bg-[#2D1B4E] text-white border-[#2D1B4E]' : 'bg-transparent text-slate-400 border-slate-200 hover:border-slate-400'}`}>{l}</button>
+             ))}
+          </div>
+
+          {loggedInShop ? (
+             <div className="hidden lg:flex gap-1.5">
+                <button onClick={handleLogout} className="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full font-black text-[9px] xl:text-[10px] uppercase border-none cursor-pointer hover:bg-slate-200">{text.nav?.logout}</button>
+                <Link href="/dashboard" className="flex items-center gap-1.5 bg-[#E8622A] text-white px-4 py-1.5 rounded-full font-black text-[9px] xl:text-[10px] uppercase tracking-widest text-decoration-none shadow-md hover:bg-[#d5521b] transition-all"><UserCircle size={14}/> {text.nav?.panel}</Link>
+             </div>
+          ) : customerSession ? (
+             <div className="hidden lg:flex gap-1.5">
+                <button onClick={handleCustomerLogout} className="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-full font-black text-[9px] xl:text-[10px] uppercase border-none cursor-pointer hover:bg-slate-200 hover:text-red-500 transition-colors">ÇIKIŞ</button>
+                <Link href="/profilim" className="flex items-center gap-1.5 bg-[#E8622A] text-white px-4 py-1.5 rounded-full font-black text-[9px] xl:text-[10px] uppercase tracking-widest text-decoration-none shadow-md hover:bg-[#d5521b] transition-all"><UserCircle size={14}/> PROFİLİM</Link>
+             </div>
+          ) : (
+             <div className="hidden lg:flex gap-1.5">
+                <button onClick={() => setShowRegister(true)} className="border-2 border-[#2D1B4E] text-[#2D1B4E] px-3 xl:px-4 py-1 xl:py-1.5 rounded-full font-black text-[9px] xl:text-[10px] uppercase tracking-widest hover:bg-[#2D1B4E] hover:text-white transition-all cursor-pointer">{text.nav?.addShop}</button>
+                <button onClick={() => setShowLogin(true)} className="flex items-center gap-1.5 bg-[#E8622A] text-white px-3 xl:px-4 py-1.5 xl:py-2 rounded-full font-black text-[9px] xl:text-[10px] uppercase tracking-widest border-none cursor-pointer shadow-md hover:bg-[#d5521b] transition-all">
+                  <UserCircle size={14}/> 
+                  <span>{text.nav?.login}</span>
+                </button>
+             </div>
+          )}
+          <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 text-[#2D1B4E] bg-transparent border-none cursor-pointer"><Menu size={24}/></button>
+        </div>
+      </nav>
+
+      {/* ... MOBİL MENÜ VE MODALLAR (AYNI KALDI) ... */}
       {/* MOBİL MENÜ OVERLAY */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[9999] bg-white flex flex-col animate-in slide-in-from-right-full duration-300">
@@ -156,113 +248,6 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* MASAÜSTÜ NAVBAR - TAMAMEN SIKIŞMAYI ENGELLEYECEK ŞEKİLDE DÜZENLENDİ */}
-      <nav className="fixed top-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur-md border-b border-slate-100 h-[70px] px-4 md:px-6 xl:px-10 flex items-center justify-between whitespace-nowrap flex-nowrap transition-all">
-        
-        {/* LOGO KISMI (Asla ezilmez: shrink-0) */}
-        <Link href="/" className="flex items-center gap-2 shrink-0 text-decoration-none group">
-          <div className="h-9 w-9 md:h-10 md:w-10 bg-white p-1.5 rounded-xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
-            <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
-          </div>
-          <span className="text-xl md:text-2xl font-black tracking-tighter text-[#2D1B4E] uppercase" style={{fontFamily: "'DM Sans', sans-serif"}}>
-            BOOKCY<span className="text-[#E8622A]">.</span>
-          </span>
-        </Link>
-
-        {/* ORTA MENÜ LİNKLERİ (Sadece yeterince geniş ekranda -lg: 1024px ve üzeri- görünür, gap kısıldı) */}
-        <ul className="hidden lg:flex items-center gap-4 xl:gap-8 list-none m-0 p-0 shrink-0">
-          <li><Link href="/isletmeler" className={`text-[12px] xl:text-[13px] font-bold text-decoration-none uppercase transition-colors hover:text-[#E8622A] ${pathname === '/isletmeler' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.places}</Link></li>
-          
-          <li style={{height:'100%', display:'flex', alignItems:'center'}}>
-              <div className="relative h-full flex items-center group" onMouseEnter={() => setShowFeaturesMenu(true)} onMouseLeave={() => setShowFeaturesMenu(false)}>
-                  <Link href="/ozellikler" className={`flex items-center gap-1 transition-colors h-full text-decoration-none uppercase text-[12px] xl:text-[13px] font-bold hover:text-[#E8622A] ${pathname?.includes('/ozellikler') ? 'active text-[#E8622A]' : 'text-slate-600'}`}>
-                      {text.nav?.features} <ChevronDown size={14} className={`transition-transform duration-200 ${showFeaturesMenu ? 'rotate-180' : ''}`} />
-                  </Link>
-                  {showFeaturesMenu && (
-                      <div className="absolute top-[70px] left-1/2 -translate-x-1/2 w-screen max-w-[100vw] bg-white text-[#2D1B4E] shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-t border-slate-200 cursor-default animate-in slide-in-from-top-2 duration-200 z-50">
-                          <div className="max-w-[1100px] mx-auto py-12 px-8">
-                              <div className="grid grid-cols-4 gap-8 mb-10 text-left text-decoration-none">
-                                  <div>
-                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{text.mega?.setup || "Kurulum"}</h4>
-                                    <ul className="space-y-4 font-bold text-slate-600 capitalize text-sm list-none p-0">
-                                      {['profile', 'market', 'team'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0 font-bold uppercase text-[12px]"><ChevronRight size={14} className="text-[#E8622A]"/> {text.featNames?.[key]}</button></li>)}
-                                    </ul>
-                                  </div>
-                                  <div>
-                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{text.mega?.engage || "Etkileşim"}</h4>
-                                    <ul className="space-y-4 font-bold text-slate-600 capitalize text-sm list-none p-0">
-                                      {['booking', 'app'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0 font-bold uppercase text-[12px]"><ChevronRight size={14} className="text-[#E8622A]"/> {text.featNames?.[key]}</button></li>)}
-                                    </ul>
-                                  </div>
-                                  <div>
-                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{text.mega?.manage || "Yönetim"}</h4>
-                                    <ul className="space-y-4 font-bold text-slate-600 capitalize text-sm list-none p-0">
-                                      {['marketing', 'calendar', 'crm'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0 font-bold uppercase text-[12px]"><ChevronRight size={14} className="text-[#E8622A]"/> {text.featNames?.[key]}</button></li>)}
-                                    </ul>
-                                  </div>
-                                  <div>
-                                    <h4 className="font-black text-[11px] uppercase tracking-widest mb-6 text-[#E8622A]">{text.mega?.grow || "Büyüme"}</h4>
-                                    <ul className="space-y-4 font-bold text-slate-600 capitalize text-sm list-none p-0">
-                                      {['boost', 'stats'].map(key => <li key={key}><button onClick={() => goToFeature(key)} className="hover:text-[#E8622A] cursor-pointer transition-colors flex items-center gap-2 bg-transparent border-none text-slate-600 p-0 font-bold uppercase text-[12px]"><ChevronRight size={14} className="text-[#E8622A]"/> {text.featNames?.[key]}</button></li>)}
-                                    </ul>
-                                  </div>
-                              </div>
-                              <div className="flex justify-center border-t border-slate-100 pt-8">
-                                <button onClick={() => { setShowFeaturesMenu(false); router.push('/ozellikler'); }} className="bg-slate-50 border border-slate-200 text-[#2D1B4E] px-8 py-3 rounded-xl font-black hover:bg-slate-100 transition-colors cursor-pointer text-xs uppercase tracking-widest">{text.mega?.btn || "Tüm Özellikler"}</button>
-                              </div>
-                          </div>
-                      </div>
-                  )}
-              </div>
-          </li>
-
-          <li><Link href="/neden-bookcy" className={`text-[12px] xl:text-[13px] font-bold text-decoration-none uppercase transition-colors hover:text-[#E8622A] ${pathname === '/neden-bookcy' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.why}</Link></li>
-          <li><Link href="/hakkimizda" className={`text-[12px] xl:text-[13px] font-bold text-decoration-none uppercase transition-colors hover:text-[#E8622A] ${pathname === '/hakkimizda' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.about}</Link></li>
-          <li><Link href="/iletisim" className={`text-[12px] xl:text-[13px] font-bold text-decoration-none uppercase transition-colors hover:text-[#E8622A] ${pathname === '/iletisim' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.contact}</Link></li>
-          
-          <li>
-            <Link href={customerSession ? "/profilim" : "/randevu-sorgula"} className={`text-[12px] xl:text-[13px] text-decoration-none uppercase text-[#E8622A] hover:text-[#d5521b] transition-colors font-black ${pathname === '/randevu-sorgula' || pathname === '/profilim' ? 'active' : ''}`}>
-              {customerSession ? 'PROFİLİM' : text.nav?.myAppts}
-            </Link>
-          </li>
-        </ul>
-
-        {/* SAĞ TARAF BUTONLARI (Asla ezilmez: shrink-0) */}
-        <div className="flex items-center gap-3 xl:gap-4 shrink-0">
-          
-          {/* DİL SEÇENEKLERİ (Sadece çok geniş ekranda xl: 1280px+ görünür, dar ekranda kalabalık yapmaz) */}
-          <div className="hidden xl:flex gap-1">
-             {['TR', 'EN', 'RU'].map(l => (
-               <button key={l} onClick={()=>setLang(l)} className={`px-2.5 py-1 rounded-full text-[10px] font-black border transition-all cursor-pointer ${lang===l ? 'bg-[#2D1B4E] text-white border-[#2D1B4E]' : 'bg-transparent text-slate-400 border-slate-200 hover:border-slate-400'}`}>{l}</button>
-             ))}
-          </div>
-
-          {loggedInShop ? (
-             <div className="hidden lg:flex gap-2">
-                <button onClick={handleLogout} className="bg-slate-100 text-slate-600 px-4 py-2 rounded-full font-black text-[11px] xl:text-xs uppercase border-none cursor-pointer hover:bg-slate-200">{text.nav?.logout}</button>
-                <Link href="/dashboard" className="flex items-center gap-2 bg-[#E8622A] text-white px-5 py-2 rounded-full font-black text-[11px] xl:text-xs uppercase tracking-widest text-decoration-none shadow-md hover:bg-[#d5521b] transition-all"><UserCircle size={16}/> {text.nav?.panel}</Link>
-             </div>
-          ) : customerSession ? (
-             <div className="hidden lg:flex gap-2">
-                <button onClick={handleCustomerLogout} className="bg-slate-100 text-slate-600 px-4 py-2 rounded-full font-black text-[11px] xl:text-xs uppercase border-none cursor-pointer hover:bg-slate-200 hover:text-red-500 transition-colors">ÇIKIŞ</button>
-                <Link href="/profilim" className="flex items-center gap-2 bg-[#E8622A] text-white px-5 py-2 rounded-full font-black text-[11px] xl:text-xs uppercase tracking-widest text-decoration-none shadow-md hover:bg-[#d5521b] transition-all"><UserCircle size={16}/> PROFİLİM</Link>
-             </div>
-          ) : (
-             <div className="hidden lg:flex gap-2">
-                <button onClick={() => setShowRegister(true)} className="border-2 border-[#2D1B4E] text-[#2D1B4E] px-4 xl:px-5 py-1.5 xl:py-2 rounded-full font-black text-[10px] xl:text-[11px] uppercase tracking-widest hover:bg-[#2D1B4E] hover:text-white transition-all cursor-pointer">{text.nav?.addShop}</button>
-                <button onClick={() => setShowLogin(true)} className="flex items-center gap-1.5 bg-[#E8622A] text-white px-4 xl:px-5 py-2 xl:py-2.5 rounded-full font-black text-[10px] xl:text-[11px] uppercase tracking-widest border-none cursor-pointer shadow-md hover:bg-[#d5521b] transition-all">
-                  <UserCircle size={14}/> 
-                  <span>{text.nav?.login}</span>
-                </button>
-             </div>
-          )}
-
-          {/* MOBİL VE KÜÇÜK LAPTOP MENÜSÜ HAMBURGER (1024px altına düşünce çıkar) */}
-          <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 text-[#2D1B4E] bg-transparent border-none cursor-pointer"><Menu size={28}/></button>
-        </div>
-      </nav>
-
-      {/* KAYIT MODALI */}
       {showRegister && (
           <div className="fixed inset-0 w-screen h-screen bg-[#2D1B4E]/90 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto py-20">
             <div className="bg-white border border-slate-200 w-full max-w-[800px] rounded-[32px] p-8 md:p-10 relative shadow-2xl my-auto animate-in zoom-in-95 duration-300 text-[#2D1B4E]">
