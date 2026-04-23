@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, MapPin, CheckCircle2, Calendar, Scissors } from 'lucide-react';
+// DİKKAT: ChevronRight eklendi! Çökme sebebi buydu.
+import { Search, MapPin, CheckCircle2, Calendar, Scissors, ChevronRight } from 'lucide-react';
 import { useAppContext } from './providers';
 import { categories, cyprusRegions } from '../lib/constants';
 
@@ -29,14 +30,13 @@ export default function Home() {
   const approvedShops = (shops || []).filter(s => s?.status === 'approved');
   
   // ÖNE ÇIKANLAR MANTIĞI: Ücretsizleri de dahil ediyoruz.
-  // VIP/Premium olanları en üste alıyoruz, sonra ücretsizleri dizip ilk 4 veya 6 tanesini gösteriyoruz.
   const recommendedShops = [...approvedShops].sort((a, b) => {
     const aVip = a.package === 'Premium' || a.package === 'Premium Paket';
     const bVip = b.package === 'Premium' || b.package === 'Premium Paket';
     if (aVip && !bVip) return -1;
     if (!aVip && bVip) return 1;
     return 0;
-  }).slice(0, 6); // Ekranda şık durması için 4 veya 6 tane alabilirsin, 6 ideal.
+  }).slice(0, 6); 
 
   const handleHeroSearch = (e) => { 
     e.preventDefault(); 
@@ -49,10 +49,9 @@ export default function Home() {
 
   return (
     <div className="w-full">
-      {/* HERO BÖLÜMÜ - %100 EKRAN İÇİN ORANTILAR DÜZELTİLDİ VE YEREL VİDEO EKLENDİ */}
       <section className="relative min-h-[100dvh] pt-[120px] w-full overflow-hidden flex flex-col items-center justify-between bg-[#1a0f2e]">
         
-        {/* 1. KENDİ ÜRETTİĞİN VİDEO (hero-bg.mp4) */}
+        {/* KENDİ ÜRETTİĞİN VİDEO */}
         <video 
           autoPlay 
           loop 
@@ -63,16 +62,13 @@ export default function Home() {
           <source src="/hero-bg.mp4" type="video/mp4" />
         </video>
 
-        {/* 2. MOR KARARTMA OVERLAY */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#2D1B4E]/80 via-[#2D1B4E]/60 to-[#2D1B4E]/95 z-10 pointer-events-none"></div>
 
-        {/* 3. KUMLANMA (NOISE) EFEKTİ */}
         <div 
           className="absolute inset-0 pointer-events-none opacity-30 z-10 mix-blend-overlay" 
           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E")` }}
         ></div>
         
-        {/* 4. ANA İÇERİK */}
         <div className="relative z-20 flex flex-col items-center justify-center flex-1 w-full max-w-[850px] mx-auto px-4 py-8 md:py-16 text-center">
           
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1 text-[10px] md:text-xs font-bold text-white/90 uppercase tracking-widest mb-4 md:mb-8 backdrop-blur-md shadow-lg">
@@ -106,9 +102,9 @@ export default function Home() {
           
           <div className="flex items-center justify-center flex-wrap gap-2 text-white/80 text-[10px] md:text-xs font-bold uppercase tracking-widest hidden md:flex">
              <span className="mr-2 drop-shadow-md">{text.hero?.pop}</span>
-             {(categories || []).slice(0,4).map(c => (
+             {(categories || []).slice(0,4).map((c, idx) => (
                <button 
-                 key={c.key} 
+                 key={c.dbName || idx} 
                  type="button" 
                  onClick={() => router.push(`/isletmeler?c=${c.dbName}`)} 
                  className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 transition-all cursor-pointer text-white font-bold hover:-translate-y-0.5"
@@ -142,7 +138,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* YENİ KATEGORİLER BÖLÜMÜ - YATAY (HORIZONTAL) KARTLAR */}
+      {/* YENİ KATEGORİLER BÖLÜMÜ - YATAY KARTLAR */}
       <section className="bg-slate-50 py-16 md:py-24 px-6 md:px-8 border-b border-slate-200">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
           <div>
@@ -154,16 +150,14 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Yatay Kategoriler Grid Yapısı */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {(categories || []).map((c) => (
+          {(categories || []).map((c, idx) => (
             <button 
-              key={c.key} 
+              key={c.dbName || idx} 
               type="button" 
               onClick={() => router.push(`/isletmeler?c=${c.dbName}`)} 
               className="group relative w-full flex items-center bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-slate-200 cursor-pointer text-left h-[100px] md:h-[120px]"
             >
-              {/* Sol Taraf: Fotoğraf */}
               <div className="w-1/3 h-full relative overflow-hidden bg-[#111]">
                 <img 
                   src={c.image || getCategoryImage(c.dbName)} 
@@ -171,13 +165,10 @@ export default function Home() {
                   className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-500"
                 />
               </div>
-              
-              {/* Sağ Taraf: Metin */}
               <div className="flex-1 p-5 flex flex-col justify-center bg-white z-10">
                 <span className="text-[#2D1B4E] font-black uppercase tracking-widest text-sm md:text-base leading-tight group-hover:text-[#E8622A] transition-colors">
                   {c.dbName}
                 </span>
-                {/* Turuncu Çizgi Efekti */}
                 <span className="w-6 h-1 bg-slate-200 mt-2 rounded-full transition-all duration-300 group-hover:w-12 group-hover:bg-[#E8622A]"></span>
               </div>
             </button>
@@ -185,7 +176,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ÖNE ÇIKANLAR BÖLÜMÜ - YATAY (HORIZONTAL) KARTLAR VE ÜCRETSİZ PAKET DAHİL */}
+      {/* ÖNE ÇIKANLAR BÖLÜMÜ - YATAY KARTLAR VE ÜCRETSİZ PAKET DAHİL */}
       {recommendedShops.length > 0 && (
           <section className="bg-white py-16 md:py-24 px-6 md:px-8 border-t border-slate-200">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
@@ -198,7 +189,6 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Yatay İşletme Kartları Grid Yapısı */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
               {recommendedShops.map((shop) => {
                 const isVip = shop.package === 'Premium' || shop.package === 'Premium Paket';
@@ -209,7 +199,6 @@ export default function Home() {
                   onClick={() => router.push(`/isletmeler/${shop.id}`)} 
                   className="group flex flex-col sm:flex-row bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer"
                 >
-                  {/* Sol Taraf: Fotoğraf Alanı */}
                   <div className="w-full sm:w-2/5 md:w-1/3 h-[200px] sm:h-auto relative bg-[#111] overflow-hidden shrink-0">
                     {shop.cover_url || shop.logo_url ? (
                       <img loading="lazy" src={shop.cover_url || shop.logo_url} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-transform duration-500"/>
@@ -217,7 +206,6 @@ export default function Home() {
                       <img loading="lazy" src={getCategoryImage(shop.category)} className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500" />
                     )}
                     
-                    {/* Yalnızca Premiumlara VIP rozeti */}
                     {isVip && (
                       <div className="absolute top-4 left-4 bg-[#E8622A] text-white text-[10px] font-black px-3 py-1.5 rounded-lg shadow-lg uppercase tracking-widest">
                         🔥 VIP
@@ -225,7 +213,6 @@ export default function Home() {
                     )}
                   </div>
 
-                  {/* Sağ Taraf: Bilgi ve Buton Alanı */}
                   <div className="p-6 flex flex-col flex-1 justify-center relative bg-white">
                     <div className="text-[10px] font-black text-[#E8622A] tracking-widest uppercase mb-2">{shop.category}</div>
                     <div className="text-xl md:text-2xl font-black text-[#2D1B4E] mb-2">{shop.name}</div>
