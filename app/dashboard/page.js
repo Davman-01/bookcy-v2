@@ -6,7 +6,7 @@ import {
   CheckCircle2, XCircle, Menu, Scissors, Image as ImageIcon, Clock, Save, Trash2, 
   MessageSquare, Phone, UserPlus, Store, Camera, 
   MessageCircle, Mail, UploadCloud, Loader2, Bell, CalendarOff, Check, UserMinus, BarChart, Filter, Shield, Music, Ticket, CalendarHeart,
-  Target, BarChart3, Lock, Send, Link as LinkIcon
+  Target, BarChart3, Lock, Send, Link as LinkIcon, Dog, Car
 } from 'lucide-react';
 
 // GERÇEK SUPABASE BAĞLANTISI
@@ -73,7 +73,6 @@ export default function Dashboard() {
   const [newService, setNewService] = useState({ name: '', price: '', duration: '30', capacity: '10' });
   const [newEvent, setNewEvent] = useState({ name: '', date: '', time: '22:00', description: '', imageFile: null });
   const [staffForm, setStaffForm] = useState([]);
-  // PERSONEL FORMU GÜNCELLENDİ (Giriş İzni)
   const [newStaff, setNewStaff] = useState({ name: '', role: '', password: '', has_login: true }); 
   const [newClosedDate, setNewClosedDate] = useState(''); 
 
@@ -82,10 +81,9 @@ export default function Dashboard() {
     appointment_date: new Date().toISOString().split('T')[0], appointment_time: '10:00', staff_name: '' 
   });
 
-  // YENİ CRM FORMLARI
   const [smsForm, setSmsForm] = useState({ date: '', message: '' });
   const [crmForm, setCrmForm] = useState({ target: '1_hafta', offer: '', message: '' });
-  const bookcyAdminPhone = "905555555555"; // BURAYI KENDİ NUMARANLA DEĞİŞTİR
+  const bookcyAdminPhone = "905555555555"; 
 
   useEffect(() => {
     const initSession = async () => {
@@ -230,13 +228,11 @@ export default function Dashboard() {
   };
 
   const removeGalleryImage = (index) => { setProfileForm({ ...profileForm, gallery: profileForm.gallery.filter((_, i) => i !== index) }); };
-
   const updateWorkingHour = (index, field, value) => { 
     const newHours = [...profileForm.working_hours]; 
     newHours[index][field] = value; 
     setProfileForm({ ...profileForm, working_hours: newHours }); 
   };
-
   const updateSocial = (network, value) => { setProfileForm({ ...profileForm, socials: { ...profileForm.socials, [network]: value } }); };
 
   const addEvent = async () => {
@@ -266,9 +262,14 @@ export default function Dashboard() {
 
   const deleteEvent = async (id) => { setEventsForm(eventsForm.filter(e => e.id !== id)); };
 
+  // SEKTÖREL AKILLI DEĞİŞKENLER
+  const categoryLower = shop?.category?.toLowerCase() || '';
+  const isClub = categoryLower.includes('bar') || categoryLower.includes('club') || categoryLower.includes('loca');
+  const isVet = categoryLower.includes('vet') || categoryLower.includes('veteriner') || categoryLower.includes('pet');
+  const isCarWash = categoryLower.includes('oto') || categoryLower.includes('yıkama');
+
   const addService = async () => {
     if (!newService.name) return alert("Lütfen bir ad giriniz.");
-    const isClub = shop?.category === 'Bar & Club';
     const finalPrice = newService.price === '' || newService.price === undefined ? '0' : newService.price;
     const finalCapacity = isClub && newService.capacity ? newService.capacity.toString() : '1';
 
@@ -365,7 +366,6 @@ export default function Dashboard() {
     setCrmForm({ target: '1_hafta', offer: '', message: '' });
   };
 
-  const isClub = shop?.category === 'Bar & Club';
   const today = new Date().toISOString().split('T')[0];
   const getApptPrice = (serviceName) => { 
     const srv = servicesForm.find(s => s.name === serviceName); 
@@ -404,21 +404,44 @@ export default function Dashboard() {
     desc: `${a.customer_name} ${a.appointment_date} için ${a.service_name} oluşturdu.`, time: 'Az önce' 
   }));
 
-  // PAKET MANTIĞI VE LİMİTLER
+  // PAKET KONTROLÜ
   const isPremium = shop && ['Premium Paket', 'Premium', 'Ücretsiz Deneme'].includes(shop.package);
   const maxStaffLogins = isPremium ? 5 : 2;
   const currentStaffLogins = staffForm.filter(s => s.has_login || (s.password && s.has_login !== false)).length;
+
+  // DİNAMİK SEKTÖREL MENÜ OLUŞTURMA
+  const getServicesLabel = () => {
+    if (isVet) return 'Aşı & Tedaviler';
+    if (isCarWash) return 'Yıkama Paketleri';
+    if (isClub) return 'Etkinlikler & Loca';
+    return 'Hizmetler & Fiyatlar';
+  };
+  const getClientsLabel = () => {
+    if (isVet) return 'Hasta & Sahipleri';
+    if (isCarWash) return 'Araçlar & Müşteriler';
+    return 'Müşteriler & Kayıtlar';
+  };
+  const getStaffLabel = () => {
+    if (isVet) return 'Hekim Yönetimi';
+    return 'Ekip Yönetimi';
+  };
+  const getServicesIcon = () => {
+    if (isVet) return <Dog size={18}/>;
+    if (isCarWash) return <Car size={18}/>;
+    if (isClub) return <Music size={18}/>;
+    return <Scissors size={18}/>;
+  };
 
   const menuItems = userRole === 'owner' 
     ? [
         { id: 'overview', icon: <LayoutDashboard size={18}/>, label: 'Özet Panel' },
         { id: 'calendar', icon: <Calendar size={18}/>, label: 'Takvim Yönetimi' },
-        { id: 'clients', icon: <Users size={18}/>, label: 'Müşteriler & Kayıtlar' },
-        { id: 'services', icon: isClub ? <Music size={18}/> : <Scissors size={18}/>, label: isClub ? 'Etkinlikler & Loca' : 'Hizmetler & Fiyatlar' },
-        ...(isClub ? [] : [{ id: 'staff', icon: <Clock size={18}/>, label: 'Ekip Yönetimi' }]),
+        { id: 'clients', icon: <Users size={18}/>, label: getClientsLabel() },
+        { id: 'services', icon: getServicesIcon(), label: getServicesLabel() },
+        ...(isClub ? [] : [{ id: 'staff', icon: <Clock size={18}/>, label: getStaffLabel() }]),
         { id: 'reviews', icon: <MessageSquare size={18}/>, label: 'Yorumlar' },
-        { id: 'reports', icon: <BarChart3 size={18}/>, label: 'Gelişmiş Raporlar' },
-        { id: 'marketing', icon: <Target size={18}/>, label: 'Pazarlama & CRM' },
+        { id: 'reports', icon: <BarChart3 size={18}/>, label: 'Gelişmiş Raporlar', isLocked: !isPremium },
+        { id: 'marketing', icon: <Target size={18}/>, label: 'Pazarlama & CRM', isLocked: !isPremium },
         { id: 'settings', icon: <Store size={18}/>, label: 'Vitrin Ayarları' }
       ]
     : [
@@ -483,7 +506,7 @@ export default function Dashboard() {
              >
                <span className="shrink-0">{tab.icon}</span> 
                <span className="truncate">{tab.label}</span>
-               {userRole === 'owner' && !isPremium && (tab.id === 'reports' || tab.id === 'marketing') && <Lock size={14} className="ml-auto opacity-50"/>}
+               {tab.isLocked && <Lock size={14} className="ml-auto opacity-50"/>}
              </button>
           ))}
         </div>
@@ -807,7 +830,7 @@ export default function Dashboard() {
               </div>
           )}
 
-          {/* TAB 3: HİZMETLER (BUKALEMUN) */}
+          {/* TAB 3: HİZMETLER VE FİYATLAR (SEKTÖREL DEĞİŞKEN) */}
           {userRole === 'owner' && activeTab === 'services' && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                 {isClub ? (
@@ -907,7 +930,9 @@ export default function Dashboard() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                       <div className="lg:col-span-2 bg-white rounded-[32px] shadow-sm border border-slate-200 p-8">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-black text-lg text-[#2D1B4E]">Menünüz</h3>
+                            <h3 className="font-black text-lg text-[#2D1B4E]">
+                               {isVet ? 'Aşı ve Tedavi Menüsü' : (isCarWash ? 'Yıkama Paketleri' : 'Hizmetler Menüsü')}
+                            </h3>
                             <button onClick={saveProfile} className="bg-[#00c48c] text-white px-4 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest border-none cursor-pointer shadow-lg hover:scale-105 transition-transform">Değişiklikleri Kaydet</button>
                         </div>
                         <div className="space-y-4">
@@ -932,10 +957,14 @@ export default function Dashboard() {
                       </div>
 
                       <div className="bg-[#2D1B4E] rounded-[32px] shadow-sm p-8 text-white h-fit">
-                        <h3 className="font-black text-lg mb-6">Yeni Hizmet Ekle</h3>
+                        <h3 className="font-black text-lg mb-6">
+                          {isVet ? 'Yeni Aşı/Tedavi Ekle' : (isCarWash ? 'Yeni Paket Ekle' : 'Yeni Hizmet Ekle')}
+                        </h3>
                         <div className="space-y-4">
                           <div>
-                            <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 block mb-2">Hizmet Adı</label>
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 block mb-2">
+                               {isVet ? 'Aşı / Tedavi Adı' : (isCarWash ? 'Paket Adı' : 'Hizmet Adı')}
+                            </label>
                             <input type="text" value={newService.name} onChange={e=>setNewService({...newService, name: e.target.value})} className="w-full bg-white/10 border border-white/10 rounded-xl py-3 px-4 text-sm font-bold text-white outline-none focus:border-[#E8622A]"/>
                           </div>
                           <div>
@@ -963,25 +992,26 @@ export default function Dashboard() {
               </div>
           )}
 
-          {/* TAB 4: PERSONEL */}
+          {/* TAB 4: PERSONEL YÖNETİMİ (SEKTÖREL DEĞİŞKEN) */}
           {userRole === 'owner' && activeTab === 'staff' && !isClub && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                 <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl font-black uppercase tracking-tight">Personel Yönetimi</h2>
+                    <h2 className="text-2xl font-black uppercase tracking-tight">
+                      {isVet ? 'Hekim Yönetimi' : 'Personel Yönetimi'}
+                    </h2>
                     <button onClick={saveProfile} className="bg-[#00c48c] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 border-none cursor-pointer shadow-lg hover:scale-105 transition-transform">
                         <Save size={16}/> Değişiklikleri Kaydet
                     </button>
                 </div>
                 
-                {/* PERSONEL LİMİTİ BİLGİLENDİRMESİ */}
                 <div className={`p-4 rounded-2xl mb-6 text-sm font-bold border ${isPremium ? 'bg-yellow-50 border-yellow-100 text-yellow-600' : 'bg-orange-50 border-orange-100 text-[#E8622A]'}`}>
-                  ℹ️ Sınırsız personel ekleyebilirsiniz. Ancak "Panel İzni" vereceğiniz personel sayısı {shop.package} paketinizde en fazla {maxStaffLogins}'dir. (Şu an kullanan: {currentStaffLogins}/{maxStaffLogins})
+                  ℹ️ Sınırsız uzman ekleyebilirsiniz. Ancak "Panel İzni" vereceğiniz kişi sayısı {shop.package} paketinizde en fazla {maxStaffLogins}'dir. (Şu an kullanan: {currentStaffLogins}/{maxStaffLogins})
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   
                   <div className="lg:col-span-2 bg-white rounded-[32px] shadow-sm border border-slate-200 p-8">
-                    <h3 className="font-black text-lg mb-6 text-[#2D1B4E]">Çalışanlarınız</h3>
+                    <h3 className="font-black text-lg mb-6 text-[#2D1B4E]">Ekibiniz</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {staffForm.map((stf, idx) => (
                         <div key={idx} className="flex justify-between items-center p-5 bg-slate-50 rounded-2xl border border-slate-100 flex-wrap gap-2">
@@ -1004,13 +1034,13 @@ export default function Dashboard() {
                           </button>
                         </div>
                       ))}
-                      {staffForm.length === 0 && <div className="col-span-full text-center py-10 text-slate-400 font-bold uppercase tracking-widest">Kayıtlı personel yok.</div>}
+                      {staffForm.length === 0 && <div className="col-span-full text-center py-10 text-slate-400 font-bold uppercase tracking-widest">Kayıtlı uzman yok.</div>}
                     </div>
                   </div>
 
                   <div className="bg-[#2D1B4E] rounded-[32px] shadow-sm p-8 text-white h-fit">
                     <h3 className="font-black text-lg mb-6 flex items-center gap-2">
-                      <Shield size={20} className="text-[#E8622A]"/> Personel Ekle
+                      <Shield size={20} className="text-[#E8622A]"/> Yeni Ekle
                     </h3>
                     <div className="space-y-4">
                       <div>
@@ -1018,7 +1048,7 @@ export default function Dashboard() {
                         <input type="text" value={newStaff.name} onChange={e=>setNewStaff({...newStaff, name: e.target.value})} className="w-full bg-white/10 border border-white/10 rounded-xl py-3 px-4 text-sm font-bold text-white outline-none focus:border-[#E8622A]"/>
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 block mb-2">Uzmanlık</label>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 block mb-2">Uzmanlık Alanı</label>
                         <input type="text" value={newStaff.role} onChange={e=>setNewStaff({...newStaff, role: e.target.value})} className="w-full bg-white/10 border border-white/10 rounded-xl py-3 px-4 text-sm font-bold text-white outline-none focus:border-[#E8622A]"/>
                       </div>
                       
@@ -1046,7 +1076,9 @@ export default function Dashboard() {
           {/* TAB 5: MÜŞTERİLER VE GEÇMİŞ RANDEVULAR */}
           {userRole === 'owner' && activeTab === 'clients' && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
-                  <h2 className="text-2xl font-black uppercase tracking-tight mb-8">Müşteri Portföyü & Tüm İşlemler</h2>
+                  <h2 className="text-2xl font-black uppercase tracking-tight mb-8">
+                     {isVet ? 'Hasta & Sahip Portföyü' : (isCarWash ? 'Araçlar & Müşteriler' : 'Müşteri Portföyü & Tüm İşlemler')}
+                  </h2>
                   <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden w-full">
                       <div className="overflow-x-auto w-full">
                         <table className="w-full text-left border-collapse">
@@ -1054,8 +1086,8 @@ export default function Dashboard() {
                             <tr className="text-[10px] font-black uppercase text-slate-400">
                               <th className="px-8 py-5 border-b border-slate-100">Müşteri Bilgisi</th>
                               <th className="px-8 py-5 border-b border-slate-100">Tarih & Saat</th>
-                              <th className="px-8 py-5 border-b border-slate-100">Hizmet / İşlem</th>
-                              <th className="px-8 py-5 border-b border-slate-100 text-center">İşlem Durumu</th>
+                              <th className="px-8 py-5 border-b border-slate-100">İşlem Detayı</th>
+                              <th className="px-8 py-5 border-b border-slate-100 text-center">Durum</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1107,7 +1139,7 @@ export default function Dashboard() {
                               ))}
                               {appointments.length === 0 && (
                                 <tr>
-                                  <td colSpan="4" className="text-center p-10 text-slate-400 font-bold uppercase tracking-widest">Henüz hiç işlem yok.</td>
+                                  <td colSpan="4" className="text-center p-10 text-slate-400 font-bold uppercase tracking-widest">Henüz hiç kayıt yok.</td>
                                 </tr>
                               )}
                           </tbody>
@@ -1126,7 +1158,7 @@ export default function Dashboard() {
                     <div key={rev.id} className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm">
                       <div className="flex items-center gap-1 mb-3">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} size={14} className={i < rev.rating ? "text-yellow-400 fill-yellow-400" : "text-slate-200 fill-slate-200"}/>
+                          <span key={i} className={i < rev.rating ? "text-yellow-400" : "text-slate-200"}>★</span>
                         ))}
                       </div>
                       <p className="text-sm font-medium text-slate-600 mb-4">"{rev.comment}"</p>
@@ -1140,14 +1172,14 @@ export default function Dashboard() {
               </div>
           )}
 
-          {/* YENİ TAB: GELİŞMİŞ RAPORLAR */}
+          {/* TAB 7: GELİŞMİŞ RAPORLAR (KİLİT SİSTEMLİ) */}
           {userRole === 'owner' && activeTab === 'reports' && (
             <div className="animate-in fade-in">
               <h2 className="text-2xl font-black text-[#2D1B4E] uppercase mb-6 border-b border-slate-200 pb-4">Gelişmiş Raporlar</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
-                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Toplam Randevu</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Toplam İşlem</p>
                   <p className="text-4xl font-black text-[#2D1B4E]">{appointments.length}</p>
                 </div>
                 <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
@@ -1174,7 +1206,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {!isClub && (
                     <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
-                      <h3 className="font-black text-[#2D1B4E] uppercase mb-6 flex items-center gap-2"><Users className="text-[#E8622A]"/> Personel Performansı</h3>
+                      <h3 className="font-black text-[#2D1B4E] uppercase mb-6 flex items-center gap-2"><Users className="text-[#E8622A]"/> Uzman Performansı</h3>
                       <div className="space-y-4">
                         {staffPerformance.map((staff, i) => (
                           <div key={i} className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
@@ -1185,7 +1217,7 @@ export default function Dashboard() {
                     </div>
                   )}
                   <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
-                    <h3 className="font-black text-[#2D1B4E] uppercase mb-6 flex items-center gap-2"><Scissors className="text-[#E8622A]"/> Popüler Hizmetler</h3>
+                    <h3 className="font-black text-[#2D1B4E] uppercase mb-6 flex items-center gap-2"><Scissors className="text-[#E8622A]"/> Popüler Tercihler</h3>
                     <div className="space-y-4">
                        <div className="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100">
                           <span className="font-bold text-sm uppercase">{servicesForm[0]?.name || 'Hizmet 1'}</span><span className="font-black text-[#E8622A]">%45 Tercih</span>
@@ -1200,7 +1232,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* YENİ TAB: PAZARLAMA & CRM */}
+          {/* TAB 8: PAZARLAMA & CRM (KİLİT SİSTEMLİ) */}
           {userRole === 'owner' && activeTab === 'marketing' && (
             <div className="animate-in fade-in">
               <h2 className="text-2xl font-black text-[#2D1B4E] uppercase mb-6 border-b border-slate-200 pb-4">Pazarlama & Segment CRM</h2>
@@ -1209,13 +1241,12 @@ export default function Dashboard() {
                 <div className="bg-white p-12 rounded-[32px] border border-slate-200 shadow-sm text-center flex flex-col items-center">
                     <div className="w-24 h-24 bg-[#2D1B4E] text-white rounded-full flex items-center justify-center mb-6 shadow-xl"><Lock size={40}/></div>
                     <h3 className="text-3xl font-black text-[#2D1B4E] uppercase tracking-tight mb-4">Pazarlama Araçları Kilitli</h3>
-                    <p className="text-slate-500 font-bold text-base max-w-xl mb-8 leading-relaxed">Müşterilerinize Toplu SMS göndermek, gelmeyen müşterilere özel indirim mailleri atmak ve kitleleri hedeflemek için Premium Pakete geçin.</p>
+                    <p className="text-slate-500 font-bold text-base max-w-xl mb-8 leading-relaxed">Müşterilerinize Toplu SMS göndermek, gelmeyen müşterilere özel kampanya mailleri atmak ve kitleleri hedeflemek için Premium Pakete geçin.</p>
                     <button className="bg-yellow-500 hover:bg-yellow-600 text-white px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl transition-all hover:scale-105 border-none cursor-pointer">Premium'a Yükselt</button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   
-                  {/* SMS FORMU */}
                   <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="w-12 h-12 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center"><MessageSquare size={24}/></div>
@@ -1237,12 +1268,11 @@ export default function Dashboard() {
                     </form>
                   </div>
 
-                  {/* SEGMENT CRM FORMU */}
                   <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm">
                     <div className="flex items-center gap-3 mb-6">
                       <div className="w-12 h-12 bg-green-50 text-green-500 rounded-xl flex items-center justify-center"><Target size={24}/></div>
                       <div>
-                        <h3 className="font-black text-[#2D1B4E] uppercase">Hedefli CRM Kampanyası</h3>
+                        <h3 className="font-black text-[#2D1B4E] uppercase">Hedefli Kampanya</h3>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Belirli Müşterilere Özel Ulaşın</p>
                       </div>
                     </div>
@@ -1272,7 +1302,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* TAB 7: VİTRİN AYARLARI (WHATSAPP LİNK GÜNCELLENDİ) */}
+          {/* TAB 9: VİTRİN AYARLARI */}
           {userRole === 'owner' && activeTab === 'settings' && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                 <div className="flex justify-between items-center mb-8">
@@ -1286,7 +1316,6 @@ export default function Dashboard() {
                   
                   <div className="space-y-8">
                     
-                    {/* Temel Bilgiler */}
                     <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 p-8">
                       <h3 className="font-black text-lg mb-6 flex items-center gap-2 text-[#2D1B4E]">
                         <Store size={20} className="text-[#E8622A]"/> Temel Bilgiler
@@ -1311,7 +1340,7 @@ export default function Dashboard() {
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Hakkımızda / İşletme Açıklaması</label>
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">İşletme Açıklaması</label>
                           <textarea value={profileForm.description} onChange={e=>setProfileForm({...profileForm, description: e.target.value})} rows="4" className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm font-medium outline-none focus:border-[#E8622A] resize-none"></textarea>
                         </div>
                         
@@ -1328,7 +1357,6 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    {/* Sosyal Medya (WHATSAPP GÜNCELLENDİ) */}
                     <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 p-8">
                       <h3 className="font-black text-lg mb-6 flex items-center gap-2 text-[#2D1B4E]">Sosyal Medya Bağlantıları</h3>
                       <div className="space-y-4">
@@ -1350,14 +1378,12 @@ export default function Dashboard() {
                           <input type="url" value={profileForm.socials.whatsapp} onChange={e=>updateSocial('whatsapp', e.target.value)} placeholder="https://wa.me/905xxxxxxxxx" className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 font-bold text-sm outline-none focus:border-green-500" />
                           <p className="text-[9px] font-bold text-slate-500 mt-2 uppercase">Müşterilerinizin size tek tıkla ulaşması için tam link giriniz.</p>
                         </div>
-
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-8">
                     
-                    {/* Çalışma Saatleri */}
                     <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 p-8">
                       <h3 className="font-black text-lg mb-6 flex items-center gap-2 text-[#2D1B4E]">
                         <Clock size={20} className="text-[#E8622A]"/> Çalışma Saatleri
@@ -1443,7 +1469,7 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* === HIZLI RANDEVU MODALI === */}
+      {/* HIZLI RANDEVU MODALI */}
       {showQuickAdd && (
         <div className="fixed inset-0 bg-[#2D1B4E]/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-[500px] rounded-[32px] p-8 relative animate-in zoom-in-95 duration-300 shadow-2xl border border-slate-200">
@@ -1472,10 +1498,9 @@ export default function Dashboard() {
                   {servicesForm.map((s,i) => <option key={i} value={s.name}>{s.name} ({s.price}TL)</option>)}
                 </select>
                 
-                {/* EĞER CLUB DEĞİLSE PERSONEL SEÇİMİ GÖSTER */}
                 {!isClub && (
                   <select required className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-[#E8622A] cursor-pointer" value={quickForm.staff_name} onChange={e => setQuickForm({...quickForm, staff_name: e.target.value})}>
-                    <option value="">Personel Seç</option>
+                    <option value="">Uzman Seç</option>
                     {staffForm.map((s,i) => <option key={i} value={s.name}>{s.name}</option>)}
                   </select>
                 )}
