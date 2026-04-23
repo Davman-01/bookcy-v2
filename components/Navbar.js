@@ -101,7 +101,6 @@ export default function Navbar() {
 
   return (
     <>
-      {/* MASAÜSTÜ NAVBAR - DAHA ZARİF VE KÜÇÜK YAZILAR */}
       <nav className="fixed top-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur-md border-b border-slate-100 h-[70px] px-4 md:px-6 xl:px-8 flex items-center justify-between whitespace-nowrap flex-nowrap transition-all">
         
         <Link href="/" className="flex items-center gap-2 shrink-0 text-decoration-none group">
@@ -113,7 +112,6 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* LİNKLER KÜÇÜLTÜLDÜ: text-[10px] xl:text-[11px] */}
         <ul className="hidden lg:flex items-center gap-4 xl:gap-8 list-none m-0 p-0 shrink-0">
           <li><Link href="/isletmeler" className={`text-[10px] xl:text-[11px] font-bold text-decoration-none uppercase transition-colors hover:text-[#E8622A] ${pathname === '/isletmeler' ? 'active text-[#E8622A]' : 'text-slate-600'}`}>{text.nav?.places}</Link></li>
           <li style={{height:'100%', display:'flex', alignItems:'center'}}>
@@ -121,8 +119,9 @@ export default function Navbar() {
                   <Link href="/ozellikler" className={`flex items-center gap-1 transition-colors h-full text-decoration-none uppercase text-[10px] xl:text-[11px] font-bold hover:text-[#E8622A] ${pathname?.includes('/ozellikler') ? 'active text-[#E8622A]' : 'text-slate-600'}`}>
                       {text.nav?.features} <ChevronDown size={14} className={`transition-transform duration-200 ${showFeaturesMenu ? 'rotate-180' : ''}`} />
                   </Link>
+                  {/* MEGA MENU: absolute yerine fixed yapıldı, ekrana tam oturtuldu */}
                   {showFeaturesMenu && (
-                      <div className="absolute top-[70px] left-1/2 -translate-x-1/2 w-screen max-w-[100vw] bg-white text-[#2D1B4E] shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-t border-slate-200 cursor-default animate-in slide-in-from-top-2 duration-200 z-50">
+                      <div className="fixed top-[70px] left-0 w-full bg-white text-[#2D1B4E] shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-t border-slate-200 cursor-default animate-in slide-in-from-top-2 duration-200 z-50">
                           <div className="max-w-[1000px] mx-auto py-10 px-8">
                               <div className="grid grid-cols-4 gap-6 mb-8 text-left text-decoration-none">
                                   <div>
@@ -168,7 +167,6 @@ export default function Navbar() {
           </li>
         </ul>
 
-        {/* SAĞ TARAF BUTONLARI KÜÇÜLTÜLDÜ */}
         <div className="flex items-center gap-2 xl:gap-3 shrink-0">
           <div className="hidden xl:flex gap-1">
              {['TR', 'EN', 'RU'].map(l => (
@@ -199,7 +197,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* ... MOBİL MENÜ VE MODALLAR (AYNI KALDI) ... */}
       {/* MOBİL MENÜ OVERLAY */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[9999] bg-white flex flex-col animate-in slide-in-from-right-full duration-300">
