@@ -87,6 +87,12 @@ export default function Dashboard() {
     appointment_date: new Date().toISOString().split('T')[0], appointment_time: '10:00', staff_name: '' 
   });
 
+  // --- KASA & ADİSYON MODÜLÜ STATE'LERİ ---
+  const [showAdisyonModal, setShowAdisyonModal] = useState(false);
+  const [adisyonForm, setAdisyonForm] = useState({
+    musteri_adi: '', hizmet: '', personel: '', tutar: '', odeme_tipi: 'Kredi Kartı', prim_yuzdesi: '30'
+  });
+
   useEffect(() => {
     const initSession = async () => {
       const session = localStorage.getItem('bookcy_biz_session');
@@ -267,6 +273,14 @@ export default function Dashboard() {
         if (error) throw error;
         alert(isClub ? "Rezervasyon eklendi!" : "Randevu eklendi!"); setShowQuickAdd(false); fetchDashboardData(shop.id); 
     } catch (error) { alert("Eklenemedi!"); }
+  };
+
+  const handleAdisyonSubmit = (e) => {
+    e.preventDefault();
+    // Veritabanı bağlandığında buraya Supabase insert kodu gelecek
+    alert(`${adisyonForm.musteri_adi} için ${adisyonForm.tutar} TL tutarında ${adisyonForm.odeme_tipi} adisyonu başarıyla kesildi! \n\nPersonel Primi: ${ (adisyonForm.tutar * adisyonForm.prim_yuzdesi) / 100 } TL`);
+    setShowAdisyonModal(false);
+    setAdisyonForm({ musteri_adi: '', hizmet: '', personel: '', tutar: '', odeme_tipi: 'Kredi Kartı', prim_yuzdesi: '30' });
   };
 
   const today = new Date().toISOString().split('T')[0];
@@ -566,7 +580,7 @@ export default function Dashboard() {
                   <h2 className="text-2xl font-black uppercase tracking-tight text-[#2D1B4E]">Kasa & Adisyon</h2>
                   <p className="text-slate-500 font-bold text-sm mt-1">Günlük finansal akışınızı ve personel hakedişlerini yönetin.</p>
                 </div>
-                <button className="bg-[#E8622A] text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 border-none cursor-pointer shadow-lg hover:scale-105 transition-transform">
+                <button onClick={() => setShowAdisyonModal(true)} className="bg-[#E8622A] text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 border-none cursor-pointer shadow-lg hover:scale-105 transition-transform">
                   <Plus size={16} /> Yeni Adisyon Kes
                 </button>
               </div>
@@ -722,7 +736,6 @@ export default function Dashboard() {
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                 {isClub ? (
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                        {/* Club Etkinlikleri - Geçildi (Kod çok uzun olmasın) */}
                         <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 p-8">
                             <h3 className="font-black text-xl text-[#2D1B4E] flex items-center gap-2 border-b border-slate-100 pb-4"><CalendarHeart size={24} className="text-[#E8622A]"/> Yaklaşan Etkinlikler</h3>
                             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-4 mt-4 shadow-inner">
@@ -1431,6 +1444,65 @@ export default function Dashboard() {
                 </select>
               </div>
               <button type="submit" className="w-full bg-[#E8622A] text-white py-5 rounded-2xl font-black uppercase text-xs shadow-xl border-none cursor-pointer mt-2 hover:scale-[1.02] transition-transform">Kaydet</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* YENİ ADİSYON MODALI */}
+      {showAdisyonModal && (
+        <div className="fixed inset-0 bg-[#2D1B4E]/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-[500px] rounded-[32px] p-8 relative animate-in zoom-in-95 duration-300 shadow-2xl border border-slate-200">
+            <button onClick={() => setShowAdisyonModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-red-500 border-none bg-transparent cursor-pointer transition-colors"><XCircle size={28}/></button>
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center mb-4 mx-auto"><Wallet size={32}/></div>
+              <h2 className="text-2xl font-black uppercase text-[#2D1B4E]">Yeni Adisyon Kes</h2>
+              <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Kasa & Personel Primi İşlemi</p>
+            </div>
+            
+            <form onSubmit={handleAdisyonSubmit} className="space-y-4">
+              <input required placeholder="Müşteri Adı Soyadı" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-emerald-500" value={adisyonForm.musteri_adi} onChange={e => setAdisyonForm({...adisyonForm, musteri_adi: e.target.value})} />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <select required className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-emerald-500 cursor-pointer" value={adisyonForm.hizmet} onChange={e => setAdisyonForm({...adisyonForm, hizmet: e.target.value})}>
+                  <option value="">Hizmet Seç</option>
+                  {servicesForm.map((s,i) => <option key={i} value={s.name}>{s.name}</option>)}
+                </select>
+                
+                <select required className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-emerald-500 cursor-pointer" value={adisyonForm.personel} onChange={e => setAdisyonForm({...adisyonForm, personel: e.target.value})}>
+                  <option value="">İşlemi Yapan Uzman</option>
+                  {staffForm.map((s,i) => <option key={i} value={s.name}>{s.name}</option>)}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black">₺</span>
+                  <input required type="number" placeholder="Toplam Tutar" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-10 pr-4 font-black text-sm outline-none focus:border-emerald-500" value={adisyonForm.tutar} onChange={e => setAdisyonForm({...adisyonForm, tutar: e.target.value})} />
+                </div>
+                <select required className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-emerald-500 cursor-pointer" value={adisyonForm.odeme_tipi} onChange={e => setAdisyonForm({...adisyonForm, odeme_tipi: e.target.value})}>
+                  <option value="Kredi Kartı">Kredi Kartı / POS</option>
+                  <option value="Nakit">Nakit</option>
+                  <option value="Havale/EFT">Havale / EFT</option>
+                </select>
+              </div>
+
+              {/* Dinamik Prim Hesaplama Bölümü */}
+              <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4 mt-4">
+                 <label className="text-[10px] font-black uppercase tracking-widest text-purple-500 block mb-2">Personel Prim Oranı (%)</label>
+                 <div className="flex items-center gap-4">
+                   <input type="range" min="0" max="100" className="flex-1 accent-purple-600 cursor-pointer" value={adisyonForm.prim_yuzdesi} onChange={e => setAdisyonForm({...adisyonForm, prim_yuzdesi: e.target.value})} />
+                   <span className="font-black text-purple-700 w-12 text-right">%{adisyonForm.prim_yuzdesi}</span>
+                 </div>
+                 <div className="flex justify-between items-center mt-3 pt-3 border-t border-purple-200/50">
+                   <span className="text-xs font-bold text-slate-500">Uzmanın Hak Ettiği Prim:</span>
+                   <span className="font-black text-purple-700 text-lg">₺{adisyonForm.tutar ? ((adisyonForm.tutar * adisyonForm.prim_yuzdesi) / 100).toFixed(2) : '0.00'}</span>
+                 </div>
+              </div>
+
+              <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl border-none cursor-pointer mt-4 hover:scale-[1.02] transition-transform">
+                Adisyonu Kaydet & Kasaya Ekle
+              </button>
             </form>
           </div>
         </div>
