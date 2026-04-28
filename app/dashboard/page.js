@@ -7,7 +7,8 @@ import {
   MessageSquare, Phone, UserPlus, Store, Camera, 
   MessageCircle, Mail, UploadCloud, Loader2, Bell, CalendarOff, Check, UserMinus, BarChart, Filter, Shield, Music, Ticket, CalendarHeart,
   Target, BarChart3, Lock, Send, Link as LinkIcon, Dog, Car,
-  PieChart, FileCode2, Rocket, ArrowRight, Wallet, CreditCard, TrendingUp
+  PieChart, FileCode2, Rocket, ArrowRight, Wallet, CreditCard, TrendingUp,
+  Package, Box, Archive, AlertTriangle, Layers
 } from 'lucide-react';
 
 // GERÇEK SUPABASE BAĞLANTISI
@@ -64,9 +65,21 @@ export default function Dashboard() {
   const [calendarStaffFilter, setCalendarStaffFilter] = useState('Tümü');
 
   // --- CRM MODÜLÜ STATE'LERİ ---
-  const [crmTab, setCrmTab] = useState('dashboard'); // dashboard, segments, templates, campaigns
+  const [crmTab, setCrmTab] = useState('dashboard');
   const [showSegmentBuilder, setShowSegmentBuilder] = useState(false);
   const [showCampaignBuilder, setShowCampaignBuilder] = useState(false);
+
+  // --- STOK & PAKET MODÜLÜ STATE'LERİ ---
+  const [inventoryTab, setInventoryTab] = useState('products'); 
+  const [products, setProducts] = useState([
+    { id: 1, name: 'Keratin Bakım Şampuanı', stock: 12, price: 450, alert: 5 },
+    { id: 2, name: 'Saç Şekillendirici Wax', stock: 3, price: 220, alert: 10 },
+    { id: 3, name: 'Argan Yağı Serum', stock: 24, price: 850, alert: 5 }
+  ]);
+  const [packages, setPackages] = useState([
+    { id: 1, name: '8 Seans Lazer Paketi', sessions: 8, price: 4500 },
+    { id: 2, name: '5 Seans Cilt Bakımı', sessions: 5, price: 2250 }
+  ]);
 
   const [profileForm, setProfileForm] = useState({ 
     logo_url: '', description: '', contact_phone: '', contact_email: '', 
@@ -277,7 +290,6 @@ export default function Dashboard() {
 
   const handleAdisyonSubmit = (e) => {
     e.preventDefault();
-    // Veritabanı bağlandığında buraya Supabase insert kodu gelecek
     alert(`${adisyonForm.musteri_adi} için ${adisyonForm.tutar} TL tutarında ${adisyonForm.odeme_tipi} adisyonu başarıyla kesildi! \n\nPersonel Primi: ${ (adisyonForm.tutar * adisyonForm.prim_yuzdesi) / 100 } TL`);
     setShowAdisyonModal(false);
     setAdisyonForm({ musteri_adi: '', hizmet: '', personel: '', tutar: '', odeme_tipi: 'Kredi Kartı', prim_yuzdesi: '30' });
@@ -320,6 +332,7 @@ export default function Dashboard() {
     ? [
         { id: 'overview', icon: <LayoutDashboard size={18}/>, label: 'Özet Panel' },
         { id: 'kasa', icon: <Wallet size={18}/>, label: 'Kasa & Adisyon' },
+        { id: 'inventory', icon: <Package size={18}/>, label: 'Stok & Paketler' },
         { id: 'calendar', icon: <Calendar size={18}/>, label: 'Takvim Yönetimi' },
         { id: 'clients', icon: <Users size={18}/>, label: getClientsLabel() },
         { id: 'services', icon: getServicesIcon(), label: getServicesLabel() },
@@ -455,23 +468,23 @@ export default function Dashboard() {
           {userRole === 'owner' && activeTab === 'overview' && (
             <div className="animate-in fade-in duration-500">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
-                    <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm">
-                      <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center mb-4"><Calendar size={20}/></div>
+                    <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm text-center">
+                      <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center mb-4 mx-auto"><Calendar size={20}/></div>
                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Bugünkü Aktif</p>
                       <p className="text-3xl font-black">{todayAppts.length}</p>
                     </div>
-                    <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm">
-                      <div className="w-10 h-10 bg-green-50 text-green-500 rounded-lg flex items-center justify-center mb-4"><CheckCircle2 size={20}/></div>
+                    <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm text-center">
+                      <div className="w-10 h-10 bg-green-50 text-green-500 rounded-lg flex items-center justify-center mb-4 mx-auto"><CheckCircle2 size={20}/></div>
                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Kazanılan Ciro</p>
                       <p className="text-3xl font-black text-green-600">₺{earnedRevenue}</p>
                     </div>
-                    <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm">
-                      <div className="w-10 h-10 bg-orange-50 text-orange-500 rounded-lg flex items-center justify-center mb-4"><Clock size={20}/></div>
+                    <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm text-center">
+                      <div className="w-10 h-10 bg-orange-50 text-orange-500 rounded-lg flex items-center justify-center mb-4 mx-auto"><Clock size={20}/></div>
                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Bekleyen Ciro</p>
                       <p className="text-3xl font-black">₺{pendingRevenue}</p>
                     </div>
-                    <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm">
-                      <div className="w-10 h-10 bg-purple-50 text-purple-500 rounded-lg flex items-center justify-center mb-4"><Users size={20}/></div>
+                    <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm text-center">
+                      <div className="w-10 h-10 bg-purple-50 text-purple-500 rounded-lg flex items-center justify-center mb-4 mx-auto"><Users size={20}/></div>
                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Toplam Müşteri</p>
                       <p className="text-3xl font-black">{uniqueCustomers}</p>
                     </div>
@@ -608,7 +621,7 @@ export default function Dashboard() {
                   <div className="flex justify-between items-start mb-4">
                     <div className="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center"><Users size={24} /></div>
                   </div>
-                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Hesaplanan Personel Primi</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Personel Primi</p>
                   <h3 className="text-3xl font-black text-[#2D1B4E]">3.150 ₺</h3>
                 </div>
               </div>
@@ -646,11 +659,108 @@ export default function Dashboard() {
                           <div className="text-[10px] font-black uppercase text-emerald-500 mt-1">Ödendi</div>
                         </td>
                       </tr>
-                      {/* Daha fazla satır eklenebilir */}
                     </tbody>
                   </table>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* TAB 1.7: STOK & PAKET YÖNETİMİ (YENİ!) */}
+          {userRole === 'owner' && activeTab === 'inventory' && (
+            <div className="animate-in fade-in duration-500">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                  <h2 className="text-2xl font-black uppercase tracking-tight text-[#2D1B4E]">Stok & Paket Yönetimi</h2>
+                  <p className="text-slate-500 font-bold text-sm mt-1">Ürün stoklarını takip edin ve seans paketleri oluşturun.</p>
+                </div>
+                <button className="bg-[#2D1B4E] text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 border-none cursor-pointer shadow-lg hover:scale-105 transition-transform">
+                  <Plus size={16} /> Yeni Ekle
+                </button>
+              </div>
+
+              {/* Sub-Tabs (Ürünler / Paketler) */}
+              <div className="flex gap-4 mb-8 bg-slate-100 p-1.5 rounded-2xl w-fit">
+                <button 
+                  onClick={() => setInventoryTab('products')} 
+                  className={`px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all border-none cursor-pointer ${inventoryTab === 'products' ? 'bg-white text-[#2D1B4E] shadow-sm' : 'text-slate-500 hover:text-[#2D1B4E]'}`}
+                >
+                  Ürün Stokları
+                </button>
+                <button 
+                  onClick={() => setInventoryTab('packages')} 
+                  className={`px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all border-none cursor-pointer ${inventoryTab === 'packages' ? 'bg-white text-[#2D1B4E] shadow-sm' : 'text-slate-500 hover:text-[#2D1B4E]'}`}
+                >
+                  Seans Paketleri
+                </button>
+              </div>
+
+              {inventoryTab === 'products' ? (
+                /* ÜRÜN STOK TABLOSU */
+                <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 overflow-hidden w-full">
+                  <div className="overflow-x-auto w-full">
+                    <table className="w-full text-left border-collapse">
+                      <thead className="bg-slate-50">
+                        <tr>
+                          <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400">Ürün Adı</th>
+                          <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 text-center">Mevcut Stok</th>
+                          <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 text-center">Birim Fiyat</th>
+                          <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 text-center">Durum</th>
+                          <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 text-right">İşlem</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {products.map((p) => (
+                          <tr key={p.id} className="border-t border-slate-50 hover:bg-slate-50 transition-colors group">
+                            <td className="px-8 py-5">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-[#2D1B4E]"><Box size={20}/></div>
+                                <span className="font-bold text-sm text-[#2D1B4E]">{p.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-8 py-5 text-center font-black text-lg text-[#2D1B4E]">{p.stock} Adet</td>
+                            <td className="px-8 py-5 text-center font-black text-[#E8622A]">{p.price} ₺</td>
+                            <td className="px-8 py-5 text-center">
+                              {p.stock <= p.alert ? (
+                                <span className="bg-red-50 text-red-500 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase flex items-center gap-1 w-fit mx-auto border border-red-100"><AlertTriangle size={12}/> Kritik Stok</span>
+                              ) : (
+                                <span className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase flex items-center gap-1 w-fit mx-auto border border-emerald-100">Yeterli</span>
+                              )}
+                            </td>
+                            <td className="px-8 py-5 text-right">
+                              <button className="p-2 text-slate-300 hover:text-[#E8622A] bg-transparent border-none cursor-pointer transition-colors"><Plus size={18}/></button>
+                              <button className="p-2 text-slate-300 hover:text-red-500 bg-transparent border-none cursor-pointer transition-colors ml-2"><Trash2 size={18}/></button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                /* PAKET TABLOSU */
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {packages.map((pkg) => (
+                    <div key={pkg.id} className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-bl-full -mr-12 -mt-12 group-hover:bg-[#E8622A]/10 transition-colors"></div>
+                      <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6"><Layers size={24}/></div>
+                      <h3 className="font-black text-xl text-[#2D1B4E] mb-2 uppercase tracking-tight">{pkg.name}</h3>
+                      <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6">{pkg.sessions} Seans Uygulama</p>
+                      <div className="flex justify-between items-end border-t border-slate-50 pt-6">
+                        <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Paket Fiyatı</p>
+                          <p className="text-2xl font-black text-[#E8622A]">{pkg.price} ₺</p>
+                        </div>
+                        <button className="bg-[#2D1B4E] text-white p-3 rounded-xl border-none cursor-pointer hover:bg-black transition-colors shadow-lg"><ArrowRight size={18}/></button>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="border-2 border-dashed border-slate-200 rounded-[32px] flex flex-col items-center justify-center p-8 hover:border-[#E8622A] hover:bg-orange-50/30 transition-all cursor-pointer group">
+                    <div className="w-12 h-12 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-[#E8622A] group-hover:text-white transition-all"><Plus size={24}/></div>
+                    <span className="font-black text-xs uppercase tracking-widest text-slate-400 group-hover:text-[#E8622A]">Yeni Paket Oluştur</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1144,7 +1254,6 @@ export default function Dashboard() {
                               </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              {/* Örnek Kayıtlı Segmentler */}
                               <div className="border border-slate-200 rounded-2xl p-6 hover:shadow-md transition-shadow">
                                 <div className="flex justify-between items-start mb-4">
                                   <h4 className="font-black text-[#2D1B4E] uppercase text-sm">Son 1 Aydır Gelmeyenler</h4>
@@ -1175,7 +1284,6 @@ export default function Dashboard() {
                             </div>
                           </>
                         ) : (
-                          // SEGMENT BUILDER EKRANI (Mockup)
                           <div className="animate-in fade-in flex-1">
                             <button onClick={() => setShowSegmentBuilder(false)} className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6 flex items-center gap-2 bg-transparent border-none cursor-pointer hover:text-[#2D1B4E]">
                               ← Kitlelere Dön
@@ -1187,7 +1295,6 @@ export default function Dashboard() {
                               
                               <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-4">Filtreleme Kuralları</h4>
                               
-                              {/* Kural 1 */}
                               <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 mb-3 shadow-sm">
                                 <span className="bg-[#2D1B4E] text-white text-[10px] font-black px-2 py-1 rounded uppercase">Eğer</span>
                                 <select className="bg-slate-50 border border-slate-100 rounded-lg py-2 px-3 text-xs font-bold outline-none cursor-pointer">
@@ -1208,7 +1315,6 @@ export default function Dashboard() {
                                 <button className="ml-auto text-slate-300 hover:text-red-500 bg-transparent border-none cursor-pointer"><Trash2 size={16}/></button>
                               </div>
 
-                              {/* Kural 2 */}
                               <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 mb-4 shadow-sm relative">
                                 <div className="absolute -top-4 left-6 bg-slate-200 text-slate-500 text-[9px] font-black px-2 py-0.5 rounded uppercase">VE (AND)</div>
                                 <span className="bg-[#2D1B4E] text-white text-[10px] font-black px-2 py-1 rounded uppercase">Eğer</span>
@@ -1269,7 +1375,6 @@ export default function Dashboard() {
                               </button>
                          </div>
 
-                         {/* Kampanya Yaratma Formu (Örnek Açık) */}
                          <div className="bg-slate-50 border border-slate-200 rounded-[24px] p-8 mb-8">
                             <h4 className="font-black uppercase text-[#2D1B4E] text-sm mb-6 flex items-center gap-2"><Rocket className="text-[#E8622A]"/> Kampanya Fırlatma Rampası</h4>
                             
@@ -1410,15 +1515,12 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* HIZLI RANDEVU MODALI */}
+      {/* MODALLAR (ADİSYON & HIZLI RANDEVU) */}
       {showQuickAdd && (
         <div className="fixed inset-0 bg-[#2D1B4E]/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-[500px] rounded-[32px] p-8 relative animate-in zoom-in-95 duration-300 shadow-2xl border border-slate-200">
+          <div className="bg-white w-full max-w-[500px] rounded-[32px] p-8 relative animate-in zoom-in-95 shadow-2xl">
             <button onClick={() => setShowQuickAdd(false)} className="absolute top-6 right-6 text-slate-400 hover:text-black border-none bg-transparent cursor-pointer"><XCircle size={28}/></button>
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-[#E8622A]/10 text-[#E8622A] rounded-2xl flex items-center justify-center mb-4 mx-auto"><Plus size={32}/></div>
-              <h2 className="text-2xl font-black uppercase text-[#2D1B4E]">Yeni {isClub ? 'Rezervasyon' : 'Randevu'}</h2>
-            </div>
+            <h2 className="text-2xl font-black uppercase text-[#2D1B4E] mb-8">Yeni Kayıt</h2>
             <form onSubmit={handleQuickAdd} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <input required placeholder="Adı" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-[#E8622A]" value={quickForm.customer_name} onChange={e => setQuickForm({...quickForm, customer_name: e.target.value})} />
