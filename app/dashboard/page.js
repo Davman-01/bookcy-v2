@@ -7,7 +7,7 @@ import {
   MessageSquare, Phone, UserPlus, Store, Camera, 
   MessageCircle, Mail, UploadCloud, Loader2, Bell, CalendarOff, Check, UserMinus, BarChart, Filter, Shield, Music, Ticket, CalendarHeart,
   Target, BarChart3, Lock, Send, Link as LinkIcon, Dog, Car,
-  PieChart, FileCode2, Rocket, ArrowRight
+  PieChart, FileCode2, Rocket, ArrowRight, Wallet, CreditCard, TrendingUp
 } from 'lucide-react';
 
 // GERÇEK SUPABASE BAĞLANTISI
@@ -305,6 +305,7 @@ export default function Dashboard() {
   const menuItems = userRole === 'owner' 
     ? [
         { id: 'overview', icon: <LayoutDashboard size={18}/>, label: 'Özet Panel' },
+        { id: 'kasa', icon: <Wallet size={18}/>, label: 'Kasa & Adisyon' },
         { id: 'calendar', icon: <Calendar size={18}/>, label: 'Takvim Yönetimi' },
         { id: 'clients', icon: <Users size={18}/>, label: getClientsLabel() },
         { id: 'services', icon: getServicesIcon(), label: getServicesLabel() },
@@ -318,7 +319,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center font-['DM Sans']">
+      <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center font-['DM_Sans']">
         <div className="w-16 h-16 border-4 border-[#E8622A] border-t-transparent rounded-full animate-spin mb-4"></div>
         <p className="font-black text-[#2D1B4E] uppercase tracking-widest animate-pulse">Sistem Yükleniyor...</p>
       </div>
@@ -327,7 +328,7 @@ export default function Dashboard() {
 
   if (!shop && !loading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center font-['DM Sans']">
+      <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center font-['DM_Sans']">
         <p className="font-black text-red-500 uppercase tracking-widest mb-4">İşletme verileri bulunamadı!</p>
         <button onClick={handleLogout} className="bg-[#2D1B4E] text-white px-6 py-3 rounded-xl font-bold border-none cursor-pointer hover:bg-[#1a0f2e]">
           Giriş Sayfasına Dön
@@ -337,7 +338,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex text-[#2D1B4E] font-['DM Sans'] overflow-hidden">
+    <div className="min-h-screen bg-[#F8F9FA] flex text-[#2D1B4E] font-['DM_Sans'] overflow-hidden">
       
       {mobileMenuOpen && ( 
         <div className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div> 
@@ -439,7 +440,6 @@ export default function Dashboard() {
           {/* TAB 1: ÖZET PANEL */}
           {userRole === 'owner' && activeTab === 'overview' && (
             <div className="animate-in fade-in duration-500">
-                {/* ... (Mevcut Overview Kodları Aynen Kalıyor) ... */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
                     <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm">
                       <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center mb-4"><Calendar size={20}/></div>
@@ -558,6 +558,88 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* TAB 1.5: KASA & ADİSYON */}
+          {userRole === 'owner' && activeTab === 'kasa' && (
+            <div className="animate-in fade-in duration-500">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                  <h2 className="text-2xl font-black uppercase tracking-tight text-[#2D1B4E]">Kasa & Adisyon</h2>
+                  <p className="text-slate-500 font-bold text-sm mt-1">Günlük finansal akışınızı ve personel hakedişlerini yönetin.</p>
+                </div>
+                <button className="bg-[#E8622A] text-white px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest flex items-center gap-2 border-none cursor-pointer shadow-lg hover:scale-105 transition-transform">
+                  <Plus size={16} /> Yeni Adisyon Kes
+                </button>
+              </div>
+
+              {/* Finansal Özet Kartları */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-200">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-xl flex items-center justify-center"><Wallet size={24} /></div>
+                    <span className="flex items-center text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-100 px-3 py-1.5 rounded-lg"><TrendingUp size={14} className="mr-1"/> +12%</span>
+                  </div>
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Günlük Toplam Ciro</p>
+                  <h3 className="text-3xl font-black text-[#2D1B4E]">12.450 ₺</h3>
+                </div>
+
+                <div className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-200">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="w-12 h-12 bg-orange-50 text-[#E8622A] rounded-xl flex items-center justify-center"><CreditCard size={24} /></div>
+                  </div>
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Kredi Kartı / POS</p>
+                  <h3 className="text-3xl font-black text-[#2D1B4E]">8.250 ₺</h3>
+                </div>
+
+                <div className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-200">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center"><Users size={24} /></div>
+                  </div>
+                  <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Hesaplanan Personel Primi</p>
+                  <h3 className="text-3xl font-black text-[#2D1B4E]">3.150 ₺</h3>
+                </div>
+              </div>
+
+              {/* Son Adisyonlar Tablosu */}
+              <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 overflow-hidden w-full">
+                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                  <h3 className="font-black uppercase tracking-tight flex items-center gap-2 text-[#2D1B4E]">Son Kesilen Adisyonlar</h3>
+                </div>
+                <div className="overflow-x-auto w-full">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400">Saat / Müşteri</th>
+                        <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400">İşlem & Uzman</th>
+                        <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400">Ödeme Tipi</th>
+                        <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 text-right">Tutar</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-slate-50 hover:bg-slate-50">
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-sm text-[#2D1B4E]">Ahmet Yılmaz</div>
+                          <div className="text-[10px] font-bold text-slate-400 mt-1">Bugün, 14:30</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-bold text-sm text-slate-600">Saç Kesimi + Sakal</div>
+                          <div className="text-[10px] font-black uppercase text-[#E8622A] mt-1">Caner Usta</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="bg-orange-50 text-[#E8622A] text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">Kredi Kartı</span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="font-black text-lg text-[#2D1B4E]">650 ₺</div>
+                          <div className="text-[10px] font-black uppercase text-emerald-500 mt-1">Ödendi</div>
+                        </td>
+                      </tr>
+                      {/* Daha fazla satır eklenebilir */}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* TAB 2: TAKVİM YÖNETİMİ */}
           {activeTab === 'calendar' && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
@@ -635,7 +717,7 @@ export default function Dashboard() {
               </div>
           )}
 
-          {/* TAB 3: HİZMETLER VE FİYATLAR (Aynı) */}
+          {/* TAB 3: HİZMETLER VE FİYATLAR */}
           {userRole === 'owner' && activeTab === 'services' && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                 {isClub ? (
@@ -770,7 +852,7 @@ export default function Dashboard() {
               </div>
           )}
 
-          {/* TAB 4: PERSONEL YÖNETİMİ (Aynı) */}
+          {/* TAB 4: PERSONEL YÖNETİMİ */}
           {userRole === 'owner' && activeTab === 'staff' && !isClub && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                 <div className="flex justify-between items-center mb-8">
@@ -824,7 +906,7 @@ export default function Dashboard() {
               </div>
           )}
 
-          {/* TAB 5: MÜŞTERİLER VE GEÇMİŞ RANDEVULAR (Aynı) */}
+          {/* TAB 5: MÜŞTERİLER VE GEÇMİŞ RANDEVULAR */}
           {userRole === 'owner' && activeTab === 'clients' && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                   <h2 className="text-2xl font-black uppercase tracking-tight mb-8">
@@ -871,7 +953,7 @@ export default function Dashboard() {
               </div>
           )}
 
-          {/* TAB 6: YORUMLAR (Aynı) */}
+          {/* TAB 6: YORUMLAR */}
           {userRole === 'owner' && activeTab === 'reviews' && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                 <h2 className="text-2xl font-black uppercase tracking-tight mb-8">Müşteri Yorumları</h2>
@@ -1213,7 +1295,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* TAB 9: VİTRİN AYARLARI (Aynı) */}
+          {/* TAB 9: VİTRİN AYARLARI */}
           {userRole === 'owner' && activeTab === 'settings' && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                 <div className="flex justify-between items-center mb-8">
@@ -1315,7 +1397,7 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* HIZLI RANDEVU MODALI (Aynı) */}
+      {/* HIZLI RANDEVU MODALI */}
       {showQuickAdd && (
         <div className="fixed inset-0 bg-[#2D1B4E]/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-[500px] rounded-[32px] p-8 relative animate-in zoom-in-95 duration-300 shadow-2xl border border-slate-200">
