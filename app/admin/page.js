@@ -169,10 +169,10 @@ export default function SuperAdmin() {
   const pendingShops = shops.filter(s => s.status === 'pending');
   const activeShops = shops.filter(s => s.status === 'approved');
   
-  // GÜVENLİK GÜNCELLEMESİ: İşletme isminin undefined olma ihtimaline karşı ? ve || kullanıldı.
-  const filteredActiveShops = activeShops.filter(s => 
-    (s?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredActiveShops = activeShops.filter(s => {
+    const safeName = typeof s?.name === 'string' ? s.name : '';
+    return safeName.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   const uniqueCustomers = [];
   const map = new Map();
@@ -183,11 +183,11 @@ export default function SuperAdmin() {
       }
   }
 
-  // GÜVENLİK GÜNCELLEMESİ: Müşteri ismi için koruma eklendi
-  const filteredCustomers = uniqueCustomers.filter(c => 
-    ((c?.customer_name || '').toLowerCase().includes(customerSearch.toLowerCase())) || 
-    (c?.customer_phone && c.customer_phone.includes(customerSearch))
-  );
+  const filteredCustomers = uniqueCustomers.filter(c => {
+    const safeName = typeof c?.customer_name === 'string' ? c.customer_name : '';
+    const safePhone = typeof c?.customer_phone === 'string' ? c.customer_phone : '';
+    return safeName.toLowerCase().includes(customerSearch.toLowerCase()) || safePhone.includes(customerSearch);
+  });
 
   const totalRevs = reviews.length;
   const avgTotal = totalRevs > 0 ? (reviews.reduce((a, b) => a + Number(b.average_score || 0), 0) / totalRevs).toFixed(1) : 0;
@@ -195,7 +195,7 @@ export default function SuperAdmin() {
   const categoryStats = {};
   appointments.forEach(app => {
     const shop = shops.find(s => s.id === app.shop_id);
-    const cat = shop ? (shop.category || 'Bilinmeyen') : 'Bilinmeyen';
+    const cat = shop ? (typeof shop.category === 'string' ? shop.category : 'Bilinmeyen') : 'Bilinmeyen';
     categoryStats[cat] = (categoryStats[cat] || 0) + 1;
   });
   const sortedCategoryStats = Object.entries(categoryStats).sort((a, b) => b[1] - a[1]);
@@ -231,10 +231,12 @@ export default function SuperAdmin() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex text-[#2D1B4E] font-['DM_Sans'] relative">
       
+      {/* Mobil Menü Arka Plan Overlay'i */}
       {mobileMenuOpen && ( 
         <div className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div> 
       )}
 
+      {/* Sidebar - Mobil Uyumlu */}
       <aside className={`fixed md:relative top-0 left-0 h-screen bg-[#2D1B4E] text-white flex flex-col w-64 shrink-0 shadow-2xl z-40 transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="p-8 border-b border-white/10 flex justify-between items-center">
           <span className="font-black text-xl tracking-tighter font-['Plus_Jakarta_Sans']">admin<span className="text-[#E8622A]">.</span></span>
@@ -261,6 +263,7 @@ export default function SuperAdmin() {
 
       <main className="flex-1 flex flex-col h-screen relative">
         
+        {/* Mobil Üst Bar (Header) */}
         <header className="md:hidden bg-white border-b border-slate-200 px-4 py-4 flex justify-between items-center sticky top-0 z-20 shadow-sm shrink-0">
           <div className="flex items-center gap-3">
             <button className="text-[#2D1B4E] bg-slate-100 p-2 rounded-lg border-none cursor-pointer hover:bg-slate-200 transition-colors" onClick={() => setMobileMenuOpen(true)}>
@@ -321,35 +324,43 @@ export default function SuperAdmin() {
                         </tr>
                       </thead>
                       <tbody>
-                        {pendingShops.map(shop => (
-                          <tr key={shop.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                            <td className="px-6 md:px-8 py-6">
-                              {/* GÜVENLİK GÜNCELLEMESİ: İsmi undefined ise hata vermemesi için koruma sağlandı */}
-                              <div className="font-black text-base text-[#2D1B4E] uppercase">{shop?.name || 'İSİMSİZ İŞLETME'}</div>
-                              <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{shop?.location || 'Bilinmiyor'} • {shop?.category || 'Bilinmiyor'}</div>
-                            </td>
-                            <td className="px-6 md:px-8 py-6">
-                              <span className="bg-orange-50 text-orange-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase border border-orange-100 whitespace-nowrap">{timeAgo(shop.created_at)}</span>
-                            </td>
-                            <td className="px-6 md:px-8 py-6">
-                              <div className="font-black text-sm text-[#2D1B4E] mb-1">{shop?.package || 'Standart'} Paket</div>
-                              <div className="text-xs font-bold text-slate-500">{shop?.admin_email || 'E-Posta Yok'}</div>
-                            </td>
-                            <td className="px-6 md:px-8 py-6 text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                <button onClick={() => sendReminderEmail(shop)} disabled={isSendingMail} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white p-2 md:px-4 md:py-2 rounded-xl text-[10px] font-black uppercase border border-blue-200 cursor-pointer transition-all">
-                                  <Mail size={16} className="md:mr-1"/><span className="hidden md:inline">Hatırlat</span>
-                                </button>
-                                <button onClick={() => approveShop(shop)} className="bg-[#00c48c] text-white p-2 md:px-4 md:py-2 rounded-xl text-[10px] font-black uppercase border-none cursor-pointer shadow-lg hover:bg-[#00a375]">
-                                  <Check size={16} className="md:mr-1"/><span className="hidden md:inline">Onayla</span>
-                                </button>
-                                <button onClick={() => deleteShop(shop.id)} className="bg-red-50 text-red-500 p-2 md:p-2 rounded-xl border border-red-200 cursor-pointer hover:bg-red-500 hover:text-white transition-all">
-                                  <Trash2 size={16}/>
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                        {pendingShops.map((shop, index) => {
+                          // TAM KORUMA SAĞLANDI
+                          const safeName = typeof shop?.name === 'string' ? shop.name : 'İSİMSİZ İŞLETME';
+                          const safeLoc = typeof shop?.location === 'string' ? shop.location : 'Bilinmiyor';
+                          const safeCat = typeof shop?.category === 'string' ? shop.category : 'Bilinmiyor';
+                          const safePkg = typeof shop?.package === 'string' ? shop.package : 'Standart';
+                          const safeMail = typeof shop?.admin_email === 'string' ? shop.admin_email : 'E-Posta Yok';
+
+                          return (
+                            <tr key={shop?.id || index} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                              <td className="px-6 md:px-8 py-6">
+                                <div className="font-black text-base text-[#2D1B4E] uppercase">{safeName}</div>
+                                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{safeLoc} • {safeCat}</div>
+                              </td>
+                              <td className="px-6 md:px-8 py-6">
+                                <span className="bg-orange-50 text-orange-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase border border-orange-100 whitespace-nowrap">{timeAgo(shop?.created_at)}</span>
+                              </td>
+                              <td className="px-6 md:px-8 py-6">
+                                <div className="font-black text-sm text-[#2D1B4E] mb-1">{safePkg} Paket</div>
+                                <div className="text-xs font-bold text-slate-500">{safeMail}</div>
+                              </td>
+                              <td className="px-6 md:px-8 py-6 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <button onClick={() => sendReminderEmail(shop)} disabled={isSendingMail} className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white p-2 md:px-4 md:py-2 rounded-xl text-[10px] font-black uppercase border border-blue-200 cursor-pointer transition-all">
+                                    <Mail size={16} className="md:mr-1"/><span className="hidden md:inline">Hatırlat</span>
+                                  </button>
+                                  <button onClick={() => approveShop(shop)} className="bg-[#00c48c] text-white p-2 md:px-4 md:py-2 rounded-xl text-[10px] font-black uppercase border-none cursor-pointer shadow-lg hover:bg-[#00a375]">
+                                    <Check size={16} className="md:mr-1"/><span className="hidden md:inline">Onayla</span>
+                                  </button>
+                                  <button onClick={() => deleteShop(shop?.id)} className="bg-red-50 text-red-500 p-2 md:p-2 rounded-xl border border-red-200 cursor-pointer hover:bg-red-500 hover:text-white transition-all">
+                                    <Trash2 size={16}/>
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                     {pendingShops.length === 0 && <div className="p-20 text-center text-slate-400 font-bold uppercase text-xs">Yeni başvuru yok.</div>}
@@ -375,24 +386,32 @@ export default function SuperAdmin() {
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredActiveShops.map(shop => (
-                            <tr key={shop.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                              <td className="px-6 md:px-8 py-6">
-                                <div className="font-black text-base text-[#2D1B4E] uppercase">{shop?.name || 'İSİMSİZ İŞLETME'}</div>
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{shop?.location || ''}</div>
-                              </td>
-                              <td className="px-6 md:px-8 py-6">
-                                <div className="font-bold text-sm text-slate-700">K.Adı: {shop?.admin_username || ''}</div>
-                                <div className="text-xs text-slate-400 font-mono mt-1">Şifre: {shop?.admin_password || ''}</div>
-                              </td>
-                              <td className="px-6 md:px-8 py-6">
-                                <span className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-slate-200 whitespace-nowrap">{shop?.package || 'Standart'}</span>
-                              </td>
-                              <td className="px-6 md:px-8 py-6 text-right">
-                                <button onClick={() => deleteShop(shop.id)} className="bg-red-50 text-red-500 p-3 rounded-xl border border-red-200 cursor-pointer shadow-sm hover:bg-red-500 hover:text-white transition-all"><Trash2 size={18}/></button>
-                              </td>
-                            </tr>
-                          ))}
+                          {filteredActiveShops.map((shop, index) => {
+                            const safeName = typeof shop?.name === 'string' ? shop.name : 'İSİMSİZ İŞLETME';
+                            const safeLoc = typeof shop?.location === 'string' ? shop.location : '';
+                            const safeUser = typeof shop?.admin_username === 'string' ? shop.admin_username : '';
+                            const safePass = typeof shop?.admin_password === 'string' ? shop.admin_password : '';
+                            const safePkg = typeof shop?.package === 'string' ? shop.package : 'Standart';
+
+                            return (
+                              <tr key={shop?.id || index} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                                <td className="px-6 md:px-8 py-6">
+                                  <div className="font-black text-base text-[#2D1B4E] uppercase">{safeName}</div>
+                                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{safeLoc}</div>
+                                </td>
+                                <td className="px-6 md:px-8 py-6">
+                                  <div className="font-bold text-sm text-slate-700">K.Adı: {safeUser}</div>
+                                  <div className="text-xs text-slate-400 font-mono mt-1">Şifre: {safePass}</div>
+                                </td>
+                                <td className="px-6 md:px-8 py-6">
+                                  <span className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-slate-200 whitespace-nowrap">{safePkg}</span>
+                                </td>
+                                <td className="px-6 md:px-8 py-6 text-right">
+                                  <button onClick={() => deleteShop(shop?.id)} className="bg-red-50 text-red-500 p-3 rounded-xl border border-red-200 cursor-pointer shadow-sm hover:bg-red-500 hover:text-white transition-all"><Trash2 size={18}/></button>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -416,20 +435,24 @@ export default function SuperAdmin() {
                         </tr>
                       </thead>
                       <tbody>
-                        {appointments.map(app => {
+                        {appointments.map((app, index) => {
                           const shopData = shops.find(s => s.id === app.shop_id);
+                          const safeShopName = typeof shopData?.name === 'string' ? shopData.name : 'Bilinmeyen İşletme';
+                          const safeCustName = typeof app?.customer_name === 'string' ? app.customer_name : '';
+                          const safeCustSur = typeof app?.customer_surname === 'string' ? app.customer_surname : '';
+                          
                           return (
-                            <tr key={app.id} className="border-b border-slate-50 hover:bg-slate-50">
+                            <tr key={app?.id || index} className="border-b border-slate-50 hover:bg-slate-50">
                               <td className="p-6 whitespace-nowrap">
                                 <div className="font-black text-[#E8622A] text-sm">{app.appointment_date}</div>
                                 <div className="text-xs font-bold text-slate-500 flex items-center gap-1"><Clock size={12}/> {app.appointment_time}</div>
                               </td>
                               <td className="p-6">
-                                <div className="font-bold text-[#2D1B4E] text-sm uppercase">{app.customer_name} {app.customer_surname}</div>
+                                <div className="font-bold text-[#2D1B4E] text-sm uppercase">{safeCustName} {safeCustSur}</div>
                                 <div className="text-xs font-medium text-slate-400">{app.customer_phone}</div>
                               </td>
                               <td className="p-6 text-xs font-bold text-slate-600">
-                                {shopData?.name || 'Bilinmiyor'} <br/><span className="text-slate-400 font-medium">{app.service_name}</span>
+                                {safeShopName} <br/><span className="text-slate-400 font-medium">{app.service_name}</span>
                               </td>
                             </tr>
                           );
@@ -457,13 +480,17 @@ export default function SuperAdmin() {
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredCustomers.map((cust, idx) => (
-                            <tr key={idx} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                              <td className="px-6 md:px-8 py-5 font-black text-sm uppercase">{cust.customer_name} {cust.customer_surname}</td>
-                              <td className="px-6 md:px-8 py-5 text-xs font-bold text-slate-600">{cust.customer_phone} <br/> {cust.customer_email}</td>
-                              <td className="px-6 md:px-8 py-5 text-xs font-bold text-slate-400 uppercase whitespace-nowrap">{cust.appointment_date}</td>
-                            </tr>
-                          ))}
+                          {filteredCustomers.map((cust, idx) => {
+                            const safeCustName = typeof cust?.customer_name === 'string' ? cust.customer_name : '';
+                            const safeCustSur = typeof cust?.customer_surname === 'string' ? cust.customer_surname : '';
+                            return (
+                              <tr key={idx} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                                <td className="px-6 md:px-8 py-5 font-black text-sm uppercase">{safeCustName} {safeCustSur}</td>
+                                <td className="px-6 md:px-8 py-5 text-xs font-bold text-slate-600">{cust?.customer_phone} <br/> {cust?.customer_email}</td>
+                                <td className="px-6 md:px-8 py-5 text-xs font-bold text-slate-400 uppercase whitespace-nowrap">{cust?.appointment_date}</td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -474,17 +501,19 @@ export default function SuperAdmin() {
               {activeTab === 'billing' && (
                 <div className="space-y-4">
                   <h2 className="text-2xl font-black mb-6 uppercase italic flex items-center gap-3"><CreditCard className="text-orange-500"/> Abonelik Takibi</h2>
-                  {activeShops.map(shop => {
-                    const sub = getSubStatus(shop.created_at);
+                  {activeShops.map((shop, index) => {
+                    const safeName = typeof shop?.name === 'string' ? shop.name : 'İSİMSİZ İŞLETME';
+                    const safePkg = typeof shop?.package === 'string' ? shop.package : 'Standart';
+                    const sub = getSubStatus(shop?.created_at);
                     return (
-                      <div key={shop.id} className="bg-white p-6 rounded-3xl border border-slate-100 flex flex-col md:flex-row items-center justify-between shadow-sm border-l-4 border-l-orange-500 gap-4">
+                      <div key={shop?.id || index} className="bg-white p-6 rounded-3xl border border-slate-100 flex flex-col md:flex-row items-center justify-between shadow-sm border-l-4 border-l-orange-500 gap-4">
                         <div className="flex items-center gap-4 w-full md:w-auto">
                           <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                            {shop.logo_url ? <img src={shop.logo_url} className="w-full h-full object-cover"/> : <Store size={20}/>}
+                            {shop?.logo_url ? <img src={shop.logo_url} className="w-full h-full object-cover"/> : <Store size={20}/>}
                           </div>
                           <div>
-                            <p className="font-black text-[#2D1B4E] uppercase text-sm">{shop?.name || 'İSİMSİZ'}</p>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase">{shop?.package || 'Standart'} Paket</p>
+                            <p className="font-black text-[#2D1B4E] uppercase text-sm">{safeName}</p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">{safePkg} Paket</p>
                           </div>
                         </div>
                         <div className="flex items-center justify-between w-full md:w-auto gap-8">
@@ -530,11 +559,11 @@ export default function SuperAdmin() {
                         <tbody>
                           {reviews.map((rev, index) => (
                             <tr key={index} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                              <td className="px-6 md:px-8 py-5 text-xs font-bold text-slate-600 whitespace-nowrap">{timeAgo(rev.created_at)}</td>
-                              <td className="px-6 md:px-8 py-5 text-center font-black">{rev.q1}</td>
-                              <td className="px-6 md:px-8 py-5 text-center font-black">{rev.q2}</td>
-                              <td className="px-6 md:px-8 py-5 text-center font-black">{rev.q4}</td>
-                              <td className="px-6 md:px-8 py-5 text-right"><span className="bg-yellow-50 text-yellow-600 px-3 py-1.5 rounded-lg text-xs font-black">{rev.average_score}</span></td>
+                              <td className="px-6 md:px-8 py-5 text-xs font-bold text-slate-600 whitespace-nowrap">{timeAgo(rev?.created_at)}</td>
+                              <td className="px-6 md:px-8 py-5 text-center font-black">{rev?.q1 || '-'}</td>
+                              <td className="px-6 md:px-8 py-5 text-center font-black">{rev?.q2 || '-'}</td>
+                              <td className="px-6 md:px-8 py-5 text-center font-black">{rev?.q4 || '-'}</td>
+                              <td className="px-6 md:px-8 py-5 text-right"><span className="bg-yellow-50 text-yellow-600 px-3 py-1.5 rounded-lg text-xs font-black">{rev?.average_score || '-'}</span></td>
                             </tr>
                           ))}
                         </tbody>
