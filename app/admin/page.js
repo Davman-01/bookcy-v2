@@ -10,11 +10,18 @@ import AdminTrialControl from '../../components/AdminTrialControl';
 import { supabase } from '../../lib/supabase';
 import { getActivationTemplate, getRegistrationTemplate } from '../../lib/emailTemplates';
 
+// ZIRH GİBİ GÜVENLİ FONKSİYONLAR (Hata önleyici)
+const safeStr = (val) => (typeof val === 'string' ? val : '');
+const safeLower = (val) => safeStr(val).toLowerCase();
+
 const timeAgo = (dateString) => {
   if (!dateString) return 'Bilinmiyor';
   const now = new Date();
   const past = new Date(dateString);
   const diffMs = now.getTime() - past.getTime();
+  
+  if (isNaN(diffMs)) return 'Geçersiz Tarih'; // Tarih hatalıysa çökmesin
+
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMins / 60);
   const diffDays = Math.floor(diffHours / 24);
@@ -47,7 +54,6 @@ export default function SuperAdmin() {
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      // NOT: Kendi mailini buraya yazmalısın
       if (session && session.user.email === 'dogukandavman01@gmail.com') {
         setIsAuthenticated(true);
         fetchData(); 
@@ -115,8 +121,10 @@ export default function SuperAdmin() {
   }
 
   const approveShop = async (shop) => {
-    const isConfirmed = window.confirm(`${shop?.name || 'Bu'} işletmesini ONAYLAMAK istediğinize emin misiniz?`);
+    if (!shop || !shop.id) return alert("İşletme kimliği bulunamadı.");
+    const isConfirmed = window.confirm(`${safeStr(shop.name) || 'Bu'} işletmesini ONAYLAMAK istediğinize emin misiniz?`);
     if (!isConfirmed) return;
+    
     setLoading(true);
     const { error } = await supabase.from('shops').update({ status: 'approved' }).eq('id', shop.id);
     if (!error) {
@@ -127,7 +135,7 @@ export default function SuperAdmin() {
           body: JSON.stringify({
             to: shop.admin_email,
             subject: 'Hesabınız Aktif Edildi - Bookcy',
-            html: getActivationTemplate({ shopName: shop.name || 'İşletme', packageName: shop.package || 'Standart Paket', username: shop.admin_username, password: shop.admin_password })
+            html: getActivationTemplate({ shopName: safeStr(shop.name) || 'İşletme', packageName: safeStr(shop.package) || 'Standart Paket', username: shop.admin_username, password: shop.admin_password })
           }),
         });
       } catch (err) { console.error(err); }
@@ -140,6 +148,7 @@ export default function SuperAdmin() {
   };
 
   const deleteShop = async (id) => {
+    if (!id) return;
     const isConfirmed = window.confirm("DİKKAT: Bu işletmeyi sistemden TAMAMEN SİLMEK istediğinize emin misiniz?");
     if (isConfirmed) {
       const { error } = await supabase.from('shops').delete().eq('id', id);
@@ -149,8 +158,10 @@ export default function SuperAdmin() {
   };
 
   const sendReminderEmail = async (shop) => {
-    const isConfirmed = window.confirm(`${shop?.name || 'Bu'} işletmesine ödeme hatırlatma maili gönderilecek. Onaylıyor musunuz?`);
+    if (!shop) return;
+    const isConfirmed = window.confirm(`${safeStr(shop.name) || 'Bu'} işletmesine ödeme hatırlatma maili gönderilecek. Onaylıyor musunuz?`);
     if (!isConfirmed) return;
+    
     setIsSendingMail(true);
     try {
       await fetch('/api/email', {
@@ -159,43 +170,41 @@ export default function SuperAdmin() {
         body: JSON.stringify({
           to: shop.admin_email,
           subject: 'Ödeme Hatırlatması - Bookcy Kayıt Talebi',
-          html: getRegistrationTemplate({ shopName: shop.name || 'İşletme', date: new Date(shop.created_at).toLocaleDateString('tr-TR'), packageName: (shop.package || 'Standart Paket').toUpperCase(), price: (shop.package === 'Premium' || shop.package === 'Premium Paket') ? '100 STG' : '60 STG' })
+          html: getRegistrationTemplate({ shopName: safeStr(shop.name) || 'İşletme', date: new Date(shop.created_at).toLocaleDateString('tr-TR'), packageName: safeStr(shop.package).toUpperCase() || 'STANDART PAKET', price: (shop.package === 'Premium' || shop.package === 'Premium Paket') ? '100 STG' : '60 STG' })
         }),
       });
       alert("Hatırlatma maili başarıyla gönderildi!");
     } catch (err) { alert("Mail hatası."); } finally { setIsSendingMail(false); }
   };
 
-  const pendingShops = shops.filter(s => s.status === 'pending');
-  const activeShops = shops.filter(s => s.status === 'approved');
+  // VERİ FİLTRELEME (TAM KORUMALI)
+  const pendingShops = (shops || []).filter(s => s?.status === 'pending');
+  const activeShops = (shops || []).filter(s => s?.status === 'approved');
   
-  const filteredActiveShops = activeShops.filter(s => {
-    const safeName = typeof s?.name === 'string' ? s.name : '';
-    return safeName.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  const filteredActiveShops = activeShops.filter(s => 
+    safeLower(s?.name).includes(safeLower(searchQuery))
+  );
 
-  const uniqueCustomers = [];
-  const map = new Map();
-  for (const item of appointments) {
-      if(item.customer_phone && !map.has(item.customer_phone)){
-          map.set(item.customer_phone, true);
-          uniqueCustomers.push(item);
+  const uniqueCustomersMap = new Map();
+  (appointments || []).forEach(item => {
+      if(item?.customer_phone && !uniqueCustomersMap.has(item.customer_phone)){
+          uniqueCustomersMap.set(item.customer_phone, item);
       }
-  }
-
-  const filteredCustomers = uniqueCustomers.filter(c => {
-    const safeName = typeof c?.customer_name === 'string' ? c.customer_name : '';
-    const safePhone = typeof c?.customer_phone === 'string' ? c.customer_phone : '';
-    return safeName.toLowerCase().includes(customerSearch.toLowerCase()) || safePhone.includes(customerSearch);
   });
+  const uniqueCustomers = Array.from(uniqueCustomersMap.values());
 
-  const totalRevs = reviews.length;
-  const avgTotal = totalRevs > 0 ? (reviews.reduce((a, b) => a + Number(b.average_score || 0), 0) / totalRevs).toFixed(1) : 0;
+  const filteredCustomers = uniqueCustomers.filter(c => 
+    safeLower(c?.customer_name).includes(safeLower(customerSearch)) || 
+    safeStr(c?.customer_phone).includes(safeStr(customerSearch))
+  );
+
+  const totalRevs = (reviews || []).length;
+  const avgTotal = totalRevs > 0 ? (reviews.reduce((a, b) => a + Number(b?.average_score || 0), 0) / totalRevs).toFixed(1) : 0;
   
   const categoryStats = {};
-  appointments.forEach(app => {
-    const shop = shops.find(s => s.id === app.shop_id);
-    const cat = shop ? (typeof shop.category === 'string' ? shop.category : 'Bilinmeyen') : 'Bilinmeyen';
+  (appointments || []).forEach(app => {
+    const shop = (shops || []).find(s => s?.id === app?.shop_id);
+    const cat = safeStr(shop?.category) || 'Bilinmeyen';
     categoryStats[cat] = (categoryStats[cat] || 0) + 1;
   });
   const sortedCategoryStats = Object.entries(categoryStats).sort((a, b) => b[1] - a[1]);
@@ -203,6 +212,7 @@ export default function SuperAdmin() {
   const getSubStatus = (date) => {
     if (!date) return { end: 'Bilinmiyor', remaining: 0 };
     const start = new Date(date);
+    if (isNaN(start)) return { end: 'Hatalı Tarih', remaining: 0 };
     const end = new Date(start);
     end.setMonth(start.getMonth() + 1);
     const diff = Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24));
@@ -263,7 +273,7 @@ export default function SuperAdmin() {
 
       <main className="flex-1 flex flex-col h-screen relative">
         
-        {/* Mobil Üst Bar (Header) */}
+        {/* Mobil Üst Bar (Header) Eklendi */}
         <header className="md:hidden bg-white border-b border-slate-200 px-4 py-4 flex justify-between items-center sticky top-0 z-20 shadow-sm shrink-0">
           <div className="flex items-center gap-3">
             <button className="text-[#2D1B4E] bg-slate-100 p-2 rounded-lg border-none cursor-pointer hover:bg-slate-200 transition-colors" onClick={() => setMobileMenuOpen(true)}>
@@ -291,6 +301,7 @@ export default function SuperAdmin() {
                     <div className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm"><p className="text-[10px] font-black uppercase text-slate-400 mb-1">Ortalama Puan</p><p className="text-4xl font-black text-yellow-500">{avgTotal}</p></div>
                   </div>
 
+                  {/* Eğer AdminTrialControl bileşeni sorun yaratırsa burayı geçici yoruma alabiliriz */}
                   <div className="mb-10"><AdminTrialControl /></div>
 
                   <div className="bg-white rounded-[32px] p-6 md:p-8 border border-slate-100 mb-10 shadow-sm">
@@ -325,25 +336,24 @@ export default function SuperAdmin() {
                       </thead>
                       <tbody>
                         {pendingShops.map((shop, index) => {
-                          // TAM KORUMA SAĞLANDI
-                          const safeName = typeof shop?.name === 'string' ? shop.name : 'İSİMSİZ İŞLETME';
-                          const safeLoc = typeof shop?.location === 'string' ? shop.location : 'Bilinmiyor';
-                          const safeCat = typeof shop?.category === 'string' ? shop.category : 'Bilinmiyor';
-                          const safePkg = typeof shop?.package === 'string' ? shop.package : 'Standart';
-                          const safeMail = typeof shop?.admin_email === 'string' ? shop.admin_email : 'E-Posta Yok';
+                          const sName = safeStr(shop?.name) || 'İSİMSİZ İŞLETME';
+                          const sLoc = safeStr(shop?.location) || 'Bilinmiyor';
+                          const sCat = safeStr(shop?.category) || 'Bilinmiyor';
+                          const sPkg = safeStr(shop?.package) || 'Standart';
+                          const sMail = safeStr(shop?.admin_email) || 'E-Posta Yok';
 
                           return (
                             <tr key={shop?.id || index} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                               <td className="px-6 md:px-8 py-6">
-                                <div className="font-black text-base text-[#2D1B4E] uppercase">{safeName}</div>
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{safeLoc} • {safeCat}</div>
+                                <div className="font-black text-base text-[#2D1B4E] uppercase">{sName}</div>
+                                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{sLoc} • {sCat}</div>
                               </td>
                               <td className="px-6 md:px-8 py-6">
                                 <span className="bg-orange-50 text-orange-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase border border-orange-100 whitespace-nowrap">{timeAgo(shop?.created_at)}</span>
                               </td>
                               <td className="px-6 md:px-8 py-6">
-                                <div className="font-black text-sm text-[#2D1B4E] mb-1">{safePkg} Paket</div>
-                                <div className="text-xs font-bold text-slate-500">{safeMail}</div>
+                                <div className="font-black text-sm text-[#2D1B4E] mb-1">{sPkg} Paket</div>
+                                <div className="text-xs font-bold text-slate-500">{sMail}</div>
                               </td>
                               <td className="px-6 md:px-8 py-6 text-right">
                                 <div className="flex items-center justify-end gap-2">
@@ -387,24 +397,24 @@ export default function SuperAdmin() {
                         </thead>
                         <tbody>
                           {filteredActiveShops.map((shop, index) => {
-                            const safeName = typeof shop?.name === 'string' ? shop.name : 'İSİMSİZ İŞLETME';
-                            const safeLoc = typeof shop?.location === 'string' ? shop.location : '';
-                            const safeUser = typeof shop?.admin_username === 'string' ? shop.admin_username : '';
-                            const safePass = typeof shop?.admin_password === 'string' ? shop.admin_password : '';
-                            const safePkg = typeof shop?.package === 'string' ? shop.package : 'Standart';
+                            const sName = safeStr(shop?.name) || 'İSİMSİZ İŞLETME';
+                            const sLoc = safeStr(shop?.location) || 'Bilinmiyor';
+                            const sUser = safeStr(shop?.admin_username) || '-';
+                            const sPass = safeStr(shop?.admin_password) || '-';
+                            const sPkg = safeStr(shop?.package) || 'Standart';
 
                             return (
                               <tr key={shop?.id || index} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                                 <td className="px-6 md:px-8 py-6">
-                                  <div className="font-black text-base text-[#2D1B4E] uppercase">{safeName}</div>
-                                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{safeLoc}</div>
+                                  <div className="font-black text-base text-[#2D1B4E] uppercase">{sName}</div>
+                                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{sLoc}</div>
                                 </td>
                                 <td className="px-6 md:px-8 py-6">
-                                  <div className="font-bold text-sm text-slate-700">K.Adı: {safeUser}</div>
-                                  <div className="text-xs text-slate-400 font-mono mt-1">Şifre: {safePass}</div>
+                                  <div className="font-bold text-sm text-slate-700">K.Adı: {sUser}</div>
+                                  <div className="text-xs text-slate-400 font-mono mt-1">Şifre: {sPass}</div>
                                 </td>
                                 <td className="px-6 md:px-8 py-6">
-                                  <span className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-slate-200 whitespace-nowrap">{safePkg}</span>
+                                  <span className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-slate-200 whitespace-nowrap">{sPkg}</span>
                                 </td>
                                 <td className="px-6 md:px-8 py-6 text-right">
                                   <button onClick={() => deleteShop(shop?.id)} className="bg-red-50 text-red-500 p-3 rounded-xl border border-red-200 cursor-pointer shadow-sm hover:bg-red-500 hover:text-white transition-all"><Trash2 size={18}/></button>
@@ -436,23 +446,24 @@ export default function SuperAdmin() {
                       </thead>
                       <tbody>
                         {appointments.map((app, index) => {
-                          const shopData = shops.find(s => s.id === app.shop_id);
-                          const safeShopName = typeof shopData?.name === 'string' ? shopData.name : 'Bilinmeyen İşletme';
-                          const safeCustName = typeof app?.customer_name === 'string' ? app.customer_name : '';
-                          const safeCustSur = typeof app?.customer_surname === 'string' ? app.customer_surname : '';
+                          const shopData = (shops || []).find(s => s?.id === app?.shop_id);
+                          const sShopName = safeStr(shopData?.name) || 'Bilinmeyen İşletme';
+                          const sCustName = safeStr(app?.customer_name);
+                          const sCustSur = safeStr(app?.customer_surname);
+                          const sSrvName = safeStr(app?.service_name);
                           
                           return (
                             <tr key={app?.id || index} className="border-b border-slate-50 hover:bg-slate-50">
                               <td className="p-6 whitespace-nowrap">
-                                <div className="font-black text-[#E8622A] text-sm">{app.appointment_date}</div>
-                                <div className="text-xs font-bold text-slate-500 flex items-center gap-1"><Clock size={12}/> {app.appointment_time}</div>
+                                <div className="font-black text-[#E8622A] text-sm">{safeStr(app?.appointment_date)}</div>
+                                <div className="text-xs font-bold text-slate-500 flex items-center gap-1"><Clock size={12}/> {safeStr(app?.appointment_time)}</div>
                               </td>
                               <td className="p-6">
-                                <div className="font-bold text-[#2D1B4E] text-sm uppercase">{safeCustName} {safeCustSur}</div>
-                                <div className="text-xs font-medium text-slate-400">{app.customer_phone}</div>
+                                <div className="font-bold text-[#2D1B4E] text-sm uppercase">{sCustName} {sCustSur}</div>
+                                <div className="text-xs font-medium text-slate-400">{safeStr(app?.customer_phone)}</div>
                               </td>
                               <td className="p-6 text-xs font-bold text-slate-600">
-                                {safeShopName} <br/><span className="text-slate-400 font-medium">{app.service_name}</span>
+                                {sShopName} <br/><span className="text-slate-400 font-medium">{sSrvName}</span>
                               </td>
                             </tr>
                           );
@@ -481,13 +492,13 @@ export default function SuperAdmin() {
                         </thead>
                         <tbody>
                           {filteredCustomers.map((cust, idx) => {
-                            const safeCustName = typeof cust?.customer_name === 'string' ? cust.customer_name : '';
-                            const safeCustSur = typeof cust?.customer_surname === 'string' ? cust.customer_surname : '';
+                            const cName = safeStr(cust?.customer_name);
+                            const cSur = safeStr(cust?.customer_surname);
                             return (
                               <tr key={idx} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                                <td className="px-6 md:px-8 py-5 font-black text-sm uppercase">{safeCustName} {safeCustSur}</td>
-                                <td className="px-6 md:px-8 py-5 text-xs font-bold text-slate-600">{cust?.customer_phone} <br/> {cust?.customer_email}</td>
-                                <td className="px-6 md:px-8 py-5 text-xs font-bold text-slate-400 uppercase whitespace-nowrap">{cust?.appointment_date}</td>
+                                <td className="px-6 md:px-8 py-5 font-black text-sm uppercase">{cName} {cSur}</td>
+                                <td className="px-6 md:px-8 py-5 text-xs font-bold text-slate-600">{safeStr(cust?.customer_phone)} <br/> {safeStr(cust?.customer_email)}</td>
+                                <td className="px-6 md:px-8 py-5 text-xs font-bold text-slate-400 uppercase whitespace-nowrap">{safeStr(cust?.appointment_date)}</td>
                               </tr>
                             );
                           })}
@@ -502,8 +513,8 @@ export default function SuperAdmin() {
                 <div className="space-y-4">
                   <h2 className="text-2xl font-black mb-6 uppercase italic flex items-center gap-3"><CreditCard className="text-orange-500"/> Abonelik Takibi</h2>
                   {activeShops.map((shop, index) => {
-                    const safeName = typeof shop?.name === 'string' ? shop.name : 'İSİMSİZ İŞLETME';
-                    const safePkg = typeof shop?.package === 'string' ? shop.package : 'Standart';
+                    const safeName = safeStr(shop?.name) || 'İSİMSİZ İŞLETME';
+                    const safePkg = safeStr(shop?.package) || 'Standart';
                     const sub = getSubStatus(shop?.created_at);
                     return (
                       <div key={shop?.id || index} className="bg-white p-6 rounded-3xl border border-slate-100 flex flex-col md:flex-row items-center justify-between shadow-sm border-l-4 border-l-orange-500 gap-4">
@@ -560,10 +571,10 @@ export default function SuperAdmin() {
                           {reviews.map((rev, index) => (
                             <tr key={index} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                               <td className="px-6 md:px-8 py-5 text-xs font-bold text-slate-600 whitespace-nowrap">{timeAgo(rev?.created_at)}</td>
-                              <td className="px-6 md:px-8 py-5 text-center font-black">{rev?.q1 || '-'}</td>
-                              <td className="px-6 md:px-8 py-5 text-center font-black">{rev?.q2 || '-'}</td>
-                              <td className="px-6 md:px-8 py-5 text-center font-black">{rev?.q4 || '-'}</td>
-                              <td className="px-6 md:px-8 py-5 text-right"><span className="bg-yellow-50 text-yellow-600 px-3 py-1.5 rounded-lg text-xs font-black">{rev?.average_score || '-'}</span></td>
+                              <td className="px-6 md:px-8 py-5 text-center font-black">{safeStr(rev?.q1) || '-'}</td>
+                              <td className="px-6 md:px-8 py-5 text-center font-black">{safeStr(rev?.q2) || '-'}</td>
+                              <td className="px-6 md:px-8 py-5 text-center font-black">{safeStr(rev?.q4) || '-'}</td>
+                              <td className="px-6 md:px-8 py-5 text-right"><span className="bg-yellow-50 text-yellow-600 px-3 py-1.5 rounded-lg text-xs font-black">{safeStr(rev?.average_score) || '-'}</span></td>
                             </tr>
                           ))}
                         </tbody>
