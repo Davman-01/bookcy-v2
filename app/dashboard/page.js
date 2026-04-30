@@ -8,7 +8,8 @@ import {
   MessageCircle, Mail, UploadCloud, Loader2, Bell, CalendarOff, Check, UserMinus, BarChart, Filter, Shield, Music, Ticket, CalendarHeart,
   Target, BarChart3, Lock, Send, Link as LinkIcon, Dog, Car,
   PieChart, FileCode2, Rocket, ArrowRight, Wallet, CreditCard, TrendingUp,
-  Package, Box, Archive, AlertTriangle, Layers
+  Package, Box, Archive, AlertTriangle, Layers,
+  UserCircle, Activity, Award, AlertOctagon, Heart, FileText, ChevronRight // YENİ CRM İKONLARI EKLENDİ
 } from 'lucide-react';
 
 // GERÇEK SUPABASE BAĞLANTISI
@@ -80,6 +81,12 @@ export default function Dashboard() {
     { id: 1, name: '8 Seans Lazer Paketi', sessions: 8, price: 4500 },
     { id: 2, name: '5 Seans Cilt Bakımı', sessions: 5, price: 2250 }
   ]);
+
+  // --- MÜŞTERİ DETAY (MODÜL 3) STATE'LERİ ---
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [clientDetailTab, setClientDetailTab] = useState('history'); // history, clinic, packages
 
   const [profileForm, setProfileForm] = useState({ 
     logo_url: '', description: '', contact_phone: '', contact_email: '', 
@@ -295,13 +302,46 @@ export default function Dashboard() {
     setAdisyonForm({ musteri_adi: '', hizmet: '', personel: '', tutar: '', odeme_tipi: 'Kredi Kartı', prim_yuzdesi: '30' });
   };
 
+  // --- MÜŞTERİ DETAY MODALINI AÇAN FONKSİYON ---
+  const openClientModal = (clientData) => {
+    setSelectedClient({
+      name: clientData.customer_name,
+      surname: clientData.customer_surname,
+      phone: clientData.customer_phone,
+      email: clientData.customer_email || 'Bilinmiyor',
+      points: Math.floor(Math.random() * 500) + 50, 
+      alerji_notu: '', 
+      measurements: [
+        { date: '2026-03-10', weight: '68', waist: '64', notes: 'İlk seans lazer atışı: 15J' },
+        { date: '2026-04-12', weight: '65', waist: '62', notes: 'İkinci seans, kızarıklık olmadı. Atış: 18J' }
+      ],
+      packages: [
+        { name: '10 Seans Tüm Vücut Lazer', total: 10, used: 2 }
+      ],
+      history: appointments.filter(a => a.customer_phone === clientData.customer_phone)
+    });
+    setClientDetailTab('history');
+    setShowClientModal(true);
+  };
+
   const today = new Date().toISOString().split('T')[0];
   const getApptPrice = (serviceName) => { const srv = servicesForm.find(s => s.name === serviceName); return srv ? parseInt(srv.price) : 0; };
   
   const todayAppts = appointments.filter(a => a.appointment_date === today && a.status !== 'İptal');
   const earnedRevenue = appointments.filter(a => a.status === 'Tamamlandı').reduce((acc, a) => acc + getApptPrice(a.service_name), 0);
   const pendingRevenue = appointments.filter(a => a.status === 'Bekliyor' || !a.status).reduce((acc, a) => acc + getApptPrice(a.service_name), 0);
-  const uniqueCustomers = [...new Set(appointments.map(a => a.customer_phone))].length;
+  const uniqueCustomersMap = new Map();
+  appointments.forEach(a => {
+    if(a.customer_phone && !uniqueCustomersMap.has(a.customer_phone)) {
+      uniqueCustomersMap.set(a.customer_phone, a);
+    }
+  });
+  const uniqueCustomers = Array.from(uniqueCustomersMap.values());
+
+  const filteredCustomers = uniqueCustomers.filter(c => 
+    (c.customer_name && c.customer_name.toLowerCase().includes(customerSearch.toLowerCase())) || 
+    (c.customer_phone && c.customer_phone.includes(customerSearch))
+  );
 
   const last7Days = [...Array(7)].map((_, i) => {
     const d = new Date(); d.setDate(d.getDate() - (6 - i));
@@ -486,7 +526,7 @@ export default function Dashboard() {
                     <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm text-center">
                       <div className="w-10 h-10 bg-purple-50 text-purple-500 rounded-lg flex items-center justify-center mb-4 mx-auto"><Users size={20}/></div>
                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Toplam Müşteri</p>
-                      <p className="text-3xl font-black">{uniqueCustomers}</p>
+                      <p className="text-3xl font-black">{uniqueCustomers.length}</p>
                     </div>
                 </div>
 
@@ -598,7 +638,6 @@ export default function Dashboard() {
                 </button>
               </div>
 
-              {/* Finansal Özet Kartları */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-200">
                   <div className="flex justify-between items-start mb-4">
@@ -626,7 +665,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Son Adisyonlar Tablosu */}
               <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 overflow-hidden w-full">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                   <h3 className="font-black uppercase tracking-tight flex items-center gap-2 text-[#2D1B4E]">Son Kesilen Adisyonlar</h3>
@@ -666,7 +704,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* TAB 1.7: STOK & PAKET YÖNETİMİ (YENİ!) */}
+          {/* TAB 1.7: STOK & PAKET YÖNETİMİ */}
           {userRole === 'owner' && activeTab === 'inventory' && (
             <div className="animate-in fade-in duration-500">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -679,7 +717,6 @@ export default function Dashboard() {
                 </button>
               </div>
 
-              {/* Sub-Tabs (Ürünler / Paketler) */}
               <div className="flex gap-4 mb-8 bg-slate-100 p-1.5 rounded-2xl w-fit">
                 <button 
                   onClick={() => setInventoryTab('products')} 
@@ -696,7 +733,6 @@ export default function Dashboard() {
               </div>
 
               {inventoryTab === 'products' ? (
-                /* ÜRÜN STOK TABLOSU */
                 <div className="bg-white rounded-[32px] shadow-sm border border-slate-200 overflow-hidden w-full">
                   <div className="overflow-x-auto w-full">
                     <table className="w-full text-left border-collapse">
@@ -738,7 +774,6 @@ export default function Dashboard() {
                   </div>
                 </div>
               ) : (
-                /* PAKET TABLOSU */
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {packages.map((pkg) => (
                     <div key={pkg.id} className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
@@ -788,7 +823,6 @@ export default function Dashboard() {
                         <div className="py-20 text-center flex flex-col items-center justify-center text-slate-400">
                           <CalendarOff size={64} className="text-red-300 mb-4"/>
                           <h3 className="text-2xl font-black text-[#2D1B4E] uppercase tracking-tight mb-2">İşletme Kapalı</h3>
-                          <p className="text-xs font-bold uppercase tracking-widest">Bugün randevu alımına kapalıdır.</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 gap-4">
@@ -1029,46 +1063,51 @@ export default function Dashboard() {
               </div>
           )}
 
-          {/* TAB 5: MÜŞTERİLER VE GEÇMİŞ RANDEVULAR */}
+          {/* TAB 5: MÜŞTERİLER VE GEÇMİŞ RANDEVULAR (MODÜL 3 CRM EKRANI EKLENDİ) */}
           {userRole === 'owner' && activeTab === 'clients' && (
               <div className="animate-in slide-in-from-bottom-4 duration-500">
-                  <h2 className="text-2xl font-black uppercase tracking-tight mb-8">
-                     {isVet ? 'Hasta & Sahip Portföyü' : (isCarWash ? 'Araçlar & Müşteriler' : 'Müşteri Portföyü & Tüm İşlemler')}
-                  </h2>
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <h2 className="text-2xl font-black uppercase tracking-tight">
+                       {isVet ? 'Hasta & Sahip Portföyü' : (isCarWash ? 'Araçlar & Müşteriler' : 'Müşteri Rehberi & CRM')}
+                    </h2>
+                    <input type="text" placeholder="İsim veya Telefon Ara..." value={customerSearch} onChange={e=>setCustomerSearch(e.target.value)} className="w-full md:w-64 bg-white border border-slate-200 rounded-xl py-3 px-4 font-bold text-sm outline-none focus:border-[#E8622A] shadow-sm"/>
+                  </div>
+                  
                   <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden w-full">
                       <div className="overflow-x-auto w-full">
                         <table className="w-full text-left border-collapse">
                           <thead className="bg-slate-50">
                             <tr className="text-[10px] font-black uppercase text-slate-400">
                               <th className="px-8 py-5 border-b border-slate-100">Müşteri Bilgisi</th>
-                              <th className="px-8 py-5 border-b border-slate-100">Tarih & Saat</th>
-                              <th className="px-8 py-5 border-b border-slate-100">İşlem Detayı</th>
-                              <th className="px-8 py-5 border-b border-slate-100 text-center">Durum</th>
+                              <th className="px-8 py-5 border-b border-slate-100">İletişim</th>
+                              <th className="px-8 py-5 border-b border-slate-100 text-center">Son Randevu</th>
+                              <th className="px-8 py-5 border-b border-slate-100 text-right">Aksiyon</th>
                             </tr>
                           </thead>
                           <tbody>
-                              {appointments.map((appt) => (
-                                  <tr key={appt.id} className="border-t border-slate-50 hover:bg-slate-50 transition-colors">
+                              {filteredCustomers.map((cust, idx) => (
+                                  <tr key={idx} className="border-t border-slate-50 hover:bg-slate-50 transition-colors group">
                                     <td className="px-8 py-5">
                                       <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center font-bold text-[#2D1B4E] text-sm shrink-0">{appt.customer_name[0]}</div>
-                                        <div><span className="font-bold text-sm uppercase block">{appt.customer_name} {appt.customer_surname}</span><span className="text-xs text-slate-500 font-bold">{appt.customer_phone}</span></div>
+                                        <div className="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center font-black text-sm shrink-0">{cust.customer_name[0]}</div>
+                                        <span className="font-bold text-sm uppercase text-[#2D1B4E]">{cust.customer_name} {cust.customer_surname}</span>
                                       </div>
                                     </td>
-                                    <td className="px-8 py-5"><span className="font-bold text-sm text-[#2D1B4E] block">{appt.appointment_date}</span><span className="text-xs text-[#E8622A] font-black">{appt.appointment_time}</span></td>
-                                    <td className="px-8 py-5"><span className="font-bold text-sm text-slate-700 block">{appt.service_name}</span>{!isClub && <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{appt.staff_name}</span>}</td>
+                                    <td className="px-8 py-5">
+                                      <span className="text-xs text-slate-500 font-bold">{cust.customer_phone}</span>
+                                    </td>
                                     <td className="px-8 py-5 text-center">
-                                      {appt.status === 'İptal' ? ( <span className="bg-red-100 text-red-600 text-[10px] font-black px-4 py-2 rounded-xl uppercase inline-flex items-center justify-center gap-1 w-fit"><XCircle size={14}/> İptal</span> ) : appt.status === 'Tamamlandı' ? ( <span className="bg-green-100 text-green-600 text-[10px] font-black px-4 py-2 rounded-xl uppercase inline-flex items-center justify-center gap-1 w-fit"><Check size={14}/> Tamamlandı</span> ) : (
-                                        <div className="flex items-center justify-center gap-2">
-                                          <button onClick={() => updateApptStatus(appt.id, 'Tamamlandı')} className="bg-green-50 text-green-600 hover:bg-green-500 hover:text-white p-2 rounded-lg border border-green-200 transition-colors cursor-pointer" title="Tamamlandı İşaretle"><Check size={16}/></button>
-                                          <button onClick={() => updateApptStatus(appt.id, 'İptal')} className="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white p-2 rounded-lg border border-red-200 transition-colors cursor-pointer" title="Randevuyu İptal Et"><XCircle size={16}/></button>
-                                        </div>
-                                      )}
-                                      <button onClick={() => deleteAppointmentCompletely(appt.id)} className="ml-2 bg-transparent text-slate-300 hover:text-red-500 p-2 rounded-lg border-none cursor-pointer transition-colors" title="Kalıcı Olarak Sil"><Trash2 size={16}/></button>
+                                      <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-3 py-1 rounded-md">{cust.appointment_date}</span>
+                                    </td>
+                                    <td className="px-8 py-5 text-right">
+                                      {/* PROFİLİ İNCELE BUTONU BURADA */}
+                                      <button onClick={() => openClientModal(cust)} className="bg-white border border-slate-200 hover:border-[#E8622A] hover:text-[#E8622A] text-slate-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest cursor-pointer transition-all shadow-sm">
+                                        Profili İncele
+                                      </button>
                                     </td>
                                   </tr>
                               ))}
-                              {appointments.length === 0 && <tr><td colSpan="4" className="text-center p-10 text-slate-400 font-bold uppercase tracking-widest">Henüz hiç kayıt yok.</td></tr>}
+                              {filteredCustomers.length === 0 && <tr><td colSpan="4" className="text-center p-10 text-slate-400 font-bold uppercase tracking-widest">Kayıt bulunamadı.</td></tr>}
                           </tbody>
                         </table>
                       </div>
@@ -1254,6 +1293,7 @@ export default function Dashboard() {
                               </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              {/* Örnek Kayıtlı Segmentler */}
                               <div className="border border-slate-200 rounded-2xl p-6 hover:shadow-md transition-shadow">
                                 <div className="flex justify-between items-start mb-4">
                                   <h4 className="font-black text-[#2D1B4E] uppercase text-sm">Son 1 Aydır Gelmeyenler</h4>
@@ -1284,6 +1324,7 @@ export default function Dashboard() {
                             </div>
                           </>
                         ) : (
+                          // SEGMENT BUILDER EKRANI (Mockup)
                           <div className="animate-in fade-in flex-1">
                             <button onClick={() => setShowSegmentBuilder(false)} className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6 flex items-center gap-2 bg-transparent border-none cursor-pointer hover:text-[#2D1B4E]">
                               ← Kitlelere Dön
@@ -1295,6 +1336,7 @@ export default function Dashboard() {
                               
                               <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 mb-4">Filtreleme Kuralları</h4>
                               
+                              {/* Kural 1 */}
                               <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 mb-3 shadow-sm">
                                 <span className="bg-[#2D1B4E] text-white text-[10px] font-black px-2 py-1 rounded uppercase">Eğer</span>
                                 <select className="bg-slate-50 border border-slate-100 rounded-lg py-2 px-3 text-xs font-bold outline-none cursor-pointer">
@@ -1315,6 +1357,7 @@ export default function Dashboard() {
                                 <button className="ml-auto text-slate-300 hover:text-red-500 bg-transparent border-none cursor-pointer"><Trash2 size={16}/></button>
                               </div>
 
+                              {/* Kural 2 */}
                               <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-200 mb-4 shadow-sm relative">
                                 <div className="absolute -top-4 left-6 bg-slate-200 text-slate-500 text-[9px] font-black px-2 py-0.5 rounded uppercase">VE (AND)</div>
                                 <span className="bg-[#2D1B4E] text-white text-[10px] font-black px-2 py-1 rounded uppercase">Eğer</span>
@@ -1375,6 +1418,7 @@ export default function Dashboard() {
                               </button>
                          </div>
 
+                         {/* Kampanya Yaratma Formu (Örnek Açık) */}
                          <div className="bg-slate-50 border border-slate-200 rounded-[24px] p-8 mb-8">
                             <h4 className="font-black uppercase text-[#2D1B4E] text-sm mb-6 flex items-center gap-2"><Rocket className="text-[#E8622A]"/> Kampanya Fırlatma Rampası</h4>
                             
@@ -1515,6 +1559,166 @@ export default function Dashboard() {
         </div>
       </main>
 
+      {/* --- MÜŞTERİ DETAY (MODÜL 3) MODALI --- */}
+      {showClientModal && selectedClient && (
+        <div className="fixed inset-0 bg-[#2D1B4E]/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
+          <div className="bg-[#F8F9FA] w-full max-w-5xl h-[85vh] rounded-[32px] relative animate-in zoom-in-95 shadow-2xl flex flex-col overflow-hidden border border-slate-200">
+            {/* Modal Header */}
+            <div className="bg-white px-8 py-6 flex justify-between items-center border-b border-slate-200 shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center font-black text-xl">
+                  {selectedClient.name[0]}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black uppercase text-[#2D1B4E] flex items-center gap-2">
+                    {selectedClient.name} {selectedClient.surname} 
+                    {selectedClient.points > 100 && <span className="bg-yellow-100 text-yellow-600 text-[10px] px-2 py-1 rounded-lg flex items-center gap-1"><Award size={12}/> VIP</span>}
+                  </h2>
+                  <p className="text-xs font-bold text-slate-500 mt-1">{selectedClient.phone} • {selectedClient.email}</p>
+                </div>
+              </div>
+              <button onClick={() => setShowClientModal(false)} className="text-slate-400 hover:text-red-500 bg-slate-100 hover:bg-red-50 p-2 rounded-xl transition-colors cursor-pointer border-none"><XCircle size={24}/></button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+              
+              {/* Sol Sütun (Sabit CRM Bilgileri) */}
+              <div className="w-full lg:w-80 bg-white border-r border-slate-200 p-6 flex flex-col gap-6 overflow-y-auto shrink-0">
+                {/* Bookcy Puan (Sadakat) */}
+                <div className="bg-gradient-to-br from-[#2D1B4E] to-[#4c2d85] p-6 rounded-2xl text-white shadow-md relative overflow-hidden">
+                   <Award className="absolute -right-4 -bottom-4 opacity-10 text-white" size={100}/>
+                   <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mb-1">Kullanılabilir Sadakat Puanı</p>
+                   <p className="text-4xl font-black">{selectedClient.points}</p>
+                   <p className="text-[9px] font-bold text-indigo-300 mt-2">Her işlemde puan kazanır.</p>
+                </div>
+
+                {/* Sağlık & Alerji Notları */}
+                <div className="bg-red-50 border border-red-100 p-5 rounded-2xl flex flex-col gap-3">
+                   <label className="text-[10px] font-black uppercase tracking-widest text-red-500 flex items-center gap-1">
+                     <AlertOctagon size={14}/> Kritik / Alerji Notları
+                   </label>
+                   <textarea 
+                     placeholder="Örn: Hassas cilt, boya alerjisi var, vb." 
+                     className="w-full bg-white border border-red-100 rounded-xl p-3 text-xs font-bold text-red-700 outline-none focus:border-red-300 resize-none h-24 placeholder:text-red-300"
+                     defaultValue={selectedClient.alerji_notu}
+                   ></textarea>
+                   <button className="bg-red-500 hover:bg-red-600 text-white text-[10px] font-black uppercase py-2 rounded-lg transition-colors border-none cursor-pointer">Notu Güncelle</button>
+                </div>
+              </div>
+
+              {/* Sağ Sütun (Dinamik Sekmeler) */}
+              <div className="flex-1 flex flex-col bg-[#F8F9FA] overflow-hidden">
+                {/* Sub-Nav */}
+                <div className="flex items-center gap-2 p-6 pb-0 border-b border-slate-200 shrink-0">
+                  <button onClick={() => setClientDetailTab('history')} className={`pb-4 px-4 font-black text-xs uppercase tracking-widest border-b-4 transition-colors bg-transparent cursor-pointer ${clientDetailTab === 'history' ? 'border-[#E8622A] text-[#2D1B4E]' : 'border-transparent text-slate-400 hover:text-[#2D1B4E]'}`}>
+                     Geçmiş Randevular
+                  </button>
+                  <button onClick={() => setClientDetailTab('clinic')} className={`pb-4 px-4 font-black text-xs uppercase tracking-widest border-b-4 transition-colors bg-transparent cursor-pointer ${clientDetailTab === 'clinic' ? 'border-[#E8622A] text-[#2D1B4E]' : 'border-transparent text-slate-400 hover:text-[#2D1B4E]'}`}>
+                     <Activity size={14} className="inline mr-1 mb-0.5"/> Klinik & Ölçüm Tablosu
+                  </button>
+                  <button onClick={() => setClientDetailTab('packages')} className={`pb-4 px-4 font-black text-xs uppercase tracking-widest border-b-4 transition-colors bg-transparent cursor-pointer ${clientDetailTab === 'packages' ? 'border-[#E8622A] text-[#2D1B4E]' : 'border-transparent text-slate-400 hover:text-[#2D1B4E]'}`}>
+                     Paketleri
+                  </button>
+                </div>
+
+                {/* Tab Content */}
+                <div className="flex-1 p-6 overflow-y-auto">
+                  
+                  {clientDetailTab === 'history' && (
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
+                      <table className="w-full text-left border-collapse">
+                        <thead className="bg-slate-50">
+                          <tr>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400">Tarih</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400">İşlem & Uzman</th>
+                            <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400 text-center">Durum</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedClient.history.length > 0 ? selectedClient.history.map(app => (
+                            <tr key={app.id} className="border-t border-slate-50">
+                              <td className="px-6 py-4 font-bold text-sm text-[#2D1B4E]">{app.appointment_date} <br/><span className="text-xs text-slate-400">{app.appointment_time}</span></td>
+                              <td className="px-6 py-4 font-bold text-sm text-slate-600">{app.service_name} <br/><span className="text-xs text-[#E8622A]">{app.staff_name}</span></td>
+                              <td className="px-6 py-4 text-center">
+                                <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase ${app.status === 'Tamamlandı' ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-500'}`}>{app.status || 'Bekliyor'}</span>
+                              </td>
+                            </tr>
+                          )) : <tr><td colSpan="3" className="p-8 text-center text-slate-400 font-bold text-xs uppercase">Geçmiş randevu yok.</td></tr>}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {clientDetailTab === 'clinic' && (
+                    <div className="animate-in fade-in">
+                      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-6">
+                        <h4 className="font-black text-sm uppercase text-[#2D1B4E] mb-4 flex items-center gap-2"><Plus size={16} className="text-[#E8622A]"/> Yeni Seans / Ölçüm Ekle</h4>
+                        <div className="grid grid-cols-3 gap-4 mb-4">
+                           <div><label className="text-[10px] font-bold text-slate-400 uppercase">Tarih</label><input type="date" defaultValue={today} className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-bold mt-1 outline-none"/></div>
+                           <div><label className="text-[10px] font-bold text-slate-400 uppercase">Kilo (Kg) / Bel Ölçüsü</label><input type="text" placeholder="Örn: 65 kg" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-bold mt-1 outline-none"/></div>
+                           <div><label className="text-[10px] font-bold text-slate-400 uppercase">İşlem Detayı (Lazer Atışı vb.)</label><input type="text" placeholder="Örn: 18 Joule, hassasiyet yok" className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-bold mt-1 outline-none"/></div>
+                        </div>
+                        <button className="bg-[#E8622A] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border-none cursor-pointer">Tabloya Kaydet</button>
+                      </div>
+
+                      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
+                        <table className="w-full text-left border-collapse">
+                          <thead className="bg-slate-50">
+                            <tr>
+                              <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400">Seans Tarihi</th>
+                              <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400">Fiziksel Ölçüm</th>
+                              <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-400">Uzman Notu / Atış</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {selectedClient.measurements.map((m, idx) => (
+                              <tr key={idx} className="border-t border-slate-50">
+                                <td className="px-6 py-4 font-black text-sm text-[#2D1B4E]">{m.date}</td>
+                                <td className="px-6 py-4 font-bold text-sm text-slate-600">Kilo: {m.weight} | Bel: {m.waist}</td>
+                                <td className="px-6 py-4 text-xs font-medium text-slate-500 italic">"{m.notes}"</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {clientDetailTab === 'packages' && (
+                    <div className="animate-in fade-in grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {selectedClient.packages.map((pkg, idx) => (
+                        <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                           <div className="flex justify-between items-start mb-4">
+                             <div className="w-10 h-10 bg-indigo-50 text-indigo-500 rounded-xl flex items-center justify-center"><Layers size={20}/></div>
+                             <span className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase">Aktif Paket</span>
+                           </div>
+                           <h4 className="font-black text-base text-[#2D1B4E] uppercase tracking-tight mb-4">{pkg.name}</h4>
+                           
+                           <div className="mb-2 flex justify-between text-xs font-bold text-slate-500 uppercase">
+                             <span>Kullanılan: {pkg.used}</span>
+                             <span>Toplam: {pkg.total} Seans</span>
+                           </div>
+                           <div className="w-full bg-slate-100 rounded-full h-3 mb-6 overflow-hidden relative">
+                             <div className="bg-[#E8622A] h-3 rounded-full transition-all" style={{ width: `${(pkg.used / pkg.total)*100}%` }}></div>
+                           </div>
+
+                           <button className="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-600 py-3 rounded-xl font-black text-xs uppercase tracking-widest border border-indigo-100 cursor-pointer transition-colors flex items-center justify-center gap-2">
+                             <CheckCircle2 size={16}/> 1 Seans Düş
+                           </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODALLAR (ADİSYON & HIZLI RANDEVU) */}
       {showQuickAdd && (
         <div className="fixed inset-0 bg-[#2D1B4E]/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
@@ -1554,57 +1758,22 @@ export default function Dashboard() {
       {/* YENİ ADİSYON MODALI */}
       {showAdisyonModal && (
         <div className="fixed inset-0 bg-[#2D1B4E]/90 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-[500px] rounded-[32px] p-8 relative animate-in zoom-in-95 duration-300 shadow-2xl border border-slate-200">
-            <button onClick={() => setShowAdisyonModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-red-500 border-none bg-transparent cursor-pointer transition-colors"><XCircle size={28}/></button>
+          <div className="bg-white w-full max-w-[500px] rounded-[32px] p-8 relative animate-in zoom-in-95 shadow-2xl">
+            <button onClick={() => setShowAdisyonModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-red-500 border-none bg-transparent cursor-pointer"><XCircle size={28}/></button>
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center mb-4 mx-auto"><Wallet size={32}/></div>
-              <h2 className="text-2xl font-black uppercase text-[#2D1B4E]">Yeni Adisyon Kes</h2>
-              <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Kasa & Personel Primi İşlemi</p>
+              <h2 className="text-2xl font-black uppercase text-[#2D1B4E]">Adisyon Kes</h2>
             </div>
-            
             <form onSubmit={handleAdisyonSubmit} className="space-y-4">
               <input required placeholder="Müşteri Adı Soyadı" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-emerald-500" value={adisyonForm.musteri_adi} onChange={e => setAdisyonForm({...adisyonForm, musteri_adi: e.target.value})} />
-              
               <div className="grid grid-cols-2 gap-4">
-                <select required className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-emerald-500 cursor-pointer" value={adisyonForm.hizmet} onChange={e => setAdisyonForm({...adisyonForm, hizmet: e.target.value})}>
-                  <option value="">Hizmet Seç</option>
-                  {servicesForm.map((s,i) => <option key={i} value={s.name}>{s.name}</option>)}
-                </select>
-                
-                <select required className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-emerald-500 cursor-pointer" value={adisyonForm.personel} onChange={e => setAdisyonForm({...adisyonForm, personel: e.target.value})}>
-                  <option value="">İşlemi Yapan Uzman</option>
-                  {staffForm.map((s,i) => <option key={i} value={s.name}>{s.name}</option>)}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black">₺</span>
-                  <input required type="number" placeholder="Toplam Tutar" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-10 pr-4 font-black text-sm outline-none focus:border-emerald-500" value={adisyonForm.tutar} onChange={e => setAdisyonForm({...adisyonForm, tutar: e.target.value})} />
-                </div>
+                <input required type="number" placeholder="Toplam Tutar" className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-black text-sm outline-none focus:border-emerald-500" value={adisyonForm.tutar} onChange={e => setAdisyonForm({...adisyonForm, tutar: e.target.value})} />
                 <select required className="bg-slate-50 border border-slate-200 rounded-2xl py-4 px-4 font-bold text-sm outline-none focus:border-emerald-500 cursor-pointer" value={adisyonForm.odeme_tipi} onChange={e => setAdisyonForm({...adisyonForm, odeme_tipi: e.target.value})}>
-                  <option value="Kredi Kartı">Kredi Kartı / POS</option>
+                  <option value="Kredi Kartı">Kredi Kartı</option>
                   <option value="Nakit">Nakit</option>
-                  <option value="Havale/EFT">Havale / EFT</option>
                 </select>
               </div>
-
-              {/* Dinamik Prim Hesaplama Bölümü */}
-              <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4 mt-4">
-                 <label className="text-[10px] font-black uppercase tracking-widest text-purple-500 block mb-2">Personel Prim Oranı (%)</label>
-                 <div className="flex items-center gap-4">
-                   <input type="range" min="0" max="100" className="flex-1 accent-purple-600 cursor-pointer" value={adisyonForm.prim_yuzdesi} onChange={e => setAdisyonForm({...adisyonForm, prim_yuzdesi: e.target.value})} />
-                   <span className="font-black text-purple-700 w-12 text-right">%{adisyonForm.prim_yuzdesi}</span>
-                 </div>
-                 <div className="flex justify-between items-center mt-3 pt-3 border-t border-purple-200/50">
-                   <span className="text-xs font-bold text-slate-500">Uzmanın Hak Ettiği Prim:</span>
-                   <span className="font-black text-purple-700 text-lg">₺{adisyonForm.tutar ? ((adisyonForm.tutar * adisyonForm.prim_yuzdesi) / 100).toFixed(2) : '0.00'}</span>
-                 </div>
-              </div>
-
-              <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl border-none cursor-pointer mt-4 hover:scale-[1.02] transition-transform">
-                Adisyonu Kaydet & Kasaya Ekle
-              </button>
+              <button type="submit" className="w-full bg-emerald-500 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl border-none cursor-pointer">Adisyonu Tamamla</button>
             </form>
           </div>
         </div>
