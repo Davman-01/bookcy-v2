@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, Store, Users, CheckCircle, Clock, Search, Mail, 
   ShieldCheck, XCircle, LogOut, CheckCircle2,
-  Trash2, AlertCircle, MapPin, CreditCard, Star, BarChart3, CalendarCheck, Menu // Menu eklendi
+  Trash2, AlertCircle, MapPin, CreditCard, Star, BarChart3, CalendarCheck, Menu 
 } from 'lucide-react';
 import AdminTrialControl from '../../components/AdminTrialControl';
 import { supabase } from '../../lib/supabase';
@@ -42,7 +42,7 @@ export default function SuperAdmin() {
   const [customerSearch, setCustomerSearch] = useState('');
 
   const [isSendingMail, setIsSendingMail] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Mobil menü state'i eklendi
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); 
 
   useEffect(() => {
     const checkSession = async () => {
@@ -115,7 +115,7 @@ export default function SuperAdmin() {
   }
 
   const approveShop = async (shop) => {
-    const isConfirmed = window.confirm(`${shop.name} işletmesini ONAYLAMAK istediğinize emin misiniz?`);
+    const isConfirmed = window.confirm(`${shop?.name || 'Bu'} işletmesini ONAYLAMAK istediğinize emin misiniz?`);
     if (!isConfirmed) return;
     setLoading(true);
     const { error } = await supabase.from('shops').update({ status: 'approved' }).eq('id', shop.id);
@@ -127,7 +127,7 @@ export default function SuperAdmin() {
           body: JSON.stringify({
             to: shop.admin_email,
             subject: 'Hesabınız Aktif Edildi - Bookcy',
-            html: getActivationTemplate({ shopName: shop.name, packageName: shop.package || 'Standart Paket', username: shop.admin_username, password: shop.admin_password })
+            html: getActivationTemplate({ shopName: shop.name || 'İşletme', packageName: shop.package || 'Standart Paket', username: shop.admin_username, password: shop.admin_password })
           }),
         });
       } catch (err) { console.error(err); }
@@ -149,7 +149,7 @@ export default function SuperAdmin() {
   };
 
   const sendReminderEmail = async (shop) => {
-    const isConfirmed = window.confirm(`${shop.name} işletmesine ödeme hatırlatma maili gönderilecek. Onaylıyor musunuz?`);
+    const isConfirmed = window.confirm(`${shop?.name || 'Bu'} işletmesine ödeme hatırlatma maili gönderilecek. Onaylıyor musunuz?`);
     if (!isConfirmed) return;
     setIsSendingMail(true);
     try {
@@ -159,7 +159,7 @@ export default function SuperAdmin() {
         body: JSON.stringify({
           to: shop.admin_email,
           subject: 'Ödeme Hatırlatması - Bookcy Kayıt Talebi',
-          html: getRegistrationTemplate({ shopName: shop.name, date: new Date(shop.created_at).toLocaleDateString('tr-TR'), packageName: (shop.package || 'Standart Paket').toUpperCase(), price: (shop.package === 'Premium' || shop.package === 'Premium Paket') ? '100 STG' : '60 STG' })
+          html: getRegistrationTemplate({ shopName: shop.name || 'İşletme', date: new Date(shop.created_at).toLocaleDateString('tr-TR'), packageName: (shop.package || 'Standart Paket').toUpperCase(), price: (shop.package === 'Premium' || shop.package === 'Premium Paket') ? '100 STG' : '60 STG' })
         }),
       });
       alert("Hatırlatma maili başarıyla gönderildi!");
@@ -168,7 +168,11 @@ export default function SuperAdmin() {
 
   const pendingShops = shops.filter(s => s.status === 'pending');
   const activeShops = shops.filter(s => s.status === 'approved');
-  const filteredActiveShops = activeShops.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  
+  // GÜVENLİK GÜNCELLEMESİ: İşletme isminin undefined olma ihtimaline karşı ? ve || kullanıldı.
+  const filteredActiveShops = activeShops.filter(s => 
+    (s?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const uniqueCustomers = [];
   const map = new Map();
@@ -179,9 +183,10 @@ export default function SuperAdmin() {
       }
   }
 
+  // GÜVENLİK GÜNCELLEMESİ: Müşteri ismi için koruma eklendi
   const filteredCustomers = uniqueCustomers.filter(c => 
-    (c.customer_name && c.customer_name.toLowerCase().includes(customerSearch.toLowerCase())) || 
-    (c.customer_phone && c.customer_phone.includes(customerSearch))
+    ((c?.customer_name || '').toLowerCase().includes(customerSearch.toLowerCase())) || 
+    (c?.customer_phone && c.customer_phone.includes(customerSearch))
   );
 
   const totalRevs = reviews.length;
@@ -190,12 +195,13 @@ export default function SuperAdmin() {
   const categoryStats = {};
   appointments.forEach(app => {
     const shop = shops.find(s => s.id === app.shop_id);
-    const cat = shop ? shop.category : 'Bilinmeyen';
+    const cat = shop ? (shop.category || 'Bilinmeyen') : 'Bilinmeyen';
     categoryStats[cat] = (categoryStats[cat] || 0) + 1;
   });
   const sortedCategoryStats = Object.entries(categoryStats).sort((a, b) => b[1] - a[1]);
 
   const getSubStatus = (date) => {
+    if (!date) return { end: 'Bilinmiyor', remaining: 0 };
     const start = new Date(date);
     const end = new Date(start);
     end.setMonth(start.getMonth() + 1);
@@ -225,12 +231,10 @@ export default function SuperAdmin() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex text-[#2D1B4E] font-['DM_Sans'] relative">
       
-      {/* Mobil Menü Arka Plan Overlay'i */}
       {mobileMenuOpen && ( 
         <div className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div> 
       )}
 
-      {/* Sidebar - Mobil Uyumlu */}
       <aside className={`fixed md:relative top-0 left-0 h-screen bg-[#2D1B4E] text-white flex flex-col w-64 shrink-0 shadow-2xl z-40 transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="p-8 border-b border-white/10 flex justify-between items-center">
           <span className="font-black text-xl tracking-tighter font-['Plus_Jakarta_Sans']">admin<span className="text-[#E8622A]">.</span></span>
@@ -257,7 +261,6 @@ export default function SuperAdmin() {
 
       <main className="flex-1 flex flex-col h-screen relative">
         
-        {/* Mobil Üst Bar (Header) Eklendi */}
         <header className="md:hidden bg-white border-b border-slate-200 px-4 py-4 flex justify-between items-center sticky top-0 z-20 shadow-sm shrink-0">
           <div className="flex items-center gap-3">
             <button className="text-[#2D1B4E] bg-slate-100 p-2 rounded-lg border-none cursor-pointer hover:bg-slate-200 transition-colors" onClick={() => setMobileMenuOpen(true)}>
@@ -321,15 +324,16 @@ export default function SuperAdmin() {
                         {pendingShops.map(shop => (
                           <tr key={shop.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                             <td className="px-6 md:px-8 py-6">
-                              <div className="font-black text-base text-[#2D1B4E] uppercase">{shop.name}</div>
-                              <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{shop.location} • {shop.category}</div>
+                              {/* GÜVENLİK GÜNCELLEMESİ: İsmi undefined ise hata vermemesi için koruma sağlandı */}
+                              <div className="font-black text-base text-[#2D1B4E] uppercase">{shop?.name || 'İSİMSİZ İŞLETME'}</div>
+                              <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{shop?.location || 'Bilinmiyor'} • {shop?.category || 'Bilinmiyor'}</div>
                             </td>
                             <td className="px-6 md:px-8 py-6">
                               <span className="bg-orange-50 text-orange-600 px-3 py-1 rounded-lg text-[10px] font-black uppercase border border-orange-100 whitespace-nowrap">{timeAgo(shop.created_at)}</span>
                             </td>
                             <td className="px-6 md:px-8 py-6">
-                              <div className="font-black text-sm text-[#2D1B4E] mb-1">{shop.package} Paket</div>
-                              <div className="text-xs font-bold text-slate-500">{shop.admin_email}</div>
+                              <div className="font-black text-sm text-[#2D1B4E] mb-1">{shop?.package || 'Standart'} Paket</div>
+                              <div className="text-xs font-bold text-slate-500">{shop?.admin_email || 'E-Posta Yok'}</div>
                             </td>
                             <td className="px-6 md:px-8 py-6 text-right">
                               <div className="flex items-center justify-end gap-2">
@@ -374,15 +378,15 @@ export default function SuperAdmin() {
                           {filteredActiveShops.map(shop => (
                             <tr key={shop.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                               <td className="px-6 md:px-8 py-6">
-                                <div className="font-black text-base text-[#2D1B4E] uppercase">{shop.name}</div>
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{shop.location}</div>
+                                <div className="font-black text-base text-[#2D1B4E] uppercase">{shop?.name || 'İSİMSİZ İŞLETME'}</div>
+                                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{shop?.location || ''}</div>
                               </td>
                               <td className="px-6 md:px-8 py-6">
-                                <div className="font-bold text-sm text-slate-700">K.Adı: {shop.admin_username}</div>
-                                <div className="text-xs text-slate-400 font-mono mt-1">Şifre: {shop.admin_password}</div>
+                                <div className="font-bold text-sm text-slate-700">K.Adı: {shop?.admin_username || ''}</div>
+                                <div className="text-xs text-slate-400 font-mono mt-1">Şifre: {shop?.admin_password || ''}</div>
                               </td>
                               <td className="px-6 md:px-8 py-6">
-                                <span className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-slate-200 whitespace-nowrap">{shop.package}</span>
+                                <span className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-slate-200 whitespace-nowrap">{shop?.package || 'Standart'}</span>
                               </td>
                               <td className="px-6 md:px-8 py-6 text-right">
                                 <button onClick={() => deleteShop(shop.id)} className="bg-red-50 text-red-500 p-3 rounded-xl border border-red-200 cursor-pointer shadow-sm hover:bg-red-500 hover:text-white transition-all"><Trash2 size={18}/></button>
@@ -425,7 +429,7 @@ export default function SuperAdmin() {
                                 <div className="text-xs font-medium text-slate-400">{app.customer_phone}</div>
                               </td>
                               <td className="p-6 text-xs font-bold text-slate-600">
-                                {shopData?.name} <br/><span className="text-slate-400 font-medium">{app.service_name}</span>
+                                {shopData?.name || 'Bilinmiyor'} <br/><span className="text-slate-400 font-medium">{app.service_name}</span>
                               </td>
                             </tr>
                           );
@@ -479,8 +483,8 @@ export default function SuperAdmin() {
                             {shop.logo_url ? <img src={shop.logo_url} className="w-full h-full object-cover"/> : <Store size={20}/>}
                           </div>
                           <div>
-                            <p className="font-black text-[#2D1B4E] uppercase text-sm">{shop.name}</p>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase">{shop.package} Paket</p>
+                            <p className="font-black text-[#2D1B4E] uppercase text-sm">{shop?.name || 'İSİMSİZ'}</p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase">{shop?.package || 'Standart'} Paket</p>
                           </div>
                         </div>
                         <div className="flex items-center justify-between w-full md:w-auto gap-8">
