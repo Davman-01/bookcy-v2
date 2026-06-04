@@ -29,9 +29,40 @@ export default function RootLayout({ children }) {
           /* NAVBAR ANA CSS KODLARI */
           nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 40px; height: 76px; display: flex; align-items: center; justify-content: space-between; background: var(--c-nav-bg); backdrop-filter: blur(20px); border-bottom: 1px solid #F1F5F9; transition: all 0.3s; }
           
-          /* YENİ: LOGO KUTUSU (Masaüstünde biraz daha geniş ve belirgin) */
+          /* ==========================================================================
+             KRİTİK GÜNCELLEME: LOGO BELİRGİNLİĞİ ARTIRILDI (Boyut Değişmedi)
+             ========================================================================== */
           .nav-logo-box { width: 170px; height: 50px; display: flex; align-items: center; cursor: pointer; text-decoration: none; } 
-          .nav-logo-box img { max-height: 100%; max-width: 100%; object-fit: contain; mix-blend-mode: multiply; transform: scale(1.45); transform-origin: left center; transition: transform 0.3s ease; } 
+
+          /* 1. Kutu Belirginliği: Gölgeyi ve Kenarlığı Güçlendir */
+          .nav-logo-box div {
+              box-shadow: 0 5px 15px rgba(45,27,78,0.18) !important; /* Daha derin ve tanımlı gölge (Fig rengi tonlu) */
+              border-width: 1.5px !important; /* Kenarlığı tık kalınlaştır */
+              border-color: rgba(226,232,240,0.9) !important; /* Kenarlığı daha belirgin yap */
+          }
+
+          /* 2. İmaj Belirginliği: Kontrast, Keskinlik ve Canlılık */
+          .nav-logo-box img { 
+              max-height: 100%; 
+              max-width: 100%; 
+              object-fit: contain; 
+              
+              /* mix-blend-mode: multiply KALDIRILDI! normal yapıyoruz */
+              mix-blend-mode: normal !important; /* Arka plana yedirme, parlak kalsın */
+
+              /* Büyüklük oranı aynı */
+              transform: scale(1.45); 
+              transform-origin: left center; 
+              transition: transform 0.3s ease; 
+              
+              /* YENİ: Keskinleştirme (Görüntü kalitesini CSS ile artır) */
+              image-rendering: -webkit-optimize-contrast;
+              image-rendering: crisp-edges;
+
+              /* YENİ: Kontrast ve Renk Canlılığını Artır (+%5 Kontrast, +%5 Doygunluk) */
+              filter: contrast(1.08) saturate(1.08) drop-shadow(0 1px 1px rgba(0,0,0,0.05));
+          } 
+          /* ========================================================================== */
           
           .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; height: 100%; margin:0; padding:0; }
           .nav-main-btn { text-decoration: none; font-size: 14px; font-weight: 700; color: #64748B; transition: all 0.2s; position: relative; background:none; border:none; outline:none; font-family:'DM Sans', sans-serif; cursor:pointer;}
@@ -53,8 +84,11 @@ export default function RootLayout({ children }) {
             /* Mobilde navbar padding ve yüksekliğini optimize ediyoruz */
             nav { padding: 0 20px; height: 70px; } 
             
-            /* YENİ: Mobilde logonun alanını genişletip scale (büyütme) oranını artırdık */
+            /* YENİ: Mobilde logonun alanını belirginleştirmek için kontrast/gölge artırıldı (Boyut Değişmedi) */
             .nav-logo-box { width: 160px; }
+            .nav-logo-box div {
+                box-shadow: 0 7px 18px rgba(45,27,78,0.22) !important; /* Mobilde gölge bir tık daha derin */
+            }
             .nav-logo-box img { transform: scale(1.65); } 
 
             .nav-links { display: none !important; }
