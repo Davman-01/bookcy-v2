@@ -103,11 +103,12 @@ export default function Navbar() {
     <>
       <nav className="fixed top-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur-md border-b border-slate-100 h-[70px] px-4 md:px-6 xl:px-8 flex items-center justify-between whitespace-nowrap flex-nowrap transition-all">
         
-        <Link href="/" className="flex items-center gap-2 shrink-0 text-decoration-none group">
-          <div className="h-8 w-8 md:h-9 md:w-9 bg-white p-1 rounded-xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
-            <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
+        {/* LOGO ALANI: Mobilde ve Masaüstünde Büyütüldü */}
+        <Link href="/" className="flex items-center gap-2 md:gap-3 shrink-0 text-decoration-none group">
+          <div className="h-11 w-11 md:h-14 md:w-14 bg-white p-1 md:p-1.5 rounded-xl md:rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
+            <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain scale-125 md:scale-150 mix-blend-multiply origin-center" />
           </div>
-          <span className="text-lg md:text-xl font-black tracking-tighter text-[#2D1B4E] uppercase" style={{fontFamily: "'DM Sans', sans-serif"}}>
+          <span className="text-xl md:text-2xl font-black tracking-tighter text-[#2D1B4E] uppercase" style={{fontFamily: "'DM Sans', sans-serif"}}>
             BOOKCY<span className="text-[#E8622A]">.</span>
           </span>
         </Link>
@@ -119,7 +120,6 @@ export default function Navbar() {
                   <Link href="/ozellikler" className={`flex items-center gap-1 transition-colors h-full text-decoration-none uppercase text-[10px] xl:text-[11px] font-bold hover:text-[#E8622A] ${pathname?.includes('/ozellikler') ? 'active text-[#E8622A]' : 'text-slate-600'}`}>
                       {text.nav?.features} <ChevronDown size={14} className={`transition-transform duration-200 ${showFeaturesMenu ? 'rotate-180' : ''}`} />
                   </Link>
-                  {/* MEGA MENU: absolute yerine fixed yapıldı, ekrana tam oturtuldu */}
                   {showFeaturesMenu && (
                       <div className="fixed top-[70px] left-0 w-full bg-white text-[#2D1B4E] shadow-[0_20px_60px_rgba(0,0,0,0.1)] border-t border-slate-200 cursor-default animate-in slide-in-from-top-2 duration-200 z-50">
                           <div className="max-w-[1000px] mx-auto py-10 px-8">
@@ -202,10 +202,11 @@ export default function Navbar() {
         <div className="fixed inset-0 z-[9999] bg-white flex flex-col animate-in slide-in-from-right-full duration-300">
             <div className="flex justify-between items-center p-6 border-b border-slate-100">
                 <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-decoration-none group">
-                  <div className="h-10 w-10 bg-white p-1 rounded-lg border border-slate-100 flex items-center justify-center overflow-hidden">
-                    <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain" />
+                  {/* MOBİL MENÜ İÇİ LOGO: Daha da büyütüldü */}
+                  <div className="h-12 w-12 bg-white p-1 rounded-xl border border-slate-100 flex items-center justify-center overflow-hidden">
+                    <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain scale-150 mix-blend-multiply origin-center" />
                   </div>
-                  <span className="text-xl font-black tracking-tighter text-[#2D1B4E] uppercase" style={{fontFamily: "'DM Sans', sans-serif"}}>BOOKCY<span className="text-[#E8622A]">.</span></span>
+                  <span className="text-2xl font-black tracking-tighter text-[#2D1B4E] uppercase" style={{fontFamily: "'DM Sans', sans-serif"}}>BOOKCY<span className="text-[#E8622A]">.</span></span>
                 </Link>
                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-500 bg-slate-50 rounded-full border-none cursor-pointer"><X size={24}/></button>
             </div>
