@@ -5,8 +5,10 @@ import { Search, MapPin, CheckCircle2, Calendar, Scissors, ChevronRight } from '
 import { useAppContext } from './providers';
 import { categories, cyprusRegions } from '../lib/constants';
 
+// YENİ SPOR VE LIFESTYLE KATEGORİLERİ İÇİN GÖRSELLER EKLENDİ
 const getCategoryImage = (name) => {
   const lowerName = name?.toLowerCase() || '';
+  // Güzellik & Bakım
   if (lowerName.includes('vet') || lowerName.includes('veteriner')) return 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?q=80&w=800&auto=format&fit=crop';
   if (lowerName.includes('pet') || lowerName.includes('köpek') || lowerName.includes('kedi')) return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800&auto=format&fit=crop';
   if (lowerName.includes('tırnak') || lowerName.includes('nail') || lowerName.includes('manikür') || lowerName.includes('bakım') || lowerName.includes('güzellik')) return 'https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop';
@@ -16,6 +18,18 @@ const getCategoryImage = (name) => {
   if (lowerName.includes('dövme') || lowerName.includes('tattoo')) return 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?q=80&w=800&auto=format&fit=crop';
   if (lowerName.includes('spa') || lowerName.includes('masaj')) return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop';
   if (lowerName.includes('klinik') || lowerName.includes('diş') || lowerName.includes('sağlık')) return 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=800&auto=format&fit=crop';
+  
+  // YENİ: Spor & Yaşam Tarzı
+  if (lowerName.includes('padel') || lowerName.includes('tenis') || lowerName.includes('kort')) return 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=800&auto=format&fit=crop'; // Padel/Tenis
+  if (lowerName.includes('pt') || lowerName.includes('fitness') || lowerName.includes('gym')) return 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop'; // Gym/Fitness
+  if (lowerName.includes('yoga') || lowerName.includes('pilates')) return 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?q=80&w=800&auto=format&fit=crop'; // Yoga
+  if (lowerName.includes('sup') || lowerName.includes('su') || lowerName.includes('water')) return 'https://images.unsplash.com/photo-1512104595221-5a1e74f85e49?q=80&w=800&auto=format&fit=crop'; // SUP/Sörf
+  if (lowerName.includes('saha') || lowerName.includes('futbol')) return 'https://images.unsplash.com/photo-1529900965600-70f44f509e5b?q=80&w=800&auto=format&fit=crop'; // Halı Saha
+  if (lowerName.includes('motor') || lowerName.includes('karting') || lowerName.includes('yarış')) return 'https://images.unsplash.com/photo-1583095123985-1d48c0fbd773?q=80&w=800&auto=format&fit=crop'; // Motorsporları/Karting
+  if (lowerName.includes('diyet') || lowerName.includes('beslenme')) return 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=800&auto=format&fit=crop'; // Diyetisyen
+  if (lowerName.includes('at') || lowerName.includes('binici') || lowerName.includes('horse')) return 'https://images.unsplash.com/photo-1553531087-b25a0b9a68ab?q=80&w=800&auto=format&fit=crop'; // At Biniciliği
+
+  // Varsayılan
   return 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&auto=format&fit=crop'; 
 };
 
