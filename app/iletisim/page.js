@@ -40,12 +40,12 @@ export default function Contact() {
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 -mt-16 md:-mt-24 relative z-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
           
-          {/* WHATSAPP */}
+          {/* WHATSAPP - HATA DÜZELTİLDİ: https:// eklendi */}
           <div className="bg-white p-6 md:p-8 rounded-[40px] text-center shadow-2xl border border-slate-200 hover:-translate-y-2 transition-transform duration-300 flex flex-col h-full">
             <div className="w-16 h-16 bg-green-50 text-[#25D366] rounded-full flex items-center justify-center mx-auto mb-6"><MessageCircle size={32}/></div>
             <h3 className="font-black text-lg text-[#2D1B4E] mb-3 uppercase tracking-widest">WhatsApp</h3>
             <p className="text-xs text-slate-500 mb-8 font-medium leading-relaxed flex-1">{text.wp1}</p>
-            <a href="wa.me/447391005689" target="_blank" className="block mt-auto bg-[#25D366] hover:bg-green-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-colors no-underline shadow-[0_10px_25px_rgba(37,211,102,0.3)]">{text.wp2}</a>
+            <a href="https://wa.me/447391005689" target="_blank" rel="noopener noreferrer" className="block mt-auto bg-[#25D366] hover:bg-green-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-colors no-underline shadow-[0_10px_25px_rgba(37,211,102,0.3)]">{text.wp2}</a>
           </div>
 
           {/* INSTAGRAM */}
@@ -53,23 +53,23 @@ export default function Contact() {
             <div className="w-16 h-16 bg-pink-50 text-[#E1306C] rounded-full flex items-center justify-center mx-auto mb-6"><InstagramIcon size={32}/></div>
             <h3 className="font-black text-lg text-[#2D1B4E] mb-3 uppercase tracking-widest">Instagram</h3>
             <p className="text-xs text-slate-500 mb-8 font-medium leading-relaxed flex-1">{text.ig1}</p>
-            <a href="https://www.instagram.com/getbookcy?igsh=d3phYWh2cmg2MHE4&utm_source=qr" target="_blank" className="block mt-auto bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F56040] hover:opacity-90 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-opacity no-underline shadow-[0_10px_25px_rgba(225,48,108,0.3)]">{text.ig2}</a>
+            <a href="https://www.instagram.com/getbookcy?igsh=d3phYWh2cmg2MHE4&utm_source=qr" target="_blank" rel="noopener noreferrer" className="block mt-auto bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F56040] hover:opacity-90 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-opacity no-underline shadow-[0_10px_25px_rgba(225,48,108,0.3)]">{text.ig2}</a>
           </div>
 
           {/* TIKTOK */}
           <div className="bg-white p-6 md:p-8 rounded-[40px] text-center shadow-2xl border border-slate-200 hover:-translate-y-2 transition-transform duration-300 flex flex-col h-full">
             <div className="w-16 h-16 bg-slate-100 text-black rounded-full flex items-center justify-center mx-auto mb-6"><TiktokIcon size={32}/></div>
             <h3 className="font-black text-lg text-[#2D1B4E] mb-3 uppercase tracking-widest">TikTok</h3>
-            <p className="text-xs text-slate-500 mb-8 font-medium leading-relaxed flex-1">{text.tt1 || "Eğlenceli ve bilgilendirici içeriklerimiz için TikTok'ta bize katılın!"}</p>
-            <a href="https://www.tiktok.com/@bookcy0?_r=1&_t=ZN-95n1SNa8PGp" target="_blank" className="block mt-auto bg-black hover:bg-slate-800 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-colors no-underline shadow-[0_10px_25px_rgba(0,0,0,0.3)]">{text.tt2 || "TikTok'ta İzle"}</a>
+            <p className="text-xs text-slate-500 mb-8 font-medium leading-relaxed flex-1">{text.tt1 || "Eğlenceli içerikler için TikTok'ta bize katılın!"}</p>
+            <a href="https://www.tiktok.com/@bookcy0?_r=1&_t=ZN-95n1SNa8PGp" target="_blank" rel="noopener noreferrer" className="block mt-auto bg-black hover:bg-slate-800 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-colors no-underline shadow-[0_10px_25px_rgba(0,0,0,0.3)]">{text.tt2 || "TikTok'ta İzle"}</a>
           </div>
 
           {/* FACEBOOK */}
           <div className="bg-white p-6 md:p-8 rounded-[40px] text-center shadow-2xl border border-slate-200 hover:-translate-y-2 transition-transform duration-300 flex flex-col h-full">
             <div className="w-16 h-16 bg-blue-50 text-[#1877F2] rounded-full flex items-center justify-center mx-auto mb-6"><FacebookIcon size={32}/></div>
             <h3 className="font-black text-lg text-[#2D1B4E] mb-3 uppercase tracking-widest">Facebook</h3>
-            <p className="text-xs text-slate-500 mb-8 font-medium leading-relaxed flex-1">{text.fb1 || "Gelişmelerden ve kampanyalardan haberdar olmak için sayfamızı beğenin."}</p>
-            <a href="https://www.facebook.com/share/17xxmB1UDv/?mibextid=wwXIfr" target="_blank" className="block mt-auto bg-[#1877F2] hover:bg-blue-700 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-colors no-underline shadow-[0_10px_25px_rgba(24,119,242,0.3)]">{text.fb2 || "Sayfamızı Ziyaret Et"}</a>
+            <p className="text-xs text-slate-500 mb-8 font-medium leading-relaxed flex-1">{text.fb1 || "Kampanyalar için bizi takip edin."}</p>
+            <a href="https://www.facebook.com/share/17xxmB1UDv/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="block mt-auto bg-[#1877F2] hover:bg-blue-700 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-colors no-underline shadow-[0_10px_25px_rgba(24,119,242,0.3)]">{text.fb2 || "Sayfamızı Ziyaret Et"}</a>
           </div>
 
           {/* E-POSTA */}
@@ -77,7 +77,7 @@ export default function Contact() {
             <div className="w-16 h-16 bg-indigo-50 text-[#2D1B4E] rounded-full flex items-center justify-center mx-auto mb-6"><Mail size={32}/></div>
             <h3 className="font-black text-lg text-[#2D1B4E] mb-3 uppercase tracking-widest">E-Posta</h3>
             <p className="text-xs text-slate-500 mb-8 font-medium leading-relaxed flex-1">{text.mail1}</p>
-            <a href="mailto:info@bookcy.co" className="block mt-auto bg-[#2D1B4E] hover:bg-[#1a0f2e] text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-colors no-underline shadow-[0_10px_25px_rgba(45,27,78,0.3)]">{text.mail2}</a>
+            <a href="mailto:info@bookcy.co" className="block mt-auto bg-[#2D1B4E] hover:bg-[#110920] text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-colors no-underline shadow-[0_10px_25px_rgba(45,27,78,0.3)]">{text.mail2}</a>
           </div>
 
         </div>
