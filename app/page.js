@@ -5,52 +5,32 @@ import { Search, MapPin, CheckCircle2, Calendar, Scissors, ChevronRight } from '
 import { useAppContext } from './providers';
 import { categories, cyprusRegions } from '../lib/constants';
 
-// GÖRSELLER DÜZELTİLDİ: Padel/Tenis ve SUP/Su Sporları için yeni garanti linkler eklendi
+// GÖRSELLER GÜNCEL VE TEST EDİLDİ - TAMAMEN TELİFSİZ VE ÇALIŞAN LİNKLER
 const getCategoryImage = (name) => {
-  const lowerName = name?.toLowerCase() || '';
-  
-  // --- GÜZELLİK, BAKIM & SAĞLIK ---
-  if (lowerName.includes('vet') || lowerName.includes('veteriner')) 
-    return 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=800&auto=format&fit=crop'; 
-  if (lowerName.includes('pet') || lowerName.includes('köpek') || lowerName.includes('kedi')) 
-    return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800&auto=format&fit=crop'; 
-  if (lowerName.includes('dövme') || lowerName.includes('tattoo')) 
-    return 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?q=80&w=800&auto=format&fit=crop'; 
-  if (lowerName.includes('spa') || lowerName.includes('masaj')) 
-    return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop'; 
-  if (lowerName.includes('berber') || lowerName.includes('barber')) 
-    return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=800&auto=format&fit=crop'; 
-  if (lowerName.includes('kuaför') || lowerName.includes('hair') || lowerName.includes('saç')) 
-    return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800&auto=format&fit=crop'; 
-  if (lowerName.includes('kişisel') || lowerName.includes('bakım') || lowerName.includes('güzellik')) 
-    return 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=800&auto=format&fit=crop'; 
-  if (lowerName.includes('bar') || lowerName.includes('pub') || lowerName.includes('club')) 
-    return 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format&fit=crop'; 
+  if (!name) return 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&auto=format&fit=crop';
+  const lowerName = name.toLowerCase();
 
-  // --- SPOR & LIFESTYLE ---
-  // YENİ VE GARANTİ LİNK: Padel & Tenis
-  if (lowerName.includes('padel') || lowerName.includes('tenis')) 
-    return 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=800&auto=format&fit=crop'; 
-  if (lowerName.includes('pt') || lowerName.includes('fitness') || lowerName.includes('gym')) 
-    return 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop'; 
-  if (lowerName.includes('yoga') || lowerName.includes('pilates')) 
-    return 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?q=80&w=800&auto=format&fit=crop'; 
-  
-  // YENİ VE GARANTİ LİNK: SUP & Su Sporları
-  if (lowerName.includes('sup') || lowerName.includes('su spor') || lowerName.includes('board')) 
-    return 'https://images.unsplash.com/photo-1520698059530-eb3782bba1dc?q=80&w=800&auto=format&fit=crop'; 
-  
-  if (lowerName.includes('saha') || lowerName.includes('kort') || lowerName.includes('futbol')) 
-    return 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=800&auto=format&fit=crop'; 
-  if (lowerName.includes('motor') || lowerName.includes('karting') || lowerName.includes('yarış')) 
-    return 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=800&auto=format&fit=crop'; 
-  if (lowerName.includes('diyet') || lowerName.includes('beslenme')) 
-    return 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=800&auto=format&fit=crop'; 
-  if (lowerName.includes('at bini') || lowerName.includes('horse')) 
-    return 'https://images.unsplash.com/photo-1553531384-cc64ac80f931?q=80&w=800&auto=format&fit=crop'; 
+  // --- GÜZELLİK & SAĞLIK ---
+  if (lowerName.includes('vet') || lowerName.includes('veteriner')) return 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('pet') || lowerName.includes('köpek') || lowerName.includes('kedi')) return 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('dövme') || lowerName.includes('tattoo')) return 'https://images.unsplash.com/photo-1598371839696-5c5bb00bdc28?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('spa') || lowerName.includes('masaj')) return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('berber') || lowerName.includes('barber')) return 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('kuaför') || lowerName.includes('hair') || lowerName.includes('saç')) return 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('kişisel') || lowerName.includes('bakım') || lowerName.includes('güzellik')) return 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('bar') || lowerName.includes('club')) return 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format&fit=crop';
 
-  // Varsayılan Görsel
-  return 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&auto=format&fit=crop'; 
+  // --- SPOR & LIFESTYLE (GARANTİ LİNKLER) ---
+  if (lowerName.includes('padel') || lowerName.includes('tenis')) return 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('pt') || lowerName.includes('fitness') || lowerName.includes('gym')) return 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('yoga') || lowerName.includes('pilates')) return 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('sup') || lowerName.includes('su spor') || lowerName.includes('board')) return 'https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('saha') || lowerName.includes('kort') || lowerName.includes('futbol')) return 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('motor') || lowerName.includes('karting')) return 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('diyet') || lowerName.includes('beslenme')) return 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=800&auto=format&fit=crop';
+  if (lowerName.includes('at') || lowerName.includes('binici') || lowerName.includes('horse')) return 'https://images.unsplash.com/photo-1553531384-cc64ac80f931?q=80&w=800&auto=format&fit=crop';
+
+  return 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&auto=format&fit=crop';
 };
 
 export default function Home() {
@@ -79,43 +59,24 @@ export default function Home() {
 
   return (
     <div className="w-full">
-      {/* HERO BÖLÜMÜ - %100 Çalışan İmaj Etiketi Yöntemi */}
+      {/* HERO BÖLÜMÜ */}
       <section className="relative h-[100dvh] pt-[70px] w-full overflow-hidden flex flex-col items-center justify-center bg-[#1a0f2e]">
-        
-        {/* DOĞRUDAN GÖRSEL ETİKETİ - CSS Background yerine bunu kullanıyoruz */}
-        <img 
-          src="/hero-bg.png" 
-          alt="Bookcy Hero" 
-          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-80"
-        />
-
-        {/* Daha hafifletilmiş karanlık filtre - Zil görseli daha iyi parlasın diye */}
+        <img src="/hero-bg.png" alt="Bookcy Hero" className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#2D1B4E]/60 via-[#2D1B4E]/40 to-[#2D1B4E]/95 z-10 pointer-events-none"></div>
-
-        {/* Kumlanma (Noise) Efekti */}
-        <div 
-          className="absolute inset-0 pointer-events-none opacity-30 z-10 mix-blend-overlay" 
-          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E")` }}
-        ></div>
+        <div className="absolute inset-0 pointer-events-none opacity-30 z-10 mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E")` }}></div>
         
-        {/* ANA İÇERİK SARICISI */}
         <div className="relative z-20 w-full max-w-[750px] mx-auto px-4 flex flex-col items-center">
-          
           <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-[9px] md:text-[10px] font-bold text-white/90 uppercase tracking-widest mb-2.5 backdrop-blur-md shadow-lg">
             <div className="w-1.5 h-1.5 rounded-full bg-[#E8622A] animate-pulse"></div>
             {text.hero?.eyebrow}
           </div>
-          
           <h1 className="text-3xl md:text-4xl lg:text-[44px] font-black text-white text-center tracking-tight mb-2.5 leading-[1.1] drop-shadow-xl">
             {text.hero?.title1} <span className="text-[#E8622A]">{text.hero?.title2}</span><br/>
             {text.hero?.title3} <span className="text-[#E8622A]">{text.hero?.title4}</span>
           </h1>
-          
           <p className="text-[11px] md:text-[13px] text-white/80 mb-5 max-w-lg mx-auto text-center font-medium drop-shadow-md px-2 leading-relaxed">
             {text.hero?.sub}
           </p>
-          
-          {/* ARAMA KUTUSU */}
           <form className="w-full bg-white rounded-[20px] md:rounded-[40px] p-1 shadow-2xl flex flex-col md:flex-row gap-1 mx-auto max-w-[650px] mb-3 relative z-30" onSubmit={handleHeroSearch}>
               <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-[16px] md:rounded-none px-4 py-2 md:border-r border-slate-200">
                   <Search size={16} className="text-slate-400 mr-2 shrink-0" />
@@ -132,8 +93,6 @@ export default function Home() {
                 {text.hero?.btn}
               </button>
           </form>
-          
-          {/* POPÜLER ARAMALAR */}
           <div className="flex items-center justify-center flex-wrap gap-2 text-white/80 text-[9px] font-bold uppercase tracking-widest hidden md:flex mb-6">
              <span className="mr-1 drop-shadow-md">{text.hero?.pop}</span>
              {(categories || []).slice(0,4).map((c, idx) => (
@@ -142,44 +101,25 @@ export default function Home() {
                </button>
              ))}
           </div>
-
-          {/* İSTATİSTİKLER */}
           <div className="w-full max-w-[700px]">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 border-t border-white/10 pt-3 md:pt-4 backdrop-blur-sm bg-white/5 rounded-[20px] pb-3 md:pb-4 px-4">
-                <div className="text-center md:border-r border-white/10 last:border-0">
-                  <div className="text-lg md:text-2xl font-black text-white mb-0.5 drop-shadow-lg">{approvedShops.length}</div>
-                  <div className="text-[8px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat1}</div>
-                </div>
-                <div className="text-center md:border-r border-white/10 last:border-0">
-                  <div className="text-lg md:text-2xl font-black text-white mb-0.5 drop-shadow-lg">{new Set((globalAppointments || []).map(a => a?.customer_phone)).size}</div>
-                  <div className="text-[8px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat2}</div>
-                </div>
-                <div className="text-center md:border-r border-white/10 last:border-0">
-                  <div className="text-lg md:text-2xl font-black text-white mb-0.5 drop-shadow-lg">{(globalAppointments || []).length}</div>
-                  <div className="text-[8px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat3}</div>
-                </div>
-                <div className="text-center last:border-0">
-                  <div className="text-lg md:text-2xl font-black text-white mb-0.5 drop-shadow-lg">%98</div>
-                  <div className="text-[8px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat4}</div>
-                </div>
+                <div className="text-center md:border-r border-white/10 last:border-0"><div className="text-lg md:text-2xl font-black text-white mb-0.5 drop-shadow-lg">{approvedShops.length}</div><div className="text-[8px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat1}</div></div>
+                <div className="text-center md:border-r border-white/10 last:border-0"><div className="text-lg md:text-2xl font-black text-white mb-0.5 drop-shadow-lg">{new Set((globalAppointments || []).map(a => a?.customer_phone)).size}</div><div className="text-[8px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat2}</div></div>
+                <div className="text-center md:border-r border-white/10 last:border-0"><div className="text-lg md:text-2xl font-black text-white mb-0.5 drop-shadow-lg">{(globalAppointments || []).length}</div><div className="text-[8px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat3}</div></div>
+                <div className="text-center last:border-0"><div className="text-lg md:text-2xl font-black text-white mb-0.5 drop-shadow-lg">%98</div><div className="text-[8px] font-bold text-white/70 uppercase tracking-widest">{text.hero?.stat4}</div></div>
             </div>
           </div>
-
         </div>
       </section>
 
-      {/* DİĞER BÖLÜMLER */}
       <section className="bg-slate-50 py-10 md:py-14 px-4 md:px-8 border-b border-slate-200">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-8 gap-4">
           <div>
             <div className="text-[9px] md:text-[10px] font-black text-[#E8622A] uppercase tracking-[0.3em] mb-1">{text.cats?.title}</div>
             <div className="text-2xl md:text-3xl font-black text-[#2D1B4E] tracking-tight">{text.cats?.sub}</div>
           </div>
-          <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer hover:underline uppercase text-[10px] md:text-xs tracking-wider" onClick={() => router.push('/isletmeler')}>
-            {text.cats?.seeAll} →
-          </button>
+          <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer hover:underline uppercase text-[10px] md:text-xs tracking-wider" onClick={() => router.push('/isletmeler')}>{text.cats?.seeAll} →</button>
         </div>
-
         <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {(categories || []).map((c, idx) => (
             <button key={c.dbName || idx} type="button" onClick={() => router.push(`/isletmeler?c=${c.dbName}`)} className="group relative w-full flex items-center bg-white rounded-[16px] overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 border border-slate-200 cursor-pointer text-left h-[70px] md:h-[80px]" >
@@ -204,7 +144,6 @@ export default function Home() {
               </div>
               <button className="text-[#E8622A] font-bold bg-transparent border-none cursor-pointer hover:underline uppercase text-[10px] md:text-xs tracking-wider" onClick={()=>router.push('/isletmeler')}> Tümünü Gör → </button>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-w-6xl mx-auto">
               {recommendedShops.map((shop) => {
                 const isVip = shop.package === 'Premium' || shop.package === 'Premium Paket';
@@ -228,7 +167,6 @@ export default function Home() {
           </section>
       )}
 
-      {/* NASIL ÇALIŞIR BÖLÜMÜ */}
       <section className="bg-slate-50 py-10 md:py-14 px-4 md:px-8 border-t border-slate-200">
         <div className="max-w-5xl mx-auto text-center">
           <div className="text-[#E8622A] font-black text-[9px] md:text-[10px] tracking-widest uppercase mb-1.5">{text.how?.title}</div>
@@ -236,36 +174,20 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 relative">
             <div className="hidden md:block absolute top-6 left-[10%] right-[10%] h-[2px] bg-slate-200 z-0"></div>
             <div className="relative z-10 flex flex-col items-center">
-              <div className="w-12 h-12 bg-white border border-slate-200 rounded-[14px] flex items-center justify-center text-[#2D1B4E] mb-3 shadow-sm relative transition-transform hover:scale-105">
-                <Search size={20} strokeWidth={1.5}/>
-                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-[9px] font-black border-2 border-white shadow-sm">1</div>
-              </div>
-              <div className="text-sm font-black text-[#2D1B4E] mb-1">{text.how?.s1}</div>
-              <div className="text-[11px] text-slate-500 font-medium px-2">{text.how?.d1}</div>
+              <div className="w-12 h-12 bg-white border border-slate-200 rounded-[14px] flex items-center justify-center text-[#2D1B4E] mb-3 shadow-sm relative transition-transform hover:scale-105"><Search size={20} strokeWidth={1.5}/><div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-[9px] font-black border-2 border-white shadow-sm">1</div></div>
+              <div className="text-sm font-black text-[#2D1B4E] mb-1">{text.how?.s1}</div><div className="text-[11px] text-slate-500 font-medium px-2">{text.how?.d1}</div>
             </div>
             <div className="relative z-10 flex flex-col items-center">
-              <div className="w-12 h-12 bg-white border border-slate-200 rounded-[14px] flex items-center justify-center text-[#2D1B4E] mb-3 shadow-sm relative transition-transform hover:scale-105">
-                <Calendar size={20} strokeWidth={1.5}/>
-                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-[9px] font-black border-2 border-white shadow-sm">2</div>
-              </div>
-              <div className="text-sm font-black text-[#2D1B4E] mb-1">{text.how?.s2}</div>
-              <div className="text-[11px] text-slate-500 font-medium px-2">{text.how?.d2}</div>
+              <div className="w-12 h-12 bg-white border border-slate-200 rounded-[14px] flex items-center justify-center text-[#2D1B4E] mb-3 shadow-sm relative transition-transform hover:scale-105"><Calendar size={20} strokeWidth={1.5}/><div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-[9px] font-black border-2 border-white shadow-sm">2</div></div>
+              <div className="text-sm font-black text-[#2D1B4E] mb-1">{text.how?.s2}</div><div className="text-[11px] text-slate-500 font-medium px-2">{text.how?.d2}</div>
             </div>
             <div className="relative z-10 flex flex-col items-center">
-              <div className="w-12 h-12 bg-white border border-slate-200 rounded-[14px] flex items-center justify-center text-[#2D1B4E] mb-3 shadow-sm relative transition-transform hover:scale-105">
-                <CheckCircle2 size={20} strokeWidth={1.5}/>
-                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-[9px] font-black border-2 border-white shadow-sm">3</div>
-              </div>
-              <div className="text-sm font-black text-[#2D1B4E] mb-1">{text.how?.s3}</div>
-              <div className="text-[11px] text-slate-500 font-medium px-2">{text.how?.d3}</div>
+              <div className="w-12 h-12 bg-white border border-slate-200 rounded-[14px] flex items-center justify-center text-[#2D1B4E] mb-3 shadow-sm relative transition-transform hover:scale-105"><CheckCircle2 size={20} strokeWidth={1.5}/><div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-[9px] font-black border-2 border-white shadow-sm">3</div></div>
+              <div className="text-sm font-black text-[#2D1B4E] mb-1">{text.how?.s3}</div><div className="text-[11px] text-slate-500 font-medium px-2">{text.how?.d3}</div>
             </div>
             <div className="relative z-10 flex flex-col items-center">
-              <div className="w-12 h-12 bg-white border border-slate-200 rounded-[14px] flex items-center justify-center text-[#2D1B4E] mb-3 shadow-sm relative transition-transform hover:scale-105">
-                <Scissors size={20} strokeWidth={1.5}/>
-                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-[9px] font-black border-2 border-white shadow-sm">4</div>
-              </div>
-              <div className="text-sm font-black text-[#2D1B4E] mb-1">{text.how?.s4}</div>
-              <div className="text-[11px] text-slate-500 font-medium px-2">{text.how?.d4}</div>
+              <div className="w-12 h-12 bg-white border border-slate-200 rounded-[14px] flex items-center justify-center text-[#2D1B4E] mb-3 shadow-sm relative transition-transform hover:scale-105"><Scissors size={20} strokeWidth={1.5}/><div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#E8622A] text-white rounded-full flex items-center justify-center text-[9px] font-black border-2 border-white shadow-sm">4</div></div>
+              <div className="text-sm font-black text-[#2D1B4E] mb-1">{text.how?.s4}</div><div className="text-[11px] text-slate-500 font-medium px-2">{text.how?.d4}</div>
             </div>
           </div>
         </div>
