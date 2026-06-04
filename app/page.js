@@ -20,19 +20,26 @@ const getCategoryImage = (name) => {
   if (lowerName.includes('kişisel') || lowerName.includes('bakım') || lowerName.includes('güzellik')) return 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=800&auto=format&fit=crop';
   if (lowerName.includes('bar') || lowerName.includes('club')) return 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=800&auto=format&fit=crop';
 
-  // --- SPOR & LIFESTYLE (GARANTİ LİNKLER) ---
+  // --- SPOR & LIFESTYLE (DOĞRU VE ÇALIŞAN GÖRSELLER) ---
+  // Padel & Tenis
   if (lowerName.includes('padel') || lowerName.includes('tenis')) return 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=800&auto=format&fit=crop';
+  // PT & Fitness
   if (lowerName.includes('pt') || lowerName.includes('fitness') || lowerName.includes('gym')) return 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop';
+  // Yoga & Pilates
   if (lowerName.includes('yoga') || lowerName.includes('pilates')) return 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?q=80&w=800&auto=format&fit=crop';
-  if (lowerName.includes('sup') || lowerName.includes('su spor') || lowerName.includes('board')) return 'https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?q=80&w=800&auto=format&fit=crop';
+  // SUP & Su Sporları (Yeni ve doğru görsel)
+  if (lowerName.includes('sup') || lowerName.includes('su spor')) return 'https://images.unsplash.com/photo-1523453058863-7186196238b9?q=80&w=800&auto=format&fit=crop';
+  // Halı Saha & Kort
   if (lowerName.includes('saha') || lowerName.includes('kort') || lowerName.includes('futbol')) return 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=800&auto=format&fit=crop';
+  // Motorsporları
   if (lowerName.includes('motor') || lowerName.includes('karting')) return 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=800&auto=format&fit=crop';
+  // Diyetisyen
   if (lowerName.includes('diyet') || lowerName.includes('beslenme')) return 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=800&auto=format&fit=crop';
+  // At Biniciliği (Yeni ve doğru görsel)
   if (lowerName.includes('at') || lowerName.includes('binici') || lowerName.includes('horse')) return 'https://images.unsplash.com/photo-1553531384-cc64ac80f931?q=80&w=800&auto=format&fit=crop';
 
   return 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=800&auto=format&fit=crop';
 };
-
 export default function Home() {
   const router = useRouter();
   const { lang = 'TR', t, shops = [], globalAppointments = [] } = useAppContext();
