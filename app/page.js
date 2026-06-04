@@ -30,14 +30,14 @@ const getCategoryImage = (name) => {
   // --- SPOR & LIFESTYLE ---
   // YENİ VE GARANTİ LİNK: Padel & Tenis
   if (lowerName.includes('padel') || lowerName.includes('tenis')) 
-    return 'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=800&auto=format&fit=crop'; 
+    return 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?q=80&w=800&auto=format&fit=crop'; 
   if (lowerName.includes('pt') || lowerName.includes('fitness') || lowerName.includes('gym')) 
     return 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop'; 
   if (lowerName.includes('yoga') || lowerName.includes('pilates')) 
     return 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?q=80&w=800&auto=format&fit=crop'; 
   
   // YENİ VE GARANTİ LİNK: SUP & Su Sporları
-  if (lowerName.includes('sup') || lowerName.includes('su spor')) 
+  if (lowerName.includes('sup') || lowerName.includes('su spor') || lowerName.includes('board')) 
     return 'https://images.unsplash.com/photo-1520698059530-eb3782bba1dc?q=80&w=800&auto=format&fit=crop'; 
   
   if (lowerName.includes('saha') || lowerName.includes('kort') || lowerName.includes('futbol')) 
@@ -79,22 +79,26 @@ export default function Home() {
 
   return (
     <div className="w-full">
-      {/* HERO BÖLÜMÜ */}
+      {/* HERO BÖLÜMÜ - %100 Çalışan İmaj Etiketi Yöntemi */}
       <section className="relative h-[100dvh] pt-[70px] w-full overflow-hidden flex flex-col items-center justify-center bg-[#1a0f2e]">
         
+        {/* DOĞRUDAN GÖRSEL ETİKETİ - CSS Background yerine bunu kullanıyoruz */}
         <img 
           src="/hero-bg.png" 
           alt="Bookcy Hero" 
           className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-80"
         />
 
+        {/* Daha hafifletilmiş karanlık filtre - Zil görseli daha iyi parlasın diye */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#2D1B4E]/60 via-[#2D1B4E]/40 to-[#2D1B4E]/95 z-10 pointer-events-none"></div>
 
+        {/* Kumlanma (Noise) Efekti */}
         <div 
           className="absolute inset-0 pointer-events-none opacity-30 z-10 mix-blend-overlay" 
           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E")` }}
         ></div>
         
+        {/* ANA İÇERİK SARICISI */}
         <div className="relative z-20 w-full max-w-[750px] mx-auto px-4 flex flex-col items-center">
           
           <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-[9px] md:text-[10px] font-bold text-white/90 uppercase tracking-widest mb-2.5 backdrop-blur-md shadow-lg">
@@ -111,6 +115,7 @@ export default function Home() {
             {text.hero?.sub}
           </p>
           
+          {/* ARAMA KUTUSU */}
           <form className="w-full bg-white rounded-[20px] md:rounded-[40px] p-1 shadow-2xl flex flex-col md:flex-row gap-1 mx-auto max-w-[650px] mb-3 relative z-30" onSubmit={handleHeroSearch}>
               <div className="flex-1 flex items-center bg-slate-50 md:bg-transparent rounded-[16px] md:rounded-none px-4 py-2 md:border-r border-slate-200">
                   <Search size={16} className="text-slate-400 mr-2 shrink-0" />
@@ -128,6 +133,7 @@ export default function Home() {
               </button>
           </form>
           
+          {/* POPÜLER ARAMALAR */}
           <div className="flex items-center justify-center flex-wrap gap-2 text-white/80 text-[9px] font-bold uppercase tracking-widest hidden md:flex mb-6">
              <span className="mr-1 drop-shadow-md">{text.hero?.pop}</span>
              {(categories || []).slice(0,4).map((c, idx) => (
@@ -137,6 +143,7 @@ export default function Home() {
              ))}
           </div>
 
+          {/* İSTATİSTİKLER */}
           <div className="w-full max-w-[700px]">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 border-t border-white/10 pt-3 md:pt-4 backdrop-blur-sm bg-white/5 rounded-[20px] pb-3 md:pb-4 px-4">
                 <div className="text-center md:border-r border-white/10 last:border-0">
