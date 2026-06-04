@@ -45,21 +45,16 @@ export default function Home() {
 
   return (
     <div className="w-full">
-      {/* HERO BÖLÜMÜ - Tam ortalama sağlandı, dağınık yerleşim kaldırıldı */}
-      <section className="relative h-[100dvh] pt-[70px] w-full overflow-hidden flex flex-col items-center justify-center bg-[#1a0f2e]">
+      {/* HERO BÖLÜMÜ - Video yerine görsel/GIF arka plan entegre edildi */}
+      <section 
+        className="relative h-[100dvh] pt-[70px] w-full overflow-hidden flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-[#1a0f2e]"
+        style={{ backgroundImage: "url('/hero-bg.gif')" }} // Eğer sabit resim kullanacaksan '/hero-bg.png' yapabilirsin
+      >
         
-        <video 
-          autoPlay 
-          loop 
-          muted 
-          playsInline 
-          className="absolute inset-0 w-full h-full object-cover z-0 opacity-40 pointer-events-none"
-        >
-          <source src="/hero-bg.mp4" type="video/mp4" />
-        </video>
-
+        {/* Karanlık Gradyan Filtre (Yazıların öne çıkmasını sağlar) */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#2D1B4E]/80 via-[#2D1B4E]/60 to-[#2D1B4E]/95 z-10 pointer-events-none"></div>
 
+        {/* Kumlanma (Noise) Efekti */}
         <div 
           className="absolute inset-0 pointer-events-none opacity-30 z-10 mix-blend-overlay" 
           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E")` }}
@@ -110,7 +105,7 @@ export default function Home() {
              ))}
           </div>
 
-          {/* İSTATİSTİKLER - Artık en alta yapışık değil, popüler aramaların hemen altında. */}
+          {/* İSTATİSTİKLER */}
           <div className="w-full max-w-[700px]">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 border-t border-white/10 pt-3 md:pt-4 backdrop-blur-sm bg-white/5 rounded-[20px] pb-3 md:pb-4 px-4">
                 <div className="text-center md:border-r border-white/10 last:border-0">
