@@ -45,14 +45,18 @@ export default function Home() {
 
   return (
     <div className="w-full">
-      {/* HERO BÖLÜMÜ - Video yerine görsel/GIF arka plan entegre edildi */}
-      <section 
-        className="relative h-[100dvh] pt-[70px] w-full overflow-hidden flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat bg-[#1a0f2e]"
-        style={{ backgroundImage: "url('/hero-bg.gif')" }} // Eğer sabit resim kullanacaksan '/hero-bg.png' yapabilirsin
-      >
+      {/* HERO BÖLÜMÜ - %100 Çalışan İmaj Etiketi Yöntemi */}
+      <section className="relative h-[100dvh] pt-[70px] w-full overflow-hidden flex flex-col items-center justify-center bg-[#1a0f2e]">
         
-        {/* Karanlık Gradyan Filtre (Yazıların öne çıkmasını sağlar) */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#2D1B4E]/80 via-[#2D1B4E]/60 to-[#2D1B4E]/95 z-10 pointer-events-none"></div>
+        {/* DOĞRUDAN GÖRSEL ETİKETİ - CSS Background yerine bunu kullanıyoruz */}
+        <img 
+          src="/hero-bg.png" 
+          alt="Bookcy Hero" 
+          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-80"
+        />
+
+        {/* Daha hafifletilmiş karanlık filtre - Zil görseli daha iyi parlasın diye */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#2D1B4E]/60 via-[#2D1B4E]/40 to-[#2D1B4E]/95 z-10 pointer-events-none"></div>
 
         {/* Kumlanma (Noise) Efekti */}
         <div 
@@ -60,7 +64,7 @@ export default function Home() {
           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E")` }}
         ></div>
         
-        {/* ANA İÇERİK SARICISI - Tüm elementler bu kutunun içinde alt alta sıkıca duracak */}
+        {/* ANA İÇERİK SARICISI */}
         <div className="relative z-20 w-full max-w-[750px] mx-auto px-4 flex flex-col items-center">
           
           <div className="inline-flex items-center gap-1.5 bg-white/10 border border-white/20 rounded-full px-3 py-1 text-[9px] md:text-[10px] font-bold text-white/90 uppercase tracking-widest mb-2.5 backdrop-blur-md shadow-lg">
