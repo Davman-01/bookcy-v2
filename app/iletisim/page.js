@@ -45,7 +45,7 @@ export default function Contact() {
             <div className="w-16 h-16 bg-green-50 text-[#25D366] rounded-full flex items-center justify-center mx-auto mb-6"><MessageCircle size={32}/></div>
             <h3 className="font-black text-lg text-[#2D1B4E] mb-3 uppercase tracking-widest">WhatsApp</h3>
             <p className="text-xs text-slate-500 mb-8 font-medium leading-relaxed flex-1">{text.wp1}</p>
-            <a href="https://wa.me/905555555555" target="_blank" className="block mt-auto bg-[#25D366] hover:bg-green-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-colors no-underline shadow-[0_10px_25px_rgba(37,211,102,0.3)]">{text.wp2}</a>
+            <a href="wa.me/447391005689" target="_blank" className="block mt-auto bg-[#25D366] hover:bg-green-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-xs transition-colors no-underline shadow-[0_10px_25px_rgba(37,211,102,0.3)]">{text.wp2}</a>
           </div>
 
           {/* INSTAGRAM */}
