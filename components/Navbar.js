@@ -202,7 +202,6 @@ export default function Navbar() {
         <div className="fixed inset-0 z-[9999] bg-white flex flex-col animate-in slide-in-from-right-full duration-300">
             <div className="flex justify-between items-center p-6 border-b border-slate-100">
                 <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-decoration-none group">
-                  {/* MOBİL MENÜ İÇİ LOGO: Daha da büyütüldü */}
                   <div className="h-12 w-12 bg-white p-1 rounded-xl border border-slate-100 flex items-center justify-center overflow-hidden">
                     <img src="/logo.png" alt="Bookcy Logo" className="w-full h-full object-contain scale-150 mix-blend-multiply origin-center" />
                   </div>
@@ -211,14 +210,15 @@ export default function Navbar() {
                 <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-500 bg-slate-50 rounded-full border-none cursor-pointer"><X size={24}/></button>
             </div>
             
+            {/* MOBİL MENÜ LİNKLERİ - YAZILAR VE BOŞLUKLAR KÜÇÜLTÜLDÜ */}
             <div className="flex flex-col gap-2 p-6 overflow-y-auto">
-                <Link href="/isletmeler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.places}</Link>
-                <Link href="/ozellikler" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.features}</Link>
-                <Link href="/neden-bookcy" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.why}</Link>
-                <Link href="/hakkimizda" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.about}</Link>
-                <Link href="/iletisim" onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#2D1B4E] py-4 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.contact}</Link>
+                <Link href="/isletmeler" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-black text-[#2D1B4E] py-3 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.places}</Link>
+                <Link href="/ozellikler" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-black text-[#2D1B4E] py-3 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.features}</Link>
+                <Link href="/neden-bookcy" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-black text-[#2D1B4E] py-3 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.why}</Link>
+                <Link href="/hakkimizda" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-black text-[#2D1B4E] py-3 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.about}</Link>
+                <Link href="/iletisim" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-black text-[#2D1B4E] py-3 border-b border-slate-50 text-decoration-none block uppercase">{text.nav?.contact}</Link>
                 
-                <Link href={customerSession ? "/profilim" : "/randevu-sorgula"} onClick={() => setIsMobileMenuOpen(false)} className="text-2xl font-black text-[#E8622A] py-4 border-b border-slate-50 text-decoration-none block uppercase">
+                <Link href={customerSession ? "/profilim" : "/randevu-sorgula"} onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-black text-[#E8622A] py-3 border-b border-slate-50 text-decoration-none block uppercase">
                   {customerSession ? 'PROFİLİM' : text.nav?.myAppts}
                 </Link>
             </div>
